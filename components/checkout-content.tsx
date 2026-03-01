@@ -21,15 +21,15 @@ interface FormErrors {
 function validateForm(data: FormData): FormErrors {
   const errors: FormErrors = {}
   if (!data.fullName.trim()) {
-    errors.fullName = 'Vui lòng nhập tên của bạn'
+    errors.fullName = 'Vui long nhap ten cua ban'
   }
   if (!data.recipientName.trim()) {
-    errors.recipientName = 'Vui lòng nhập tên người nhận'
+    errors.recipientName = 'Vui long nhap ten nguoi nhan'
   }
   if (!data.phoneNumber.trim()) {
-    errors.phoneNumber = 'Vui lòng nhập số điện thoại'
+    errors.phoneNumber = 'Vui long nhap so dien thoai'
   } else if (!/^[0-9]{9,11}$/.test(data.phoneNumber.replace(/\s/g, ''))) {
-    errors.phoneNumber = 'Số điện thoại không hợp lệ'
+    errors.phoneNumber = 'So dien thoai khong hop le'
   }
   return errors
 }
@@ -64,7 +64,11 @@ function FormInput({
 }) {
   return (
     <div>
-      <label htmlFor={id} className="flex items-center gap-2 text-sm text-[#C5A55A] mb-2 tracking-wide">
+      <label
+        htmlFor={id}
+        className="flex items-center gap-2 text-sm mb-2 tracking-wide"
+        style={{ color: '#C5A55A' }}
+      >
         <Icon className="h-4 w-4" />
         {label}
       </label>
@@ -74,10 +78,21 @@ function FormInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-[#D4AF37]/20 bg-[#0d0b09] px-4 py-3.5 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none focus:border-[#D4AF37]/60 transition-colors font-serif text-base"
+        className="w-full px-4 py-3.5 font-serif text-base transition-colors duration-300 focus:outline-none"
+        style={{
+          border: '1px solid rgba(212,175,55,0.2)',
+          background: '#0D0B09',
+          color: '#F5E6C8',
+        }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = 'rgba(212,175,55,0.5)'
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = 'rgba(212,175,55,0.2)'
+        }}
       />
       {error && (
-        <p className="mt-1.5 text-xs text-[#A52525]">{error}</p>
+        <p className="mt-1.5 text-xs" style={{ color: '#A52525' }}>{error}</p>
       )}
     </div>
   )
@@ -91,17 +106,26 @@ function CertificateReveal({
   recipientName: string
 }) {
   return (
-    <div className="flex flex-col items-center gap-10 py-8 animate-in fade-in duration-700">
+    <div className="flex flex-col items-center gap-10 py-8">
       {/* Success message */}
-      <div className="text-center space-y-3">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#D4AF37]/30">
-          <ShieldCheck className="h-7 w-7 text-[#D4AF37]" />
+      <div className="text-center space-y-3 animate-in fade-in duration-700">
+        <div
+          className="mx-auto flex h-14 w-14 items-center justify-center rounded-full"
+          style={{ border: '1px solid rgba(212,175,55,0.3)' }}
+        >
+          <ShieldCheck className="h-7 w-7" style={{ color: '#D4AF37' }} />
         </div>
-        <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37]">
-          Lời thề đã được ghi nhận
+        <p
+          className="text-[10px] tracking-[0.5em] uppercase"
+          style={{ color: '#D4AF37' }}
+        >
+          {'L\u1eddi th\u1ec1 \u0111\u00e3 \u0111\u01b0\u1ee3c ghi nh\u1eadn'}
         </p>
-        <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
-          {'Chứng thư của bạn đã sẵn sàng'}
+        <h2
+          className="text-2xl md:text-3xl font-light font-display"
+          style={{ color: '#F5E6C8' }}
+        >
+          {'Ch\u1ee9ng th\u01b0 c\u1ee7a b\u1ea1n \u0111\u00e3 s\u1eb5n s\u00e0ng'}
         </h2>
       </div>
 
@@ -115,10 +139,11 @@ function CertificateReveal({
       {/* Back home */}
       <Link
         href="/"
-        className="flex items-center gap-2 text-sm text-[#C5A55A] hover:text-[#D4AF37] transition-colors tracking-wider uppercase"
+        className="flex items-center gap-2 text-sm transition-colors tracking-wider uppercase"
+        style={{ color: '#C5A55A' }}
       >
         <ArrowLeft className="h-4 w-4" />
-        Quay về trang chủ
+        {'Quay v\u1ec1 trang ch\u1ee7'}
       </Link>
     </div>
   )
@@ -133,7 +158,7 @@ export function CheckoutContent() {
   })
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
-  const [isFlipping, setIsFlipping] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
   const updateField = useCallback(
     (field: keyof FormData) => (value: string) => {
@@ -157,10 +182,10 @@ export function CheckoutContent() {
       setErrors(validationErrors)
       return
     }
-    setIsFlipping(true)
+    setIsTransitioning(true)
     setTimeout(() => {
       setSubmitted(true)
-    }, 700)
+    }, 800)
   }
 
   if (submitted) {
@@ -173,16 +198,25 @@ export function CheckoutContent() {
   }
 
   return (
-    <div className={`perspective-container transition-all duration-700 ${isFlipping ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+    <div
+      className="transition-all duration-800 ease-out"
+      style={{
+        opacity: isTransitioning ? 0 : 1,
+        transform: isTransitioning ? 'scale(0.97) translateY(10px)' : 'scale(1) translateY(0)',
+      }}
+    >
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-        {/* Left: Certificate Preview */}
+        {/* Left: Live Certificate Preview */}
         <div className="order-2 lg:order-1">
-          <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-6 text-center lg:text-left">
-            Xem trước chứng thư
+          <p
+            className="text-[10px] tracking-[0.4em] uppercase mb-6 text-center lg:text-left"
+            style={{ color: '#C5A55A' }}
+          >
+            {'Xem tr\u01b0\u1edbc ch\u1ee9ng th\u01b0'}
           </p>
           <CommitmentCertificate
-            buyerName={formData.fullName || 'Buyer\'s Name'}
-            recipientName={formData.recipientName || 'Recipient\'s Name'}
+            buyerName={formData.fullName || "Buyer's Name"}
+            recipientName={formData.recipientName || "Recipient's Name"}
             animate={false}
           />
         </div>
@@ -190,23 +224,32 @@ export function CheckoutContent() {
         {/* Right: Form */}
         <div className="order-1 lg:order-2">
           <div className="mb-8">
-            <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-3">
-              Thông tin cam kết
+            <p
+              className="text-[10px] tracking-[0.4em] uppercase mb-3"
+              style={{ color: '#D4AF37' }}
+            >
+              {'Th\u00f4ng tin cam k\u1ebft'}
             </p>
-            <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
-              {'Viết lời thề của bạn'}
+            <h2
+              className="text-2xl md:text-3xl font-light font-display"
+              style={{ color: '#F5E6C8' }}
+            >
+              {'Vi\u1ebft l\u1eddi th\u1ec1 c\u1ee7a b\u1ea1n'}
             </h2>
-            <p className="mt-2 text-sm text-[#8A7D65] leading-relaxed">
-              {'Điền đầy đủ thông tin để tạo chứng thư cam kết. Tất cả các trường đều bắt buộc.'}
+            <p
+              className="mt-2 text-sm leading-relaxed"
+              style={{ color: '#8A7D65' }}
+            >
+              {'\u0110i\u1ec1n \u0111\u1ea7y \u0111\u1ee7 th\u00f4ng tin \u0111\u1ec3 t\u1ea1o ch\u1ee9ng th\u01b0 cam k\u1ebft. T\u1ea5t c\u1ea3 c\u00e1c tr\u01b0\u1eddng \u0111\u1ec1u b\u1eaft bu\u1ed9c.'}
             </p>
           </div>
 
           <div className="space-y-5">
             <FormInput
               id="full-name"
-              label="Họ và tên"
+              label="H\u1ecd v\u00e0 t\u00ean"
               icon={User}
-              placeholder="Nhập họ và tên của bạn..."
+              placeholder="Nh\u1eadp h\u1ecd v\u00e0 t\u00ean c\u1ee7a b\u1ea1n..."
               value={formData.fullName}
               onChange={updateField('fullName')}
               error={errors.fullName}
@@ -214,9 +257,9 @@ export function CheckoutContent() {
 
             <FormInput
               id="recipient-name"
-              label="Tên người nhận"
+              label="T\u00ean ng\u01b0\u1eddi nh\u1eadn"
               icon={Heart}
-              placeholder="Nhập tên người bạn yêu thương..."
+              placeholder="Nh\u1eadp t\u00ean ng\u01b0\u1eddi b\u1ea1n y\u00eau th\u01b0\u01a1ng..."
               value={formData.recipientName}
               onChange={updateField('recipientName')}
               error={errors.recipientName}
@@ -224,7 +267,7 @@ export function CheckoutContent() {
 
             <FormInput
               id="phone-number"
-              label="Số điện thoại"
+              label="S\u1ed1 \u0111i\u1ec7n tho\u1ea1i"
               icon={Phone}
               type="tel"
               placeholder="0xxx xxx xxx"
@@ -237,20 +280,28 @@ export function CheckoutContent() {
             <div>
               <label
                 htmlFor="love-letter"
-                className="flex items-center gap-2 text-sm text-[#C5A55A] mb-2 tracking-wide"
+                className="flex items-center gap-2 text-sm mb-2 tracking-wide"
+                style={{ color: '#C5A55A' }}
               >
                 <PenLine className="h-4 w-4" />
-                Thư tình
+                {'Th\u01b0 t\u00ecnh'}
               </label>
-              <div className="border border-[#D4AF37]/20 bg-[#0d0b09] p-1">
+              <div
+                className="p-1"
+                style={{
+                  border: '1px solid rgba(212,175,55,0.2)',
+                  background: '#0D0B09',
+                }}
+              >
                 <div className="letter-paper">
                   <textarea
                     id="love-letter"
                     value={formData.loveLetter}
                     onChange={(e) => updateField('loveLetter')(e.target.value)}
-                    placeholder="Gửi người tôi yêu thương nhất..."
+                    placeholder="G\u1eedi ng\u01b0\u1eddi t\u00f4i y\u00eau th\u01b0\u01a1ng nh\u1ea5t..."
                     rows={5}
-                    className="w-full bg-transparent px-3 py-2 text-[#F5E6C8] placeholder:text-[#555040] resize-none focus:outline-none italic leading-8 font-serif text-base"
+                    className="w-full bg-transparent px-3 py-2 resize-none focus:outline-none italic leading-8 font-serif text-base"
+                    style={{ color: '#F5E6C8' }}
                   />
                 </div>
               </div>
@@ -258,21 +309,33 @@ export function CheckoutContent() {
           </div>
 
           {/* Vow summary */}
-          <div className="mt-8 border border-[#D4AF37]/15 bg-[#0d0b09]/80 p-6 text-center">
-            <p className="text-[10px] tracking-[0.35em] uppercase text-[#D4AF37] mb-3">
-              Lời thề Nhất Tâm
+          <div
+            className="mt-8 p-6 text-center"
+            style={{
+              border: '1px solid rgba(212,175,55,0.12)',
+              background: 'rgba(13,11,9,0.8)',
+            }}
+          >
+            <p
+              className="text-[9px] tracking-[0.4em] uppercase mb-3"
+              style={{ color: '#D4AF37' }}
+            >
+              {'L\u1eddi th\u1ec1 Nh\u1ea5t T\u00e2m'}
             </p>
-            <p className="text-sm text-[#C5A55A] leading-relaxed">
+            <p
+              className="text-sm leading-relaxed"
+              style={{ color: '#C5A55A' }}
+            >
               {formData.fullName && formData.recipientName ? (
                 <>
-                  {'Bạn xác nhận rằng tất cả hoa hồng Nhất Tâm, hôm nay và mãi mãi, chỉ dành cho '}
-                  <span className="text-[#F5E6C8] italic text-lg font-display">
+                  {'B\u1ea1n x\u00e1c nh\u1eadn r\u1eb1ng t\u1ea5t c\u1ea3 hoa h\u1ed3ng Nh\u1ea5t T\u00e2m, h\u00f4m nay v\u00e0 m\u00e3i m\u00e3i, ch\u1ec9 d\u00e0nh cho '}
+                  <span className="text-lg italic font-display" style={{ color: '#F5E6C8' }}>
                     {formData.recipientName}
                   </span>
                 </>
               ) : (
-                <span className="text-[#555040] italic">
-                  {'Nhập tên để xem lời thề của bạn...'}
+                <span className="italic" style={{ color: '#555040' }}>
+                  {'Nh\u1eadp t\u00ean \u0111\u1ec3 xem l\u1eddi th\u1ec1 c\u1ee7a b\u1ea1n...'}
                 </span>
               )}
             </p>
@@ -282,23 +345,39 @@ export function CheckoutContent() {
           <button
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className={`mt-6 w-full py-4 text-sm tracking-[0.25em] uppercase font-medium transition-all duration-500 cursor-pointer ${
+            className="mt-6 w-full py-4 text-sm tracking-[0.25em] uppercase font-medium transition-all duration-500 cursor-pointer"
+            style={
               canSubmit
-                ? 'bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]'
-                : 'bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]'
-            }`}
+                ? {
+                    background: 'linear-gradient(90deg, #B8860B, #D4AF37, #B8860B)',
+                    color: '#0A0A08',
+                    boxShadow: '0 0 20px rgba(212,175,55,0.15)',
+                  }
+                : {
+                    background: '#1A1814',
+                    color: '#555040',
+                    cursor: 'not-allowed',
+                    border: '1px solid #2A2520',
+                  }
+            }
           >
-            {'Xác nhận lời thề & Thanh toán'}
+            {'X\u00e1c nh\u1eadn l\u1eddi th\u1ec1 & Thanh to\u00e1n'}
           </button>
 
           {!canSubmit && (
-            <p className="mt-3 text-center text-xs text-[#555040]">
-              {'Vui lòng điền đầy đủ tất cả các trường để tiếp tục'}
+            <p
+              className="mt-3 text-center text-xs"
+              style={{ color: '#555040' }}
+            >
+              {'Vui l\u00f2ng \u0111i\u1ec1n \u0111\u1ea7y \u0111\u1ee7 t\u1ea5t c\u1ea3 c\u00e1c tr\u01b0\u1eddng \u0111\u1ec3 ti\u1ebfp t\u1ee5c'}
             </p>
           )}
 
-          <p className="mt-4 text-center text-[10px] text-[#555040] tracking-wider">
-            {'Thanh toán an toàn. Chứng thư sẽ được gửi sau khi xác nhận.'}
+          <p
+            className="mt-4 text-center text-[10px] tracking-wider"
+            style={{ color: '#555040' }}
+          >
+            {'Thanh to\u00e1n an to\u00e0n. Ch\u1ee9ng th\u01b0 s\u1ebd \u0111\u01b0\u1ee3c g\u1eedi sau khi x\u00e1c nh\u1eadn.'}
           </p>
         </div>
       </div>
