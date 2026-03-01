@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next'
-import { Cormorant_Garamond, Geist_Mono } from 'next/font/google'
+import { Cormorant_Garamond, Geist_Mono, Playfair_Display } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import { AppShell } from '@/components/app-shell'
 import './globals.css'
@@ -11,6 +11,12 @@ const _cormorant = Cormorant_Garamond({
 })
 
 const _geistMono = Geist_Mono({ subsets: ['latin'] })
+
+const _playfair = Playfair_Display({
+  subsets: ['latin', 'vietnamese'],
+  weight: ['400', '500', '600', '700', '800', '900'],
+  variable: '--font-playfair',
+})
 
 export const metadata: Metadata = {
   title: 'Nhất Tâm Hoa | Một đời, một đóa, một người',

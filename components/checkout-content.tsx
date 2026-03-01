@@ -1,278 +1,123 @@
 'use client'
 
-import Image from 'next/image'
+import { useState, useCallback } from 'react'
 import Link from 'next/link'
-import { useState, useRef } from 'react'
-import { useCart } from '@/lib/cart-context'
-import { formatPrice } from '@/lib/products'
-import { X, Download } from 'lucide-react'
+import { User, Heart, Phone, PenLine, ShieldCheck, ArrowLeft } from 'lucide-react'
+import { CommitmentCertificate } from '@/components/commitment-certificate'
 
-function OrderSummary() {
-  const { items, recipientName, removeFromCart, totalPrice } = useCart()
+interface FormData {
+  fullName: string
+  recipientName: string
+  phoneNumber: string
+  loveLetter: string
+}
 
-  if (items.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <p className="text-2xl font-light text-foreground mb-4">Giỏ hàng trống</p>
-        <p className="text-muted-foreground mb-8">
-          Hãy chọn một bông hồng để bắt đầu lời thề của bạn.
-        </p>
-        <Link
-          href="/"
-          className="border border-gold/40 px-8 py-3 text-sm tracking-[0.3em] uppercase text-gold hover:bg-gold hover:text-primary-foreground transition-all duration-500"
-        >
-          Khám phá bộ sưu tập
-        </Link>
-      </div>
-    )
+interface FormErrors {
+  fullName?: string
+  recipientName?: string
+  phoneNumber?: string
+}
+
+function validateForm(data: FormData): FormErrors {
+  const errors: FormErrors = {}
+  if (!data.fullName.trim()) {
+    errors.fullName = 'Vui lòng nhập tên của bạn'
   }
+  if (!data.recipientName.trim()) {
+    errors.recipientName = 'Vui lòng nhập tên người nhận'
+  }
+  if (!data.phoneNumber.trim()) {
+    errors.phoneNumber = 'Vui lòng nhập số điện thoại'
+  } else if (!/^[0-9]{9,11}$/.test(data.phoneNumber.replace(/\s/g, ''))) {
+    errors.phoneNumber = 'Số điện thoại không hợp lệ'
+  }
+  return errors
+}
 
+function isFormComplete(data: FormData): boolean {
+  return (
+    data.fullName.trim().length > 0 &&
+    data.recipientName.trim().length > 0 &&
+    data.phoneNumber.trim().length > 0 &&
+    data.loveLetter.trim().length > 0
+  )
+}
+
+function FormInput({
+  id,
+  label,
+  icon: Icon,
+  type = 'text',
+  placeholder,
+  value,
+  onChange,
+  error,
+}: {
+  id: string
+  label: string
+  icon: React.ComponentType<{ className?: string }>
+  type?: string
+  placeholder: string
+  value: string
+  onChange: (val: string) => void
+  error?: string
+}) {
   return (
     <div>
-      <h2 className="text-lg font-medium text-foreground mb-6">Tóm tắt đơn hàng</h2>
-      <div className="space-y-4">
-        {items.map((item) => (
-          <div key={item.product.id} className="flex gap-4 border border-border p-4">
-            <div className="relative h-24 w-20 flex-shrink-0 overflow-hidden bg-secondary">
-              <Image
-                src={item.product.image}
-                alt={item.product.name}
-                fill
-                className="object-cover"
-              />
-            </div>
-            <div className="flex flex-1 flex-col justify-between">
-              <div>
-                <h3 className="text-foreground font-medium">{item.product.name}</h3>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {`Dành cho: ${recipientName}`}
-                </p>
-              </div>
-              <p className="text-sm text-gold">{formatPrice(item.product.price)}</p>
-            </div>
-            <button
-              onClick={() => removeFromCart(item.product.id)}
-              className="self-start text-muted-foreground hover:text-foreground transition-colors"
-              aria-label="Xóa sản phẩm"
-            >
-              <X className="h-4 w-4" />
-            </button>
-          </div>
-        ))}
-      </div>
-      <div className="mt-6 flex justify-between border-t border-border pt-4">
-        <span className="text-muted-foreground">Tổng cộng</span>
-        <span className="text-xl text-gold font-medium">{formatPrice(totalPrice)}</span>
-      </div>
+      <label htmlFor={id} className="flex items-center gap-2 text-sm text-[#C5A55A] mb-2 tracking-wide">
+        <Icon className="h-4 w-4" />
+        {label}
+      </label>
+      <input
+        id={id}
+        type={type}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        className="w-full border border-[#D4AF37]/20 bg-[#0d0b09] px-4 py-3.5 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none focus:border-[#D4AF37]/60 transition-colors font-serif text-base"
+      />
+      {error && (
+        <p className="mt-1.5 text-xs text-[#A52525]">{error}</p>
+      )}
     </div>
   )
 }
 
-function LoveLetter() {
-  const { loveLetter, setLoveLetter } = useCart()
-
-  return (
-    <div className="mt-10">
-      <h2 className="text-lg font-medium text-foreground mb-2">Thư Tình</h2>
-      <p className="text-sm text-muted-foreground mb-4">
-        Gửi gắm thông điệp yêu thương. Lá thư sẽ được in trên giấy thật và gửi kèm hoa.
-      </p>
-      <div className="border border-border bg-secondary/30 p-6">
-        <div className="letter-paper">
-          <label htmlFor="love-letter" className="sr-only">Viết thư tình</label>
-          <textarea
-            id="love-letter"
-            value={loveLetter}
-            onChange={(e) => setLoveLetter(e.target.value)}
-            placeholder="Gửi người tôi yêu thương nhất..."
-            rows={8}
-            className="w-full bg-transparent text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none italic leading-8"
-          />
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function CertificateCanvas({
+function CertificateReveal({
   buyerName,
   recipientName,
 }: {
   buyerName: string
   recipientName: string
 }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-  const [downloading, setDownloading] = useState(false)
-
-  function drawCertificate() {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const w = 1200
-    const h = 800
-    canvas.width = w
-    canvas.height = h
-
-    // Background
-    ctx.fillStyle = '#1a1714'
-    ctx.fillRect(0, 0, w, h)
-
-    // Border
-    ctx.strokeStyle = '#b8a068'
-    ctx.lineWidth = 2
-    ctx.strokeRect(40, 40, w - 80, h - 80)
-
-    // Inner border
-    ctx.strokeStyle = '#b8a06840'
-    ctx.lineWidth = 1
-    ctx.strokeRect(50, 50, w - 100, h - 100)
-
-    // Title
-    ctx.fillStyle = '#b8a068'
-    ctx.font = '16px Georgia, serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('CHUNG THU', w / 2, 120)
-
-    ctx.fillStyle = '#f0e6d0'
-    ctx.font = '48px Georgia, serif'
-    ctx.fillText('Nhất Tâm Hoa', w / 2, 180)
-
-    ctx.fillStyle = '#b8a068'
-    ctx.font = 'italic 14px Georgia, serif'
-    ctx.fillText('Eternal Roses - Một đời, một đóa, một người', w / 2, 215)
-
-    // Divider
-    ctx.strokeStyle = '#b8a068'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.moveTo(w / 2 - 100, 250)
-    ctx.lineTo(w / 2 + 100, 250)
-    ctx.stroke()
-
-    // Body
-    ctx.fillStyle = '#c0b090'
-    ctx.font = '18px Georgia, serif'
-    ctx.fillText('Chứng nhận rằng', w / 2, 310)
-
-    ctx.fillStyle = '#f0e6d0'
-    ctx.font = 'italic 36px Georgia, serif'
-    ctx.fillText(buyerName || 'Người tặng', w / 2, 370)
-
-    ctx.fillStyle = '#c0b090'
-    ctx.font = '18px Georgia, serif'
-    ctx.fillText('đã trao trọn tâm ý cho', w / 2, 420)
-
-    ctx.fillStyle = '#f0e6d0'
-    ctx.font = 'italic 36px Georgia, serif'
-    ctx.fillText(recipientName || 'Người nhận', w / 2, 480)
-
-    ctx.fillStyle = '#c0b090'
-    ctx.font = '18px Georgia, serif'
-    ctx.fillText('Lời thề này là vĩnh viễn và không thể thay đổi.', w / 2, 540)
-
-    // Date
-    const today = new Date().toLocaleDateString('vi-VN', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    })
-    ctx.fillStyle = '#b8a068'
-    ctx.font = '14px Georgia, serif'
-    ctx.fillText(today, w / 2, 610)
-
-    // Bottom decor
-    ctx.strokeStyle = '#b8a068'
-    ctx.lineWidth = 1
-    ctx.beginPath()
-    ctx.moveTo(w / 2 - 60, 650)
-    ctx.lineTo(w / 2 + 60, 650)
-    ctx.stroke()
-
-    ctx.fillStyle = '#b8a06880'
-    ctx.font = '12px Georgia, serif'
-    ctx.fillText('Nhất Tâm Hoa - nhatamhoa.vn', w / 2, 690)
-  }
-
-  function handleDownload() {
-    setDownloading(true)
-    drawCertificate()
-    setTimeout(() => {
-      const canvas = canvasRef.current
-      if (!canvas) return
-      const link = document.createElement('a')
-      link.download = 'chung-thu-nhat-tam.png'
-      link.href = canvas.toDataURL('image/png')
-      link.click()
-      setDownloading(false)
-    }, 100)
-  }
-
   return (
-    <div className="flex flex-col items-center gap-6">
-      <canvas ref={canvasRef} className="hidden" />
-      <button
-        onClick={handleDownload}
-        disabled={downloading}
-        className="flex items-center gap-2 border border-gold/40 px-8 py-3 text-sm tracking-[0.2em] uppercase text-gold hover:bg-gold hover:text-primary-foreground transition-all duration-500"
-      >
-        <Download className="h-4 w-4" />
-        Tải chứng thư
-      </button>
-    </div>
-  )
-}
-
-function SuccessPage({ buyerName }: { buyerName: string }) {
-  const { recipientName } = useCart()
-
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <p className="text-sm tracking-[0.4em] uppercase text-gold-dim mb-6">
-        Lời thề đã được xác nhận
-      </p>
-      <h1 className="text-3xl md:text-5xl font-light text-foreground text-balance">
-        Chứng Thư Nhất Tâm
-      </h1>
-      <p className="mx-auto mt-6 max-w-md text-cream-dim leading-relaxed">
-        {`Tình yêu của ${buyerName || 'bạn'} dành cho ${recipientName} đã được ghi nhận. `}
-        Chứng thư này là bằng chứng vĩnh viễn cho lời thề của bạn.
-      </p>
-
-      {/* Visual certificate preview */}
-      <div className="mt-10 w-full max-w-2xl border border-gold/30 bg-secondary/30 p-8 md:p-12">
-        <div className="border border-gold/20 p-6 md:p-10 text-center">
-          <p className="text-xs tracking-[0.4em] uppercase text-gold-dim">Chứng thư</p>
-          <h2 className="mt-4 text-2xl md:text-3xl font-light text-foreground">Nhất Tâm Hoa</h2>
-          <p className="mt-1 text-xs italic text-muted-foreground">
-            Eternal Roses
-          </p>
-          <div className="mx-auto my-6 w-24 h-px bg-gold/40" />
-          <p className="text-sm text-cream-dim">Chứng nhận rằng</p>
-          <p className="mt-3 text-2xl italic text-gold">{buyerName || 'Người tặng'}</p>
-          <p className="mt-3 text-sm text-cream-dim">đã trao trọn tâm ý cho</p>
-          <p className="mt-3 text-2xl italic text-gold">{recipientName}</p>
-          <div className="mx-auto my-6 w-24 h-px bg-gold/40" />
-          <p className="text-xs text-muted-foreground">
-            {new Date().toLocaleDateString('vi-VN', {
-              day: 'numeric',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </p>
+    <div className="flex flex-col items-center gap-10 py-8 animate-in fade-in duration-700">
+      {/* Success message */}
+      <div className="text-center space-y-3">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#D4AF37]/30">
+          <ShieldCheck className="h-7 w-7 text-[#D4AF37]" />
         </div>
+        <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37]">
+          Lời thề đã được ghi nhận
+        </p>
+        <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
+          {'Chứng thư của bạn đã sẵn sàng'}
+        </h2>
       </div>
 
-      <div className="mt-8">
-        <CertificateCanvas buyerName={buyerName} recipientName={recipientName} />
-      </div>
+      {/* Certificate */}
+      <CommitmentCertificate
+        buyerName={buyerName}
+        recipientName={recipientName}
+        animate={true}
+      />
 
+      {/* Back home */}
       <Link
         href="/"
-        className="mt-10 text-sm text-muted-foreground hover:text-gold transition-colors tracking-wider uppercase"
+        className="flex items-center gap-2 text-sm text-[#C5A55A] hover:text-[#D4AF37] transition-colors tracking-wider uppercase"
       >
+        <ArrowLeft className="h-4 w-4" />
         Quay về trang chủ
       </Link>
     </div>
@@ -280,106 +125,182 @@ function SuccessPage({ buyerName }: { buyerName: string }) {
 }
 
 export function CheckoutContent() {
-  const { items, recipientName } = useCart()
-  const [buyerName, setBuyerName] = useState('')
-  const [completed, setCompleted] = useState(false)
+  const [formData, setFormData] = useState<FormData>({
+    fullName: '',
+    recipientName: '',
+    phoneNumber: '',
+    loveLetter: '',
+  })
+  const [errors, setErrors] = useState<FormErrors>({})
+  const [submitted, setSubmitted] = useState(false)
+  const [isFlipping, setIsFlipping] = useState(false)
 
-  if (completed) {
-    return <SuccessPage buyerName={buyerName} />
+  const updateField = useCallback(
+    (field: keyof FormData) => (value: string) => {
+      setFormData((prev) => ({ ...prev, [field]: value }))
+      if (errors[field as keyof FormErrors]) {
+        setErrors((prev) => {
+          const next = { ...prev }
+          delete next[field as keyof FormErrors]
+          return next
+        })
+      }
+    },
+    [errors]
+  )
+
+  const canSubmit = isFormComplete(formData)
+
+  function handleSubmit() {
+    const validationErrors = validateForm(formData)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+    setIsFlipping(true)
+    setTimeout(() => {
+      setSubmitted(true)
+    }, 700)
   }
 
-  if (items.length === 0) {
-    return <OrderSummary />
-  }
-
-  function handleCheckout() {
-    setCompleted(true)
+  if (submitted) {
+    return (
+      <CertificateReveal
+        buyerName={formData.fullName}
+        recipientName={formData.recipientName}
+      />
+    )
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-      {/* Left column */}
-      <div>
-        <OrderSummary />
-        <LoveLetter />
-      </div>
+    <div className={`perspective-container transition-all duration-700 ${isFlipping ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+        {/* Left: Certificate Preview */}
+        <div className="order-2 lg:order-1">
+          <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-6 text-center lg:text-left">
+            Xem trước chứng thư
+          </p>
+          <CommitmentCertificate
+            buyerName={formData.fullName || 'Buyer\'s Name'}
+            recipientName={formData.recipientName || 'Recipient\'s Name'}
+            animate={false}
+          />
+        </div>
 
-      {/* Right column */}
-      <div>
-        <h2 className="text-lg font-medium text-foreground mb-6">Thông tin thanh toán</h2>
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="buyer-name" className="text-sm text-muted-foreground mb-1.5 block">
-              Tên của bạn
-            </label>
-            <input
-              id="buyer-name"
-              type="text"
-              value={buyerName}
-              onChange={(e) => setBuyerName(e.target.value)}
-              placeholder="Nhập tên của bạn..."
-              className="w-full border border-border bg-input px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold transition-colors"
-            />
+        {/* Right: Form */}
+        <div className="order-1 lg:order-2">
+          <div className="mb-8">
+            <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-3">
+              Thông tin cam kết
+            </p>
+            <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
+              {'Viết lời thề của bạn'}
+            </h2>
+            <p className="mt-2 text-sm text-[#8A7D65] leading-relaxed">
+              {'Điền đầy đủ thông tin để tạo chứng thư cam kết. Tất cả các trường đều bắt buộc.'}
+            </p>
           </div>
-          <div>
-            <label htmlFor="buyer-email" className="text-sm text-muted-foreground mb-1.5 block">
-              Email
-            </label>
-            <input
-              id="buyer-email"
-              type="email"
-              placeholder="email@example.com"
-              className="w-full border border-border bg-input px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold transition-colors"
+
+          <div className="space-y-5">
+            <FormInput
+              id="full-name"
+              label="Họ và tên"
+              icon={User}
+              placeholder="Nhập họ và tên của bạn..."
+              value={formData.fullName}
+              onChange={updateField('fullName')}
+              error={errors.fullName}
             />
-          </div>
-          <div>
-            <label htmlFor="buyer-phone" className="text-sm text-muted-foreground mb-1.5 block">
-              Số điện thoại
-            </label>
-            <input
-              id="buyer-phone"
+
+            <FormInput
+              id="recipient-name"
+              label="Tên người nhận"
+              icon={Heart}
+              placeholder="Nhập tên người bạn yêu thương..."
+              value={formData.recipientName}
+              onChange={updateField('recipientName')}
+              error={errors.recipientName}
+            />
+
+            <FormInput
+              id="phone-number"
+              label="Số điện thoại"
+              icon={Phone}
               type="tel"
               placeholder="0xxx xxx xxx"
-              className="w-full border border-border bg-input px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold transition-colors"
+              value={formData.phoneNumber}
+              onChange={updateField('phoneNumber')}
+              error={errors.phoneNumber}
             />
-          </div>
-          <div>
-            <label htmlFor="buyer-address" className="text-sm text-muted-foreground mb-1.5 block">
-              Địa chỉ giao hàng
-            </label>
-            <textarea
-              id="buyer-address"
-              rows={3}
-              placeholder="Nhập địa chỉ giao hàng..."
-              className="w-full border border-border bg-input px-4 py-3 text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-gold transition-colors resize-none"
-            />
-          </div>
-        </div>
 
-        {/* Vow summary */}
-        <div className="mt-8 border border-gold/20 bg-secondary/30 p-6 text-center">
-          <p className="text-xs tracking-[0.3em] uppercase text-gold-dim mb-2">Lời thề Nhất Tâm</p>
-          <p className="text-cream-dim text-sm leading-relaxed">
-            {`Bạn xác nhận rằng tất cả hoa hồng Nhất Tâm của bạn, hôm nay và mãi mãi, chỉ dành cho `}
-            <span className="text-gold italic text-lg">{recipientName}</span>
+            {/* Love letter */}
+            <div>
+              <label
+                htmlFor="love-letter"
+                className="flex items-center gap-2 text-sm text-[#C5A55A] mb-2 tracking-wide"
+              >
+                <PenLine className="h-4 w-4" />
+                Thư tình
+              </label>
+              <div className="border border-[#D4AF37]/20 bg-[#0d0b09] p-1">
+                <div className="letter-paper">
+                  <textarea
+                    id="love-letter"
+                    value={formData.loveLetter}
+                    onChange={(e) => updateField('loveLetter')(e.target.value)}
+                    placeholder="Gửi người tôi yêu thương nhất..."
+                    rows={5}
+                    className="w-full bg-transparent px-3 py-2 text-[#F5E6C8] placeholder:text-[#555040] resize-none focus:outline-none italic leading-8 font-serif text-base"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Vow summary */}
+          <div className="mt-8 border border-[#D4AF37]/15 bg-[#0d0b09]/80 p-6 text-center">
+            <p className="text-[10px] tracking-[0.35em] uppercase text-[#D4AF37] mb-3">
+              Lời thề Nhất Tâm
+            </p>
+            <p className="text-sm text-[#C5A55A] leading-relaxed">
+              {formData.fullName && formData.recipientName ? (
+                <>
+                  {'Bạn xác nhận rằng tất cả hoa hồng Nhất Tâm, hôm nay và mãi mãi, chỉ dành cho '}
+                  <span className="text-[#F5E6C8] italic text-lg font-display">
+                    {formData.recipientName}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[#555040] italic">
+                  {'Nhập tên để xem lời thề của bạn...'}
+                </span>
+              )}
+            </p>
+          </div>
+
+          {/* Submit button */}
+          <button
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className={`mt-6 w-full py-4 text-sm tracking-[0.25em] uppercase font-medium transition-all duration-500 cursor-pointer ${
+              canSubmit
+                ? 'bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]'
+                : 'bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]'
+            }`}
+          >
+            {'Xác nhận lời thề & Thanh toán'}
+          </button>
+
+          {!canSubmit && (
+            <p className="mt-3 text-center text-xs text-[#555040]">
+              {'Vui lòng điền đầy đủ tất cả các trường để tiếp tục'}
+            </p>
+          )}
+
+          <p className="mt-4 text-center text-[10px] text-[#555040] tracking-wider">
+            {'Thanh toán an toàn. Chứng thư sẽ được gửi sau khi xác nhận.'}
           </p>
         </div>
-
-        <button
-          onClick={handleCheckout}
-          disabled={!buyerName.trim()}
-          className={`mt-6 w-full py-4 text-sm tracking-[0.3em] uppercase font-medium transition-all duration-500 ${
-            buyerName.trim()
-              ? 'bg-gold text-primary-foreground hover:bg-gold-dim cursor-pointer'
-              : 'bg-muted text-muted-foreground cursor-not-allowed'
-          }`}
-        >
-          {'Xác nhận lời thề & Thanh toán'}
-        </button>
-
-        <p className="mt-4 text-center text-xs text-muted-foreground">
-          Thanh toán an toàn. Chứng thư sẽ được gửi sau khi xác nhận.
-        </p>
       </div>
     </div>
   )
