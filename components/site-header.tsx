@@ -11,7 +11,7 @@ const navLinks = [
   { href: '/nghe-thuat-bao-ton', label: 'Bảo tồn' },
   { href: '/khoanh-khac', label: 'Khoảnh khắc' },
   { href: '/san-sang', label: 'Sẵn sàng' },
-  { href: '/nghi-thuc', label: 'Nghi thức' },
+  { href: '/chon-vat-chung', label: 'Vật chứng' },
   { href: '/hoi-dap', label: 'Hỏi đáp' },
 ]
 
