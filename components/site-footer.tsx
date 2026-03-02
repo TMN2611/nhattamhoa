@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 const footerLinks = {
   'Nghi thức': [
+    { href: '/san-sang', label: 'Bạn Đã Sẵn Sàng?' },
     { href: '/nghi-thuc', label: 'Nghi Thức Lựa Chọn' },
     { href: '/quy-uoc', label: 'Quy Ước Lời Thề' },
     { href: '/loi-the', label: 'Lời Thề Đã Trao' },
@@ -9,8 +10,9 @@ const footerLinks = {
   ],
   'Khám phá': [
     { href: '/ve-chung-toi', label: 'Về Nhất Tâm Hoa' },
+    { href: '/nghe-thuat-bao-ton', label: 'Nghệ Thuật Bảo Tồn' },
+    { href: '/khoanh-khac', label: 'Khoảnh Khắc Đã Chọn' },
     { href: '/hoi-dap', label: 'Câu Hỏi Thường Gặp' },
-    { href: '/#collection', label: 'Bộ Sưu Tập' },
   ],
 }
 

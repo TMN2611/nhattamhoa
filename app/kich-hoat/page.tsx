@@ -129,7 +129,7 @@ export default function ActivationPage() {
                     colorScheme: 'dark',
                   }}
                 />
-                <p className="mt-1.5 text-xs" style={{ color: '#555040' }}>
+                <p className="mt-2 text-sm" style={{ color: '#6B5F4A' }}>
                   {'Có thể là hôm nay, ngày kỷ niệm, hoặc bất kỳ ngày nào có ý nghĩa với bạn.'}
                 </p>
               </div>
@@ -177,7 +177,7 @@ export default function ActivationPage() {
               </button>
 
               {!canActivate && (
-                <p className="text-center text-xs" style={{ color: '#555040' }}>
+                <p className="text-center text-sm" style={{ color: '#6B5F4A' }}>
                   {'Vui lòng chọn ngày và nhập thông điệp để tiếp tục'}
                 </p>
               )}

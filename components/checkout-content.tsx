@@ -271,7 +271,7 @@ export function CheckoutContent() {
                   </span>
                 </>
               ) : (
-                <span className="text-[#555040] italic">
+                <span className="text-[#6B5F4A] italic">
                   {'Nhập tên để xem lời thề của bạn...'}
                 </span>
               )}
@@ -292,12 +292,12 @@ export function CheckoutContent() {
           </button>
 
           {!canSubmit && (
-            <p className="mt-3 text-center text-xs text-[#555040]">
+            <p className="mt-3 text-center text-sm text-[#6B5F4A]">
               {'Vui lòng điền đầy đủ tất cả các trường để tiếp tục'}
             </p>
           )}
 
-          <p className="mt-4 text-center text-[10px] text-[#555040] tracking-wider">
+          <p className="mt-4 text-center text-xs text-[#6B5F4A] tracking-wider">
             {'Thanh toán an toàn. Chứng thư sẽ được gửi sau khi xác nhận.'}
           </p>
         </div>
