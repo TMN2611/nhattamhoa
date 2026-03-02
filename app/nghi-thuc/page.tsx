@@ -120,7 +120,7 @@ export default function RitualPage() {
             </button>
 
             {!allChecked && (
-              <p className="mt-4 text-center text-xs" style={{ color: '#555040' }}>
+              <p className="mt-4 text-center text-sm" style={{ color: '#6B5F4A' }}>
                 {'Vui lòng xác nhận tất cả cam kết để tiếp tục'}
               </p>
             )}

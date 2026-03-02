@@ -63,15 +63,15 @@ export default function VowTimelinePage() {
                           {vow.city}
                         </span>
                       </div>
-                      <p className="text-xs tracking-[0.25em] uppercase" style={{ color: '#6B5F4A' }}>
+                      <p className="text-sm tracking-[0.2em] uppercase" style={{ color: '#6B5F4A' }}>
                         {`${vow.month} ${vow.year}`}
                       </p>
                     </div>
 
                     {/* Right whisper text */}
                     <span
-                      className="hidden md:block pt-3 text-xs italic"
-                      style={{ color: '#3a3428' }}
+                      className="hidden md:block pt-3 text-sm italic"
+                      style={{ color: '#6B5F4A' }}
                     >
                       {'Một lời thề đã được ghi nhận'}
                     </span>

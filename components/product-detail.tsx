@@ -86,9 +86,9 @@ export function ProductDetail({ product }: { product: Product }) {
 
             {hasExistingRecipient ? (
               <div className="bg-muted/50 border border-border px-4 py-3">
-                <p className="text-xs text-muted-foreground mb-1">Người nhận đã được ghi nhận</p>
+                <p className="text-sm text-muted-foreground mb-1">Người nhận đã được ghi nhận</p>
                 <p className="text-lg text-gold font-medium">{existingRecipient}</p>
-                <p className="text-xs text-muted-foreground mt-2 italic">
+                <p className="text-sm text-muted-foreground mt-2 italic">
                   {`Món quà này sẽ mặc định dành cho ${existingRecipient}`}
                 </p>
               </div>
@@ -138,7 +138,7 @@ export function ProductDetail({ product }: { product: Product }) {
             Thêm vào giỏ hàng
           </button>
 
-          <p className="mt-4 text-center text-xs text-muted-foreground">
+          <p className="mt-4 text-center text-sm text-muted-foreground">
             Miễn phí giao hàng toàn quốc. Bảo hành vĩnh viễn.
           </p>
         </div>
