@@ -1,40 +1,61 @@
 'use client'
 
-import { MapPin } from 'lucide-react'
+import { Heart } from 'lucide-react'
+import Link from 'next/link'
 import { FadeInSection, GoldDivider } from '@/components/shared-ui'
 
-const moments = [
+const commitments = [
   {
-    city: 'Hà Nội',
-    title: 'Lời cầu hôn mùa đông',
-    description:
-      'Giữa cơn gió lạnh tháng Mười Hai, anh quỳ xuống — không phải vì chuẩn bị sẵn, mà vì không thể chờ thêm được nữa. Có những lời hứa không cần thời điểm hoàn hảo.',
-    season: 'Đông 2025',
+    giver: 'Minh',
+    receiver: 'Lan',
+    date: '14.02.2026',
+    vow: 'Anh chọn em. Không phải hôm nay. Mà là mãi mãi.',
   },
   {
-    city: 'TP. Hồ Chí Minh',
-    title: 'Kỷ niệm 7 năm',
-    description:
-      'Bảy năm không phải là một con số. Đó là bảy năm chọn cùng một người mỗi sáng thức dậy. Bảy năm của những cuộc cãi vã — và những lần chọn ở lại.',
-    season: 'Xuân 2026',
+    giver: 'Tuấn',
+    receiver: 'Hà',
+    date: '01.01.2026',
+    vow: 'Mỗi ngày anh thức dậy, điều đầu tiên anh nghĩ tới — vẫn là em.',
   },
   {
-    city: 'Đà Lạt',
-    title: 'Lời xin lỗi sau chia xa',
-    description:
-      'Họ đã từng chia tay. Nhưng có những người, dù đi bao xa, vẫn quay về. Không phải vì quen thuộc. Mà vì biết rằng — không ai khác thay thế được.',
-    season: 'Thu 2025',
+    giver: 'Khang',
+    receiver: 'Thy',
+    date: '20.10.2025',
+    vow: 'Anh không hứa sẽ hoàn hảo. Nhưng anh hứa sẽ không bao giờ bỏ đi.',
   },
   {
-    city: 'Đà Nẵng',
-    title: 'Ngày cưới',
-    description:
-      'Không phải một đám cưới hoành tráng. Chỉ có hai người, một đóa hồng, và lời thề trước biển. Đôi khi, những điều thiêng liêng nhất lại đơn giản như thế.',
-    season: 'Hè 2025',
+    giver: 'Hưng',
+    receiver: 'Mai',
+    date: '08.03.2026',
+    vow: 'Em là lý do duy nhất anh tin vào hai chữ "mãi mãi".',
+  },
+  {
+    giver: 'Bảo',
+    receiver: 'Ngọc',
+    date: '25.12.2025',
+    vow: 'Trong hàng triệu người, anh đã chọn em — và anh sẽ chọn lại nếu được sống thêm lần nữa.',
+  },
+  {
+    giver: 'Đức',
+    receiver: 'Linh',
+    date: '14.09.2025',
+    vow: 'Nếu tình yêu là một lời thề, thì em là lời thề đẹp nhất đời anh.',
+  },
+  {
+    giver: 'Phong',
+    receiver: 'Uyên',
+    date: '22.11.2025',
+    vow: 'Anh không biết tương lai ra sao. Nhưng anh biết — có em trong đó.',
+  },
+  {
+    giver: 'Thành',
+    receiver: 'Trinh',
+    date: '05.02.2026',
+    vow: 'Có người hỏi anh sợ gì nhất. Anh nói: mất em.',
   },
 ]
 
-export default function MomentsGalleryPage() {
+export default function ChosenMomentsPage() {
   return (
     <>
       {/* Hero */}
@@ -42,79 +63,122 @@ export default function MomentsGalleryPage() {
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.04) 0%, transparent 70%)',
+            background:
+              'radial-gradient(ellipse at 50% 30%, rgba(212,175,55,0.05) 0%, transparent 70%)',
           }}
         />
         <FadeInSection>
-          <p className="text-xs tracking-[0.4em] uppercase mb-6" style={{ color: '#C5A55A' }}>
-            {'Những câu chuyện có thật'}
+          <p
+            className="text-xs tracking-[0.4em] uppercase mb-6"
+            style={{ color: '#C5A55A' }}
+          >
+            {'Khoảnh khắc đã chọn'}
           </p>
           <h1
             className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight font-display text-balance"
             style={{ color: '#F5E6C8' }}
           >
-            {'Những Khoảnh Khắc Đã Được Chọn'}
+            {'Những Lời Thề Đã Được Trao'}
           </h1>
           <p
-            className="mx-auto mt-8 max-w-lg text-lg md:text-xl leading-relaxed italic"
-            style={{ color: '#C5A55A' }}
+            className="mx-auto mt-8 max-w-2xl text-lg md:text-xl leading-relaxed"
+            style={{ color: '#8A7D65' }}
           >
-            {'Họ không cần một dịp đặc biệt. Chỉ cần biết rằng họ sẽ không chọn ai khác.'}
+            {'Không phải ai cũng chọn. Nhưng những người đã chọn — họ không bao giờ quay lại.'}
           </p>
           <GoldDivider className="mt-12" />
         </FadeInSection>
       </section>
 
-      {/* Timeline Gallery */}
-      <section className="px-6 pb-24 md:pb-32">
-        <div className="mx-auto max-w-4xl">
-          {moments.map((moment, i) => (
-            <FadeInSection key={moment.city} delay={i * 200}>
+      {/* Commitment Grid */}
+      <section className="px-6 pb-20 md:pb-28">
+        <div className="mx-auto max-w-5xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8">
+          {commitments.map((item, i) => (
+            <FadeInSection key={`${item.giver}-${item.receiver}`} delay={i * 120}>
               <div
-                className={`relative flex flex-col ${
-                  i % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'
-                } gap-8 md:gap-16 items-start py-14 md:py-20`}
+                className="group relative p-7 md:p-9 rounded-sm transition-all duration-700 hover:scale-[1.02]"
+                style={{
+                  background:
+                    'linear-gradient(145deg, rgba(30,27,22,0.9) 0%, rgba(20,18,14,0.95) 100%)',
+                  border: '1px solid rgba(212,175,55,0.12)',
+                  boxShadow: '0 0 30px rgba(212,175,55,0.03)',
+                }}
               >
-                {/* City and season label */}
-                <div className="flex-shrink-0 md:w-1/3">
-                  <div className="flex items-center gap-3 mb-3">
-                    <MapPin className="h-4 w-4" style={{ color: '#D4AF37' }} />
+                {/* Hover glow */}
+                <div
+                  className="absolute inset-0 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none"
+                  style={{
+                    boxShadow:
+                      'inset 0 0 40px rgba(212,175,55,0.06), 0 0 60px rgba(212,175,55,0.04)',
+                  }}
+                />
+
+                {/* Top: names and date */}
+                <div className="relative flex items-center justify-between mb-5">
+                  <div className="flex items-center gap-2.5">
                     <span
-                      className="text-sm tracking-[0.2em] uppercase"
-                      style={{ color: '#D4AF37' }}
+                      className="text-lg md:text-xl font-display font-medium"
+                      style={{ color: '#F5E6C8' }}
                     >
-                      {moment.city}
+                      {item.giver}
+                    </span>
+                    <Heart
+                      className="h-3.5 w-3.5 flex-shrink-0"
+                      style={{ color: '#D4AF37', fill: '#D4AF37', opacity: 0.5 }}
+                    />
+                    <span
+                      className="text-lg md:text-xl font-display font-medium"
+                      style={{ color: '#F5E6C8' }}
+                    >
+                      {item.receiver}
                     </span>
                   </div>
-                  <p
-                    className="text-sm tracking-[0.2em] uppercase"
+                  <span
+                    className="text-sm tracking-wider"
                     style={{ color: '#6B5F4A' }}
                   >
-                    {moment.season}
-                  </p>
+                    {item.date}
+                  </span>
                 </div>
 
-                {/* Content */}
-                <div className="flex-1">
-                  <h2
-                    className="text-2xl md:text-3xl font-display font-light mb-5"
-                    style={{ color: '#F5E6C8' }}
-                  >
-                    {moment.title}
-                  </h2>
-                  <p
-                    className="text-base md:text-lg leading-relaxed"
-                    style={{ color: '#8A7D65' }}
-                  >
-                    {moment.description}
-                  </p>
-                </div>
-
-                {/* Decorative corner element */}
+                {/* Thin divider */}
                 <div
-                  className="absolute top-0 left-0 right-0 h-px"
+                  className="h-px w-full mb-5"
                   style={{
-                    background: i === 0 ? 'transparent' : 'linear-gradient(90deg, transparent, rgba(212,175,55,0.15), transparent)',
+                    background:
+                      'linear-gradient(90deg, rgba(212,175,55,0.2), rgba(212,175,55,0.05))',
+                  }}
+                />
+
+                {/* Commitment label */}
+                <p
+                  className="text-xs tracking-[0.25em] uppercase mb-3"
+                  style={{ color: '#C5A55A' }}
+                >
+                  {`${item.giver} đã chọn ${item.receiver}`}
+                </p>
+
+                {/* Vow */}
+                <p
+                  className="text-base md:text-lg leading-relaxed italic font-display"
+                  style={{ color: '#C5A55A', opacity: 0.85 }}
+                >
+                  {`"${item.vow}"`}
+                </p>
+
+                {/* Corner accents */}
+                <div
+                  className="absolute top-0 left-0 w-5 h-5 pointer-events-none"
+                  style={{
+                    borderTop: '1px solid rgba(212,175,55,0.25)',
+                    borderLeft: '1px solid rgba(212,175,55,0.25)',
+                  }}
+                />
+                <div
+                  className="absolute bottom-0 right-0 w-5 h-5 pointer-events-none"
+                  style={{
+                    borderBottom: '1px solid rgba(212,175,55,0.25)',
+                    borderRight: '1px solid rgba(212,175,55,0.25)',
                   }}
                 />
               </div>
@@ -123,17 +187,37 @@ export default function MomentsGalleryPage() {
         </div>
       </section>
 
-      {/* Closing */}
+      {/* Closing statement */}
       <section className="px-6 py-20 md:py-28 text-center">
         <FadeInSection>
           <GoldDivider className="mb-14" />
           <p
-            className="text-xl md:text-2xl lg:text-3xl font-light italic font-display leading-relaxed max-w-xl mx-auto"
+            className="text-xl md:text-2xl lg:text-3xl font-light italic font-display leading-relaxed max-w-2xl mx-auto text-balance"
             style={{ color: '#D4AF37' }}
           >
-            {'"Có lẽ khoảnh khắc tiếp theo... là của bạn."'}
+            {'"Mỗi lời thề là một quyết định không thể thay đổi."'}
           </p>
-          <GoldDivider className="mt-14" />
+          <GoldDivider className="mt-14 mb-14" />
+
+          {/* CTA */}
+          <Link
+            href="/nghi-thuc"
+            className="group relative inline-flex items-center gap-3 px-10 py-4 rounded-sm text-sm tracking-[0.2em] uppercase font-display transition-all duration-500 hover:scale-105"
+            style={{
+              color: '#D4AF37',
+              border: '1px solid rgba(212,175,55,0.4)',
+              background: 'transparent',
+            }}
+          >
+            <span
+              className="absolute inset-0 rounded-sm opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
+              style={{
+                boxShadow:
+                  '0 0 30px rgba(212,175,55,0.15), inset 0 0 20px rgba(212,175,55,0.05)',
+              }}
+            />
+            <span className="relative">{'I am ready to choose'}</span>
+          </Link>
         </FadeInSection>
       </section>
     </>

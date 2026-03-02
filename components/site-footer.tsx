@@ -3,8 +3,8 @@ import Link from 'next/link'
 const footerLinks = {
   'Nghi thức': [
     { href: '/san-sang', label: 'Bạn Đã Sẵn Sàng?' },
+    { href: '/chon-vat-chung', label: 'Chọn Vật Chứng' },
     { href: '/nghi-thuc', label: 'Nghi Thức Lựa Chọn' },
-    { href: '/quy-uoc', label: 'Quy Ước Lời Thề' },
     { href: '/loi-the', label: 'Lời Thề Đã Trao' },
     { href: '/kich-hoat', label: 'Kích Hoạt Lời Thề' },
   ],
