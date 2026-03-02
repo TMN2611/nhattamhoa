@@ -36,14 +36,14 @@ export default function ActivationPage() {
                 className="mt-8 text-xs tracking-[0.4em] uppercase"
                 style={{ color: '#D4AF37' }}
               >
-                {'Kich hoat thanh cong'}
+                {'Kích hoạt thành công'}
               </p>
 
               <h1
                 className="mt-4 text-3xl md:text-4xl font-display font-light"
                 style={{ color: '#F5E6C8' }}
               >
-                {'Loi the cua ban da song'}
+                {'Lời thề của bạn đã sống'}
               </h1>
 
               <GoldDivider className="my-10" />
@@ -53,7 +53,7 @@ export default function ActivationPage() {
                 style={{ borderColor: 'rgba(212,175,55,0.2)', background: 'rgba(212,175,55,0.02)' }}
               >
                 <p className="text-xs tracking-[0.3em] uppercase mb-3" style={{ color: '#C5A55A' }}>
-                  {'Ngay kich hoat'}
+                  {'Ngày kích hoạt'}
                 </p>
                 <p className="text-xl font-display" style={{ color: '#F5E6C8' }}>
                   {new Date(date).toLocaleDateString('vi-VN', {
@@ -70,7 +70,7 @@ export default function ActivationPage() {
                 />
 
                 <p className="text-xs tracking-[0.3em] uppercase mb-3" style={{ color: '#C5A55A' }}>
-                  {'Thong diep'}
+                  {'Thông điệp'}
                 </p>
                 <p
                   className="text-lg italic font-display leading-relaxed"
@@ -81,7 +81,7 @@ export default function ActivationPage() {
               </div>
 
               <p className="mt-8 text-sm" style={{ color: '#6B5F4A' }}>
-                {'Chung thu cua ban da duoc cap nhat voi ngay kich hoat va thong diep nay.'}
+                {'Chứng thư của bạn đã được cập nhật với ngày kích hoạt và thông điệp này.'}
               </p>
             </div>
           </FadeInSection>
@@ -93,9 +93,9 @@ export default function ActivationPage() {
   return (
     <>
       <PageHero
-        pretitle="Khoanh khac thieng lieng"
-        title="Kich Hoat Loi The"
-        subtitle="Chon ngay dac biet va gui loi nhan tu trai tim ban. Loi the se song tu khoanh khac nay."
+        pretitle="Khoảnh khắc thiêng liêng"
+        title="Kích Hoạt Lời Thề"
+        subtitle="Chọn ngày đặc biệt và gửi lời nhắn từ trái tim bạn. Lời thề sẽ sống từ khoảnh khắc này."
       />
 
       <section className="px-6 pb-24 md:pb-32">
@@ -114,7 +114,7 @@ export default function ActivationPage() {
                   style={{ color: '#C5A55A' }}
                 >
                   <Calendar className="h-4 w-4" />
-                  {'Ngay kich hoat'}
+                  {'Ngày kích hoạt'}
                 </label>
                 <input
                   id="activation-date"
@@ -130,7 +130,7 @@ export default function ActivationPage() {
                   }}
                 />
                 <p className="mt-1.5 text-xs" style={{ color: '#555040' }}>
-                  {'Co the la hom nay, ngay ky niem, hoac bat ky ngay nao co y nghia voi ban.'}
+                  {'Có thể là hôm nay, ngày kỷ niệm, hoặc bất kỳ ngày nào có ý nghĩa với bạn.'}
                 </p>
               </div>
 
@@ -142,7 +142,7 @@ export default function ActivationPage() {
                   style={{ color: '#C5A55A' }}
                 >
                   <MessageSquareHeart className="h-4 w-4" />
-                  {'Thong diep'}
+                  {'Thông điệp'}
                 </label>
                 <div
                   className="border p-1"
@@ -152,7 +152,7 @@ export default function ActivationPage() {
                     id="activation-message"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Viet nhung loi ban muon gui kem loi the..."
+                    placeholder="Viết những lời bạn muốn gửi kèm lời thề..."
                     rows={5}
                     className="w-full bg-transparent px-3 py-2 resize-none focus:outline-none italic leading-8 font-serif text-base"
                     style={{ color: '#F5E6C8' }}
@@ -173,12 +173,12 @@ export default function ActivationPage() {
                 }`}
               >
                 <Sparkles className="h-4 w-4" />
-                {'Kich hoat'}
+                {'Kích hoạt'}
               </button>
 
               {!canActivate && (
                 <p className="text-center text-xs" style={{ color: '#555040' }}>
-                  {'Vui long chon ngay va nhap thong diep de tiep tuc'}
+                  {'Vui lòng chọn ngày và nhập thông điệp để tiếp tục'}
                 </p>
               )}
             </div>

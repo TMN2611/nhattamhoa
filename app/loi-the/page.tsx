@@ -4,23 +4,23 @@ import { MapPin } from 'lucide-react'
 import { FadeInSection, GoldDivider, PageHero } from '@/components/shared-ui'
 
 const vows = [
-  { year: '2026', city: 'Ha Noi', month: 'Thang 1' },
-  { year: '2026', city: 'TP. Ho Chi Minh', month: 'Thang 1' },
-  { year: '2026', city: 'Da Nang', month: 'Thang 2' },
-  { year: '2026', city: 'Ha Noi', month: 'Thang 2' },
-  { year: '2026', city: 'Can Tho', month: 'Thang 2' },
-  { year: '2026', city: 'TP. Ho Chi Minh', month: 'Thang 3' },
-  { year: '2026', city: 'Hue', month: 'Thang 3' },
-  { year: '2026', city: 'Da Lat', month: 'Thang 3' },
+  { year: '2026', city: 'Hà Nội', month: 'Tháng 1' },
+  { year: '2026', city: 'TP. Hồ Chí Minh', month: 'Tháng 1' },
+  { year: '2026', city: 'Đà Nẵng', month: 'Tháng 2' },
+  { year: '2026', city: 'Hà Nội', month: 'Tháng 2' },
+  { year: '2026', city: 'Cần Thơ', month: 'Tháng 2' },
+  { year: '2026', city: 'TP. Hồ Chí Minh', month: 'Tháng 3' },
+  { year: '2026', city: 'Huế', month: 'Tháng 3' },
+  { year: '2026', city: 'Đà Lạt', month: 'Tháng 3' },
 ]
 
 export default function VowTimelinePage() {
   return (
     <>
       <PageHero
-        pretitle="Nhung loi the da duoc trao"
-        title="Nhung Loi The Da Duoc Trao"
-        subtitle="Moi dong la mot loi hua. An danh. Vinh cuu. Thieng lieng."
+        pretitle="Những lời thề đã được trao"
+        title="Những Lời Thề Đã Được Trao"
+        subtitle="Mỗi dòng là một lời hứa. Ẩn danh. Vĩnh cửu. Thiêng liêng."
       />
 
       <section className="px-6 pb-24 md:pb-32">
@@ -73,7 +73,7 @@ export default function VowTimelinePage() {
                       className="hidden md:block pt-3 text-xs italic"
                       style={{ color: '#3a3428' }}
                     >
-                      {'Mot loi the da duoc ghi nhan'}
+                      {'Một lời thề đã được ghi nhận'}
                     </span>
                   </div>
                 </FadeInSection>
@@ -86,13 +86,13 @@ export default function VowTimelinePage() {
             <div className="mt-14 text-center">
               <GoldDivider className="mb-10" />
               <p className="text-sm" style={{ color: '#6B5F4A' }}>
-                {'Va con nhieu loi the khac dang cho duoc viet...'}
+                {'Và còn nhiều lời thề khác đang chờ được viết...'}
               </p>
               <p
                 className="mt-4 text-base italic font-display"
                 style={{ color: '#D4AF37' }}
               >
-                {'"Co le loi the tiep theo la cua ban."'}
+                {'"Có lẽ lời thề tiếp theo là của bạn."'}
               </p>
             </div>
           </FadeInSection>
