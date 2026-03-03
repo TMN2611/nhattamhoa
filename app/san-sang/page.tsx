@@ -138,7 +138,7 @@ export default function ReadinessPage() {
 
               {/* Button 2: Ready */}
               <button
-                onClick={() => router.push('/nghi-thuc')}
+                onClick={() => router.push('/khoanh-khac')}
                 className="group w-full p-8 text-center transition-all duration-700 cursor-pointer bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] shadow-[0_0_40px_rgba(212,175,55,0.1)] hover:shadow-[0_0_60px_rgba(212,175,55,0.2)]"
               >
                 <p

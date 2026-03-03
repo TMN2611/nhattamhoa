@@ -107,7 +107,7 @@ export default function RitualPage() {
             <GoldDivider className="mb-10" />
 
             <button
-              onClick={() => router.push('/checkout')}
+              onClick={() => router.push('/chon-vat-chung')}
               disabled={!allChecked}
               className={`w-full py-5 flex items-center justify-center gap-3 text-sm tracking-[0.25em] uppercase font-medium transition-all duration-700 cursor-pointer ${
                 allChecked
