@@ -1,0 +1,251 @@
+Add an Admin Dashboard and order management system to my NextJS project.
+
+Project context:
+
+This is a luxury flower brand website called "Nhất Tâm Hoa".
+
+Customer flow:
+
+Home
+→ Ritual Page
+→ Product Selection
+→ Checkout
+→ Certificate
+
+When a user checks out they enter:
+
+- buyerName
+- recipientName
+- phoneNumber
+- loveLetter
+
+Currently the certificate is generated immediately.
+
+I want to change the architecture:
+
+NEW FLOW:
+
+1️⃣ Customer submits checkout form
+
+2️⃣ Order is stored in database first
+
+3️⃣ Admin reviews order
+
+4️⃣ Admin clicks "Record on Blockchain"
+
+5️⃣ Then certificate becomes permanent
+
+Tech stack:
+
+NextJS App Router
+Typescript
+Tailwind
+Replit environment
+SQLite database
+
+Use Prisma ORM.
+
+---
+
+DATABASE
+
+Create Prisma schema:
+
+model Order {
+  id            String   @id @default(uuid())
+  buyerName     String
+  recipientName String
+  phoneNumber   String
+  loveLetter    String
+  status        String   @default("pending")
+  txHash        String?
+  createdAt     DateTime @default(now())
+}
+
+Status values:
+
+pending
+recorded
+
+---
+
+API ROUTES
+
+Create API routes:
+
+POST /api/orders/create
+
+Store order in database.
+
+Body:
+
+{
+buyerName
+recipientName
+phoneNumber
+loveLetter
+}
+
+Return:
+
+orderId
+
+---
+
+GET /api/orders
+
+Return all orders for admin.
+
+---
+
+POST /api/orders/record
+
+Body:
+
+{
+orderId
+}
+
+Call blockchain function:
+
+saveCertificateOnChain()
+
+Then update order:
+
+status = recorded
+txHash = transaction hash
+
+---
+
+ADMIN LOGIN
+
+Create simple admin login.
+
+Credentials:
+
+username: adm1
+password: 123
+
+Store session in localStorage.
+
+Create route:
+
+/admin/login
+
+After login redirect to:
+
+/admin/dashboard
+
+---
+
+ADMIN DASHBOARD
+
+Page:
+
+/admin/dashboard
+
+Features:
+
+Show table of orders.
+
+Columns:
+
+Order ID
+Buyer
+Recipient
+Phone
+Message
+Status
+Date
+Blockchain TX
+
+Buttons:
+
+View
+Record on Blockchain
+
+If status = pending:
+
+show button:
+
+"Record on Blockchain"
+
+When clicked:
+
+call API:
+
+POST /api/orders/record
+
+Update UI after success.
+
+---
+
+ADMIN UI STYLE
+
+Use same design style as website:
+
+Dark background
+Gold accents
+
+Table styling:
+
+bg-[#0d0b09]
+border-[#D4AF37]/20
+
+Button:
+
+gold gradient
+
+---
+
+SECURITY
+
+Protect admin routes.
+
+If not logged in redirect to:
+
+/admin/login
+
+---
+
+CHECKOUT UPDATE
+
+Modify checkout submit logic.
+
+Instead of directly creating certificate:
+
+Call:
+
+POST /api/orders/create
+
+Then show success page:
+
+"Your commitment has been received.
+It will be sealed permanently soon."
+
+---
+
+BONUS
+
+Add small dashboard stats:
+
+Total Orders
+Pending
+Recorded on Blockchain
+
+Display at top of dashboard.
+
+---
+
+INSTALL PACKAGES
+
+npm install prisma @prisma/client sqlite3
+
+Run:
+
+npx prisma init
+npx prisma migrate dev
+
+---
+
+Generate full working code.
