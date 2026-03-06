@@ -190,15 +190,17 @@ function generateSerialId() {
 interface CommitmentCertificateProps {
   buyerName: string
   recipientName: string
+  blockchainData?: { orderId: string, txHash: string } | null
   animate?: boolean
 }
 
 export function CommitmentCertificate({
   buyerName,
   recipientName,
+  blockchainData,
   animate = true,
 }: CommitmentCertificateProps) {
-  const [serialId] = useState(() => generateSerialId())
+  const [serialId] = useState(() => blockchainData?.orderId || generateSerialId())
   const [visible, setVisible] = useState(!animate)
 
   useEffect(() => {
@@ -316,6 +318,30 @@ export function CommitmentCertificate({
                 >
                   {`Ngày xác nhận: ${currentDate}`}
                 </p>
+
+                {blockchainData && (
+                  <div className="mt-6 p-4 border border-[#D4AF37]/20 bg-black/40 text-left w-full max-w-sm rounded-sm backdrop-blur-sm">
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2 font-display">
+                      Chứng thực Blockchain (Polygon)
+                    </p>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between items-center gap-4">
+                        <span className="text-[10px] text-[#8A7D65]">Certificate ID:</span>
+                        <span className="text-[10px] text-[#F5E6C8] font-mono truncate">{blockchainData.orderId}</span>
+                      </div>
+                      <div className="flex justify-between items-center gap-4">
+                        <span className="text-[10px] text-[#8A7D65]">TX Hash:</span>
+                        <span className="text-[10px] text-[#D4AF37] font-mono truncate hover:underline cursor-pointer">
+                          {blockchainData.txHash.substring(0, 10)}...{blockchainData.txHash.substring(60)}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[9px] text-green-500 uppercase tracking-widest">Recorded permanently</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Bottom section: seal + QR */}
                 <div className="mt-10 flex w-full items-end justify-between px-2">

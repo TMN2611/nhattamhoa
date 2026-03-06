@@ -1,0 +1,157 @@
+Add blockchain certificate storage to my NextJS project.
+
+Context:
+
+This is a luxury flower brand website called "Nhất Tâm Hoa".
+Customers go through a ritual flow and then checkout where they enter:
+
+- buyer name
+- recipient name
+- phone number
+- love letter
+
+After checkout a "Commitment Certificate" is generated.
+
+I want to store a permanent proof of the certificate on blockchain.
+
+IMPORTANT ARCHITECTURE:
+
+Do NOT store all data on blockchain.
+
+Instead:
+
+1. Generate a SHA256 hash of:
+   buyerName + recipientName + message + timestamp
+
+2. Store only the hash on blockchain
+
+3. Store full certificate data in database (future)
+
+Blockchain network:
+Polygon (low gas fees)
+
+Tech stack:
+NextJS App Router
+Typescript
+Tailwind
+Ethers.js
+
+WHAT I NEED YOU TO IMPLEMENT:
+
+1️⃣ Smart contract (Solidity)
+
+Contract name:
+NhatTamCertificate
+
+Functions:
+
+createCertificate(
+    orderId,
+    buyerName,
+    recipientName,
+    message
+)
+
+Store:
+
+- orderId
+- timestamp
+- hash
+
+Emit event CertificateCreated.
+
+2️⃣ Blockchain helper
+
+Create file:
+
+/lib/blockchain.ts
+
+Use ethers.js.
+
+Function:
+
+saveCertificateOnChain(
+    orderId,
+    buyerName,
+    recipientName,
+    message
+)
+
+Return transaction hash.
+
+3️⃣ API route
+
+Create:
+
+/app/api/create-certificate/route.ts
+
+POST body:
+
+{
+buyerName
+recipientName
+message
+}
+
+Generate orderId using uuid.
+
+Call saveCertificateOnChain().
+
+Return:
+
+{
+success:true,
+orderId,
+txHash
+}
+
+4️⃣ Checkout integration
+
+Modify checkout submit logic.
+
+After user submits form:
+
+Call API:
+
+POST /api/create-certificate
+
+Send:
+
+buyerName
+recipientName
+message
+
+Store returned:
+
+orderId
+txHash
+
+5️⃣ Certificate display
+
+Update CommitmentCertificate component to display:
+
+Certificate ID
+Blockchain Transaction Hash
+Timestamp
+
+Example UI:
+
+Certificate ID: NT-2026-0001
+Recorded on Blockchain
+TX: 0x8923af...
+
+6️⃣ Security
+
+Private key must be stored in environment variable:
+
+PRIVATE_KEY
+
+RPC:
+
+NEXT_PUBLIC_RPC_URL
+
+7️⃣ Add install instruction
+
+npm install ethers uuid
+
+Make the implementation clean and production ready.

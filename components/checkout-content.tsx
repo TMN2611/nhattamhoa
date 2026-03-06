@@ -86,9 +86,11 @@ function FormInput({
 function CertificateReveal({
   buyerName,
   recipientName,
+  blockchainData,
 }: {
   buyerName: string
   recipientName: string
+  blockchainData: { orderId: string, txHash: string } | null
 }) {
   return (
     <div className="flex flex-col items-center gap-10 py-8 animate-in fade-in duration-700">
@@ -109,6 +111,7 @@ function CertificateReveal({
       <CommitmentCertificate
         buyerName={buyerName}
         recipientName={recipientName}
+        blockchainData={blockchainData}
         animate={true}
       />
 
@@ -134,6 +137,7 @@ export function CheckoutContent() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [submitted, setSubmitted] = useState(false)
   const [isFlipping, setIsFlipping] = useState(false)
+  const [blockchainData, setBlockchainData] = useState<{ orderId: string, txHash: string } | null>(null)
 
   const updateField = useCallback(
     (field: keyof FormData) => (value: string) => {
@@ -151,13 +155,34 @@ export function CheckoutContent() {
 
   const canSubmit = isFormComplete(formData)
 
-  function handleSubmit() {
+  async function handleSubmit() {
     const validationErrors = validateForm(formData)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       return
     }
+    
     setIsFlipping(true)
+    
+    try {
+      const response = await fetch('/api/create-certificate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          buyerName: formData.fullName,
+          recipientName: formData.recipientName,
+          message: formData.loveLetter,
+        }),
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        setBlockchainData({ orderId: data.orderId, txHash: data.txHash });
+      }
+    } catch (err) {
+      console.error("Failed to create blockchain certificate", err);
+    }
+
     setTimeout(() => {
       setSubmitted(true)
     }, 700)
@@ -168,6 +193,7 @@ export function CheckoutContent() {
       <CertificateReveal
         buyerName={formData.fullName}
         recipientName={formData.recipientName}
+        blockchainData={blockchainData}
       />
     )
   }
