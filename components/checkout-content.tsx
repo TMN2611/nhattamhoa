@@ -100,20 +100,34 @@ function CertificateReveal({
           <ShieldCheck className="h-7 w-7 text-[#D4AF37]" />
         </div>
         <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37]">
-          Lời thề đã được ghi nhận
+          Đơn hàng đã được nhận
         </p>
         <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
-          {'Chứng thư của bạn đã sẵn sàng'}
+          {'Lời thề của bạn đã được ghi nhận'}
         </h2>
+        <p className="text-sm text-[#8A7D65] mt-3">
+          {'Quản trị viên sẽ xác nhận và ghi lên blockchain trong thời gian sớm nhất.'}
+        </p>
       </div>
 
-      {/* Certificate */}
+      {/* Certificate Preview */}
       <CommitmentCertificate
         buyerName={buyerName}
         recipientName={recipientName}
         blockchainData={blockchainData}
         animate={true}
       />
+
+      {blockchainData && (
+        <div className="p-4 bg-[#0d0b09] border border-[#D4AF37]/20 rounded text-center max-w-md">
+          <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2">
+            Mã đơn hàng
+          </p>
+          <p className="text-sm text-[#F5E6C8] font-mono break-all">
+            {blockchainData.orderId}
+          </p>
+        </div>
+      )}
 
       {/* Back home */}
       <Link
@@ -165,22 +179,23 @@ export function CheckoutContent() {
     setIsFlipping(true)
     
     try {
-      const response = await fetch('/api/create-certificate', {
+      const response = await fetch('/api/orders/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           buyerName: formData.fullName,
           recipientName: formData.recipientName,
-          message: formData.loveLetter,
+          phoneNumber: formData.phoneNumber,
+          loveLetter: formData.loveLetter,
         }),
       });
       
       const data = await response.json();
       if (data.success) {
-        setBlockchainData({ orderId: data.orderId, txHash: data.txHash });
+        setBlockchainData({ orderId: data.orderId, txHash: '' });
       }
     } catch (err) {
-      console.error("Failed to create blockchain certificate", err);
+      console.error("Failed to create order", err);
     }
 
     setTimeout(() => {
