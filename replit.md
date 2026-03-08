@@ -16,13 +16,14 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 ## Pages
 
 ### Public Pages
-- `/` - Home page with hero + product grid
+- `/` - Home page with hero + product grid + live vow feed
 - `/product/[id]` - Product detail (from Supabase, fallback to static)
-- `/ready` - Ritual readiness check (detects returning users)
+- `/ready` - Ritual readiness with reflective questions + dual buttons
 - `/moment` - Describe moment/intention
-- `/ritual` - Choose ritual type (Love, Gratitude, Healing, Reconnection)
-- `/offering` - Choose offering (Lotus, Lily, Peony, Rose)
-- `/checkout` - Checkout form + AI message + certificate preview
+- `/moments` - Vow wall (loads from Supabase orders, fallback to static)
+- `/ritual` - Commitment checkboxes (3 promises before continuing)
+- `/offering` - Choose offering (3 products with prices)
+- `/checkout` - Checkout form + AI message + certificate preview + public_vow toggle
 - `/lookup` - Certificate code search
 - `/certificate/[code]` - Certificate display + PDF download
 - `/ve-chung-toi` - About us
@@ -50,7 +51,7 @@ Each step sets `ntt_ritual_step` in localStorage. Pages check the step and redir
 id, name, description, price, image_url, category, created_at
 
 ### Orders Table
-id, product_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, status, created_at
+id, product_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, status, created_at
 
 ### Setup
 Run `supabase/migrations/001_create_tables.sql` in Supabase SQL Editor to create tables and seed products.

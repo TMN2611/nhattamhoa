@@ -2,37 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-
-const offeringOptions = [
-  {
-    id: 'lotus',
-    name: 'Lotus flower',
-    label: 'Hoa Sen',
-    description: 'Biểu tượng của sự thuần khiết và giác ngộ.',
-    emoji: '🪷',
-  },
-  {
-    id: 'lily',
-    name: 'White lily',
-    label: 'Hoa Lily Trắng',
-    description: 'Sự trong trẻo, thanh cao và lòng chân thành.',
-    emoji: '🤍',
-  },
-  {
-    id: 'peony',
-    name: 'Peony',
-    label: 'Hoa Mẫu Đơn',
-    description: 'Sự thịnh vượng, may mắn và tình yêu trọn vẹn.',
-    emoji: '🌸',
-  },
-  {
-    id: 'rose',
-    name: 'Rose',
-    label: 'Hoa Hồng',
-    description: 'Tình yêu vĩnh cửu, đam mê và sự cam kết.',
-    emoji: '🌹',
-  },
-]
+import { offeringPageText } from '@/content/ritualText'
 
 export default function OfferingPage() {
   const router = useRouter()
@@ -50,48 +20,60 @@ export default function OfferingPage() {
 
   function handleContinue() {
     if (!selected) return
-    const offering = offeringOptions.find(o => o.id === selected)
-    localStorage.setItem('ntt_offering', offering?.name || '')
+    const product = offeringPageText.products.find(p => p.id === selected)
+    localStorage.setItem('ntt_offering', product?.name || '')
     localStorage.setItem('ntt_ritual_step', 'offering')
     router.push('/checkout')
   }
 
   return (
     <main className="min-h-screen bg-[#0a0a08] flex items-center justify-center px-6 py-20">
-      <div className={`max-w-2xl w-full text-center transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
+      <div className={`max-w-3xl w-full text-center transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
         <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37] mb-6">
-          Vật Chứng
+          {offeringPageText.label}
         </p>
 
         <h1 className="text-3xl md:text-4xl font-light text-[#F5E6C8] font-display leading-tight mb-4">
-          Chọn vật chứng thiêng liêng
+          {offeringPageText.title}
         </h1>
 
-        <p className="text-[#8A7D65] leading-relaxed mb-10">
-          Vật chứng là biểu tượng cho ý niệm bạn muốn gửi gắm. Hãy chọn loài hoa phù hợp với tâm nguyện.
+        <p className="text-[#8A7D65] leading-relaxed mb-12 text-base">
+          {offeringPageText.subtitle}
         </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-          {offeringOptions.map((option) => {
-            const isSelected = selected === option.id
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          {offeringPageText.products.map((product) => {
+            const isSelected = selected === product.id
             return (
               <button
-                key={option.id}
-                onClick={() => setSelected(option.id)}
-                className={`p-6 border text-left transition-all duration-300 ${
+                key={product.id}
+                onClick={() => setSelected(product.id)}
+                className={`group relative p-8 border text-left transition-all duration-500 hover:translate-y-[-4px] ${
                   isSelected
-                    ? 'border-[#D4AF37] bg-[#D4AF37]/10'
-                    : 'border-[#D4AF37]/20 bg-[#0d0b09] hover:border-[#D4AF37]/40'
+                    ? 'border-[#D4AF37] bg-[#D4AF37]/10 shadow-[0_0_40px_rgba(212,175,55,0.15)]'
+                    : 'border-[#D4AF37]/20 bg-[#0d0b09] hover:border-[#D4AF37]/50 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)]'
                 }`}
               >
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">{option.emoji}</span>
-                  <h3 className={`text-sm tracking-wider uppercase font-medium ${isSelected ? 'text-[#D4AF37]' : 'text-[#C5A55A]'}`}>
-                    {option.label}
-                  </h3>
-                </div>
-                <p className="text-xs text-[#8A7D65] leading-relaxed">
-                  {option.description}
+                <div className={`absolute top-0 left-0 right-0 h-[2px] transition-all duration-500 ${
+                  isSelected ? 'bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent' : 'bg-transparent'
+                }`} />
+
+                <h3 className={`text-base tracking-wider font-medium mb-4 transition-colors ${
+                  isSelected ? 'text-[#D4AF37]' : 'text-[#C5A55A] group-hover:text-[#D4AF37]'
+                }`}>
+                  {product.name}
+                </h3>
+
+                <p className="text-xs text-[#8A7D65] leading-relaxed whitespace-pre-line mb-6">
+                  {product.description}
+                </p>
+
+                <div className="h-px w-12 bg-gradient-to-r from-[#D4AF37]/40 to-transparent mb-4" />
+
+                <p className={`text-lg font-display transition-colors ${
+                  isSelected ? 'text-[#F5E6C8]' : 'text-[#C5A55A]'
+                }`}>
+                  {product.price}
                 </p>
               </button>
             )
@@ -107,7 +89,7 @@ export default function OfferingPage() {
               : 'bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]'
           }`}
         >
-          Tiếp tục đến thanh toán
+          {offeringPageText.button}
         </button>
       </div>
     </main>

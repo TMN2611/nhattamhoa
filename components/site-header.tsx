@@ -8,7 +8,7 @@ import { useCart } from "@/lib/cart-context";
 
 const navLinks = [
   { href: "/ve-chung-toi", label: "Về chúng tôi" },
-  { href: "/nghe-thuat-bao-ton", label: "Bảo tồn" },
+  { href: "/moments", label: "Lời thề" },
   { href: "/ready", label: "Nghi lễ" },
   { href: "/lookup", label: "Tra cứu" },
 ];

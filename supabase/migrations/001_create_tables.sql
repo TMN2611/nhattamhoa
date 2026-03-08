@@ -23,6 +23,7 @@ CREATE TABLE IF NOT EXISTS orders (
   offering text,
   certificate_id text UNIQUE,
   blockchain_hash text,
+  public_vow boolean DEFAULT true,
   status text NOT NULL DEFAULT 'pending',
   created_at timestamp with time zone DEFAULT now()
 );
@@ -55,3 +56,14 @@ INSERT INTO products (name, description, price, image_url, category) VALUES
   ('Hồng Nhung Trái Tim', 'Hồng nhung burgundy trong hộp trái tim nhung đen, điểm vàng lá. Dành cho người bạn yêu nhất.', 3500000, '/images/product-4.jpg', 'Hộp Quà'),
   ('Bộ Sưu Tập Hoàng Gia', 'Bộ sưu tập hồng vàng và đỏ phối hợp trong hộp vuông luxury. Dành cho những dịp đặc biệt nhất.', 8500000, '/images/product-5.jpg', 'Bộ Sưu Tập')
 ON CONFLICT DO NOTHING;
+
+-- If tables already exist, add public_vow column
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM information_schema.columns
+    WHERE table_name = 'orders' AND column_name = 'public_vow'
+  ) THEN
+    ALTER TABLE orders ADD COLUMN public_vow boolean DEFAULT true;
+  END IF;
+END $$;

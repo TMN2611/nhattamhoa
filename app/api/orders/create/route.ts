@@ -7,7 +7,7 @@ import { generateCertificateCode, generateBlockchainHash } from '@/lib/certifica
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { sender_name, receiver_name, phone, message, ritual_type, offering, product_id } = body
+    const { sender_name, receiver_name, phone, message, ritual_type, offering, product_id, public_vow } = body
 
     if (!sender_name || !receiver_name || !phone || !message) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
         ritual_type: ritual_type || null,
         offering: offering || null,
         product_id: product_id || null,
+        public_vow: public_vow !== false,
         certificate_id,
         blockchain_hash,
         status: 'pending',

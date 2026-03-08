@@ -68,6 +68,7 @@ export function CheckoutContent() {
   const [isFlipping, setIsFlipping] = useState(false)
   const [orderResult, setOrderResult] = useState<{ orderId: string; certificate_id: string; blockchain_hash: string } | null>(null)
   const [generatingMessage, setGeneratingMessage] = useState(false)
+  const [publicVow, setPublicVow] = useState(true)
   const [ritualType, setRitualType] = useState('')
   const [offering, setOffering] = useState('')
   const [moment, setMoment] = useState('')
@@ -135,6 +136,7 @@ export function CheckoutContent() {
           ritual_type: ritualType,
           offering: offering,
           product_id: productId || undefined,
+          public_vow: publicVow,
         }),
       })
 
@@ -340,6 +342,27 @@ export function CheckoutContent() {
               </div>
             </div>
           </div>
+
+          <label className="mt-6 flex items-center gap-3 cursor-pointer group">
+            <div className={`h-5 w-5 flex-shrink-0 border transition-all duration-300 flex items-center justify-center ${
+              publicVow ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#D4AF37]/40 group-hover:border-[#D4AF37]/60'
+            }`}>
+              {publicVow && (
+                <svg className="h-3 w-3 text-[#0a0a08]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              )}
+            </div>
+            <input
+              type="checkbox"
+              checked={publicVow}
+              onChange={(e) => setPublicVow(e.target.checked)}
+              className="sr-only"
+            />
+            <span className="text-sm text-[#C5A55A]/80">
+              Cho phép hiển thị lời thề trên trang &ldquo;Những Lời Thề&rdquo;
+            </span>
+          </label>
 
           <button
             onClick={handleSubmit}

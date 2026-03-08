@@ -1,0 +1,367 @@
+Restore and upgrade the ritual storytelling system for the brand "Nhất Tâm Hoa".
+
+IMPORTANT:
+Do NOT remove the current design or styles.
+Only restore missing content and add database functionality.
+
+Stack:
+Next.js
+Supabase
+
+Supabase project:
+https://boodwpdbinacuhwwvtuq.supabase.co
+
+
+================================================
+1 CREATE CONTENT LAYER (PREVENT FUTURE CONTENT LOSS)
+================================================
+
+Create folder:
+
+/content
+
+Create files:
+
+ritualText.js
+momentsText.js
+
+All brand storytelling text must be stored here instead of hardcoding in pages.
+
+Example structure:
+
+export const readyPageText = {
+title: "Không phải ai cũng nên trao lời thề",
+subtitle: "Một lời hứa vĩnh viễn không dành cho những cảm xúc tạm thời.",
+questions: [
+"Bạn đang chọn vì khoảnh khắc hay vì con người?",
+"Nếu ngày mai mọi thứ thay đổi, bạn vẫn chọn người này?"
+],
+divider: "Không phải ai cũng sẵn sàng. Và điều đó hoàn toàn ổn."
+}
+
+
+
+================================================
+2 RESTORE READY PAGE
+================================================
+
+Page:
+/ready
+
+Content:
+
+Title
+Không phải ai cũng nên trao lời thề
+
+Subtitle
+Một lời hứa vĩnh viễn không dành cho những cảm xúc tạm thời.
+
+Section
+
+Hãy tự hỏi mình
+
+Questions
+
+Bạn đang chọn vì khoảnh khắc hay vì con người?
+
+Nếu ngày mai mọi thứ thay đổi, bạn vẫn chọn người này?
+
+Divider
+
+Không phải ai cũng sẵn sàng. Và điều đó hoàn toàn ổn.
+
+Buttons
+
+Secondary
+Chưa phải lúc này
+Hãy quay lại khi bạn chắc chắn.
+
+Primary
+Tôi đã sẵn sàng
+Tiến vào Nghi Thức
+
+
+
+================================================
+3 RESTORE MOMENTS PAGE
+================================================
+
+Page:
+/moments
+
+Title
+
+Những Lời Thề Đã Được Trao
+
+Subtitle
+
+Không phải ai cũng chọn.
+Nhưng những người đã chọn — họ không bao giờ quay lại.
+
+Cards example content:
+
+Minh ❤ Lan
+"Anh chọn em. Không phải hôm nay. Mà là mãi mãi."
+
+Hoàng ❤ Mai
+"Giữa vạn người, anh chỉ nhìn thấy duy nhất một sự tồn tại."
+
+Quốc ❤ An
+"Lời thề này không có ngày hết hạn."
+
+Đức ❤ Thảo
+"Cảm ơn em đã cho anh lý do để dừng lại và cam kết."
+
+Sơn ❤ Hà
+"Tình yêu là một quyết định, và anh đã quyết định xong rồi."
+
+Nam ❤ Linh
+"Bông hoa này tàn phai, nhưng lời hứa của anh thì không."
+
+Bottom quote
+
+"Mỗi lời thề là một quyết định không thể thay đổi."
+
+Button
+
+I AM READY TO CHOOSE
+
+
+
+================================================
+4 MOMENTS PAGE LOAD REAL DATA
+================================================
+
+Instead of static cards, load vows from Supabase.
+
+Table:
+
+orders
+
+Fields:
+
+sender_name
+receiver_name
+message
+created_at
+
+Query example:
+
+supabase
+.from("orders")
+.select("sender_name,receiver_name,message,created_at")
+.order("created_at",{ascending:false})
+.limit(6)
+
+Render vow cards dynamically.
+
+
+
+================================================
+5 ADD ANONYMOUS OPTION
+================================================
+
+Add column in orders table:
+
+public_vow boolean
+
+If false:
+
+Hide names.
+
+Display instead:
+
+"Một lời thề ẩn danh"
+
+
+
+================================================
+6 RESTORE RITUAL PAGE
+================================================
+
+Page:
+/ritual
+
+Title
+
+Nghi Thức Lựa Chọn
+
+Subtitle
+
+Trước khi tiếp tục, bạn cần hiểu rằng đây không phải một giao dịch thông thường.
+Đây là một nghi thức cam kết.
+
+Text
+
+Trong một thế giới mà lời hứa trở nên nhẹ như gió,
+Nhất Tâm Hoa yêu cầu bạn dừng lại một nhịp.
+
+Hãy tự hỏi mình:
+
+người này có xứng đáng với lời thề trọn đời không?
+
+Highlight
+
+"Nếu câu trả lời là có — hãy tiếp tục."
+
+Checkbox commitments
+
+Tôi hiểu rằng lựa chọn này mang ý nghĩa vĩnh viễn
+
+Tôi hiểu rằng đây không chỉ là một món quà
+
+Tôi tự nguyện đưa ra quyết định này
+
+Button
+
+Tiếp tục Nghi Thức
+
+
+
+================================================
+7 RESTORE OFFERING PAGE
+================================================
+
+Page:
+/offering
+
+Title
+
+Lời thề cần một vật chứng
+
+Subtitle
+
+Cách bạn lưu giữ khoảnh khắc này sẽ tồn tại mãi.
+
+Products
+
+1
+
+Title
+Lưu giữ tinh giản
+
+Description
+Một bông hồng đỏ thẫm duy nhất,
+được bảo tồn trong sự tĩnh lặng.
+
+Price
+2.500.000đ
+
+
+2
+
+Title
+Lưu giữ cổ điển
+
+Description
+Một nghi thức truyền thống,
+nơi ký ức được gìn giữ qua thời gian.
+
+Price
+3.500.000đ
+
+
+3
+
+Title
+Lưu giữ vĩnh cửu
+
+Description
+Một biểu tượng không phai,
+đại diện cho lời thề vượt qua thời gian.
+
+Price
+3.200.000đ
+
+Button
+
+Tiếp tục hoàn tất lời thề
+
+
+
+================================================
+8 ADD CINEMATIC SCROLL EFFECT
+================================================
+
+Add simple animations:
+
+Ready page
+fade in questions
+
+Moments page
+vow cards appear slowly
+
+Ritual page
+checkbox items animate in sequence
+
+Offering page
+product highlight hover effect
+
+
+
+================================================
+9 CERTIFICATE PAGE
+================================================
+
+Create page:
+
+/certificate/[code]
+
+Load data from Supabase.
+
+Show:
+
+Sender
+Receiver
+Message
+Ritual
+Date
+Certificate Code
+Blockchain Hash
+
+Design certificate like a sacred document.
+
+
+
+================================================
+10 LIVE VOW FEED
+================================================
+
+Add homepage section:
+
+"Những Lời Thề Mới Nhất"
+
+Load last 3 vows from Supabase.
+
+
+
+================================================
+11 DATABASE STRUCTURE
+================================================
+
+Ensure orders table contains:
+
+id
+sender_name
+receiver_name
+message
+ritual_type
+offering
+certificate_id
+blockchain_hash
+public_vow
+created_at
+
+
+
+================================================
+12 EXPERIENCE GOAL
+================================================
+
+The website should feel like:
+
+a ritual
+a sacred choice
+a timeless commitment
+
+Not a normal ecommerce store.
