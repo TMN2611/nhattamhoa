@@ -1,0 +1,279 @@
+Improve the flower ritual ordering platform "Nhất Tâm Hoa".
+
+Current bug:
+Users can go from the homepage directly to checkout without selecting a ritual.
+
+Fix the ordering flow and add AI message generator, certificate PDF, and email delivery.
+
+
+--------------------------------
+1. FIX ORDER FLOW
+--------------------------------
+
+New required flow:
+
+Homepage
+→ Ritual Selection
+→ Product (flower witness)
+→ Checkout
+→ Order Success
+→ Certificate
+
+Users must NOT access checkout without selecting a ritual.
+
+Implementation:
+
+Create a required ritual state stored in:
+
+localStorage
+
+Key:
+
+selectedRitual
+
+
+--------------------------------
+2. RITUAL SELECTION PAGE
+--------------------------------
+
+Create page:
+
+/ritual
+
+Display ritual cards:
+
+Love Blessing
+Gratitude
+Reconciliation
+Prayer for Connection
+
+When user selects ritual:
+
+save to localStorage:
+
+localStorage.setItem("selectedRitual", ritualName)
+
+Then redirect:
+
+/product
+
+
+--------------------------------
+3. PRODUCT PAGE
+--------------------------------
+
+Display flower witnesses.
+
+Example products:
+
+White Lotus
+Rose of Devotion
+Peony of Gratitude
+Lily of Forgiveness
+
+When selecting product:
+
+store:
+
+selectedFlower
+
+Then redirect:
+
+/checkout
+
+
+--------------------------------
+4. PROTECT CHECKOUT PAGE
+--------------------------------
+
+On checkout page load:
+
+check:
+
+localStorage.getItem("selectedRitual")
+
+If empty:
+
+redirect to:
+
+/ritual
+
+
+--------------------------------
+5. AI MESSAGE GENERATOR
+--------------------------------
+
+Add button:
+
+"Generate Message"
+
+When clicked:
+
+call API:
+
+/api/generate-message
+
+Input:
+
+receiver name
+ritual type
+
+
+Example output:
+
+"For the quiet bond that lives between us, I send this flower with sincerity and gratitude."
+
+
+Use OpenAI API for generation.
+
+Tone:
+
+gentle
+spiritual
+emotional
+short poetic message
+
+
+--------------------------------
+6. CREATE CERTIFICATE PDF
+--------------------------------
+
+Install:
+
+pdfkit
+
+When order is created:
+
+generate certificate PDF.
+
+Certificate content:
+
+Nhất Tâm Hoa
+Flower Intention Certificate
+
+Sender
+Receiver
+Message
+Ritual
+Date
+Certificate Code
+Blockchain Hash
+
+
+Save file:
+
+/certificates/{certificate_code}.pdf
+
+
+--------------------------------
+7. SEND EMAIL WITH CERTIFICATE
+--------------------------------
+
+Install:
+
+nodemailer
+
+
+Send email to customer after order success.
+
+Email content:
+
+Subject:
+Your Nhất Tâm Hoa Certificate
+
+Body:
+
+Thank you for your flower ritual.
+
+Attached:
+certificate PDF.
+
+
+--------------------------------
+8. UPDATE DATABASE
+--------------------------------
+
+Supabase orders table add:
+
+email text
+flower_type text
+certificate_pdf text
+
+
+--------------------------------
+9. CHECKOUT UX IMPROVEMENT
+--------------------------------
+
+Checkout layout:
+
+Section 1
+Selected Ritual
+
+Section 2
+Selected Flower
+
+Section 3
+Receiver Information
+
+Receiver Name
+Sender Name
+Phone
+Email
+
+Section 4
+Message
+
+Textarea
+Generate AI Message button
+
+
+Section 5
+Review Order
+
+
+--------------------------------
+10. FINAL ORDER FLOW
+--------------------------------
+
+Final system flow:
+
+Homepage
+↓
+Ritual Selection
+↓
+Flower Witness
+↓
+Checkout
+↓
+Create Order
+↓
+Generate Certificate
+↓
+Save to Supabase
+↓
+Create Blockchain Hash
+↓
+Generate PDF
+↓
+Send Email
+↓
+Order Success Page
+↓
+Certificate Lookup
+
+
+--------------------------------
+11. DESIGN STYLE
+--------------------------------
+
+Minimal spiritual design.
+
+Colors:
+
+soft beige background
+warm gold accent
+serif typography
+
+Brand:
+
+Nhất Tâm Hoa

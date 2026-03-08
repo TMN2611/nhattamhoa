@@ -1,0 +1,406 @@
+Upgrade the existing "Nhất Tâm Hoa" flower ritual platform.
+
+Current stack:
+Next.js
+Supabase database
+
+Supabase project:
+
+URL:
+https://boodwpdbinacuhwwvtuq.supabase.co
+
+PUBLIC KEY:
+sb_publishable_5nDvWEkLlTk3h9LP9kDpDw_mBqboDqg
+
+
+================================================
+1 FIX HOMEPAGE FLOW BUG
+================================================
+
+Currently users can go directly from product page to checkout.
+
+This is incorrect.
+
+Fix the UX flow so the process must follow ritual steps.
+
+
+NEW ORDER FLOW (FIRST TIME USER)
+
+Product Detail
+↓
+Ready Page (Sẵn Sàng)
+↓
+Moment Page (Khoảnh Khắc)
+↓
+Ritual Selection (Nghi Thức)
+↓
+Offering Selection (Vật Chứng)
+↓
+Checkout
+
+
+RETURNING USER FLOW
+
+If user already completed an order before:
+
+Product Detail
+↓
+Quick Ritual
+↓
+Checkout
+
+
+Use localStorage or Supabase user history to detect returning users.
+
+Example key:
+
+localStorage.setItem("ntt_returning_user", true)
+
+
+================================================
+2 CREATE PRODUCT DATABASE
+================================================
+
+Create table:
+
+products
+
+columns:
+
+id uuid primary key
+name text
+description text
+price numeric
+image_url text
+category text
+created_at timestamp
+
+
+Load products dynamically from Supabase.
+
+
+Homepage should fetch products using:
+
+supabase
+.from("products")
+.select("*")
+
+
+Display product cards.
+
+
+================================================
+3 PRODUCT DETAIL PAGE
+================================================
+
+Page:
+
+/product/[id]
+
+Load product data from Supabase.
+
+Show:
+
+product image
+name
+description
+price
+
+Button:
+
+Begin Ritual
+
+Redirect to:
+
+/ready
+
+
+================================================
+4 CREATE RITUAL FLOW PAGES
+================================================
+
+Create pages:
+
+/ready
+/moment
+/ritual
+/offering
+
+
+READY PAGE
+Title:
+Bạn đã sẵn sàng gửi một ý niệm chưa?
+
+Button:
+Tôi đã sẵn sàng
+
+
+MOMENT PAGE
+Input:
+
+Describe the moment or intention
+
+
+RITUAL PAGE
+Options:
+
+Love blessing
+Gratitude
+Healing
+Reconnection
+
+
+OFFERING PAGE
+Options:
+
+Lotus flower
+White lily
+Peony
+Rose
+
+
+Save selections in localStorage.
+
+
+================================================
+5 CHECKOUT PAGE
+================================================
+
+Fields:
+
+Receiver name
+Sender name
+Phone
+Message
+
+Add button:
+
+AI Suggest Message
+
+
+================================================
+6 AI MESSAGE GENERATOR
+================================================
+
+Create API:
+
+/api/generate-message
+
+Use OpenAI style prompt:
+
+Write a beautiful emotional message for a flower ritual.
+
+Input:
+
+receiver_name
+sender_name
+ritual_type
+moment
+
+
+Return message suggestion.
+
+
+================================================
+7 CERTIFICATE PDF
+================================================
+
+Install:
+
+jspdf
+
+Create certificate PDF after order.
+
+PDF layout:
+
+NHẤT TÂM HOA
+Flower Intention Certificate
+
+Fields:
+
+Sender
+Receiver
+Message
+Ritual
+Date
+Certificate Code
+Blockchain Hash
+
+
+Download button:
+
+Download Certificate PDF
+
+
+================================================
+8 EMAIL CERTIFICATE
+================================================
+
+Install:
+
+nodemailer
+
+After order success:
+
+Send email to customer.
+
+Email content:
+
+Your flower ritual has been recorded.
+
+Include:
+
+certificate code
+certificate link
+
+
+================================================
+9 ORDER DATABASE
+================================================
+
+orders table:
+
+id
+product_id
+sender_name
+receiver_name
+message
+ritual_type
+offering
+certificate_id
+blockchain_hash
+status
+created_at
+
+
+================================================
+10 ADMIN DASHBOARD
+================================================
+
+Create admin login.
+
+username:
+adm1
+
+password:
+123
+
+
+Dashboard pages:
+
+/admin/dashboard
+
+
+Features:
+
+VIEW ORDERS
+
+table:
+
+Sender
+Receiver
+Product
+Ritual
+Status
+Date
+
+
+Edit order
+Delete order
+Mark completed
+
+
+
+================================================
+11 PRODUCT MANAGEMENT
+================================================
+
+Admin dashboard section:
+
+Products
+
+Features:
+
+Add product
+Edit product
+Delete product
+
+Fields:
+
+name
+description
+price
+image_url
+category
+
+
+================================================
+12 CERTIFICATE LOOKUP
+================================================
+
+Page:
+
+/lookup
+
+Input:
+
+certificate code
+
+Search Supabase.
+
+Redirect to:
+
+/certificate/[code]
+
+
+================================================
+13 BLOCKCHAIN HASH
+================================================
+
+Generate SHA256 hash for each order.
+
+Hash data:
+
+sender
+receiver
+message
+ritual
+timestamp
+
+Store in Supabase.
+
+Show hash inside certificate.
+
+
+================================================
+14 UI DESIGN
+================================================
+
+Brand:
+
+Nhất Tâm Hoa
+
+Style:
+
+spiritual
+minimal
+beige background
+gold accents
+serif headings
+soft animations
+
+
+================================================
+15 GOAL
+================================================
+
+Create a platform where:
+
+users buy flower rituals
+follow a meaningful ritual flow
+orders stored in Supabase
+AI helps write emotional messages
+certificates generated as PDF
+email certificate sent
+admin manages products and orders
+customers can lookup certificates
