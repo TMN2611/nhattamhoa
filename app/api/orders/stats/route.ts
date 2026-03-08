@@ -1,20 +1,19 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+export const dynamic = "force-dynamic"
 
-const prisma = new PrismaClient();
+import { NextResponse } from 'next/server'
+import { getOrderStats } from '@/lib/db'
+import { validateAdminRequest } from '@/lib/admin-utils'
 
-export async function GET() {
+export async function GET(req: Request) {
+  if (!validateAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const total = await prisma.order.count();
-    const pending = await prisma.order.count({ where: { status: 'pending' } });
-    const recorded = await prisma.order.count({ where: { status: 'recorded' } });
-
-    return NextResponse.json({
-      success: true,
-      stats: { total, pending, recorded },
-    });
+    const stats = getOrderStats()
+    return NextResponse.json({ success: true, stats })
   } catch (error: any) {
-    console.error('Stats error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Stats error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

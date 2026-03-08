@@ -1,0 +1,276 @@
+Fix build errors and complete the order management system in my NextJS project.
+
+Current error during deployment:
+
+Error:
+Failed to collect page data for /api/orders/record
+
+This happens during NextJS build on Replit.
+
+Fix this by ensuring all API routes use dynamic runtime and are not statically evaluated during build.
+
+Add this line at the top of every API route file:
+
+export const dynamic = "force-dynamic"
+
+Apply this fix to:
+
+/app/api/orders/create/route.ts
+/app/api/orders/record/route.ts
+/app/api/orders/route.ts
+
+---
+
+PROJECT CONTEXT
+
+This is a luxury flower brand website called "Nhất Tâm Hoa".
+
+Customer flow:
+
+Home
+→ Ritual
+→ Product
+→ Checkout
+→ Certificate
+
+Users enter:
+
+buyerName
+recipientName
+phoneNumber
+loveLetter
+
+Orders must be saved to database first before recording on blockchain.
+
+---
+
+TECH STACK
+
+NextJS App Router
+Typescript
+Tailwind
+Prisma
+SQLite (for Replit)
+
+---
+
+DATABASE SETUP
+
+Create Prisma schema:
+
+model Order {
+  id            String   @id @default(uuid())
+  buyerName     String
+  recipientName String
+  phoneNumber   String
+  loveLetter    String
+  status        String   @default("pending")
+  txHash        String?
+  createdAt     DateTime @default(now())
+}
+
+Run migrations if needed.
+
+---
+
+PRISMA CLIENT
+
+Create:
+
+/lib/prisma.ts
+
+Use singleton pattern for PrismaClient.
+
+---
+
+API ROUTES
+
+1️⃣ Create order
+
+/app/api/orders/create/route.ts
+
+POST body:
+
+{
+buyerName
+recipientName
+phoneNumber
+loveLetter
+}
+
+Action:
+
+Save order in database with status = "pending".
+
+Return:
+
+{
+success:true,
+orderId
+}
+
+---
+
+2️⃣ Get orders
+
+/app/api/orders/route.ts
+
+GET
+
+Return all orders sorted by createdAt DESC.
+
+---
+
+3️⃣ Record order on blockchain
+
+/app/api/orders/record/route.ts
+
+POST body:
+
+{
+orderId
+}
+
+Steps:
+
+1. Find order in database
+2. Call saveCertificateOnChain()
+3. Get transaction hash
+4. Update order:
+
+status = "recorded"
+txHash = transaction hash
+
+Return:
+
+{
+success:true,
+txHash
+}
+
+---
+
+BLOCKCHAIN HELPER
+
+Use existing function:
+
+saveCertificateOnChain(
+orderId,
+buyerName,
+recipientName,
+message
+)
+
+located in:
+
+/lib/blockchain.ts
+
+---
+
+CHECKOUT INTEGRATION
+
+Modify checkout form submit logic.
+
+Instead of generating certificate immediately:
+
+Call:
+
+POST /api/orders/create
+
+Send:
+
+buyerName
+recipientName
+phoneNumber
+loveLetter
+
+After success show message:
+
+"Your commitment has been received and will soon be sealed permanently."
+
+---
+
+ADMIN PANEL
+
+Admin login:
+
+username: adm1
+password: 123
+
+Routes:
+
+/admin/login
+/admin/dashboard
+
+---
+
+ADMIN DASHBOARD
+
+Show table of orders:
+
+Columns:
+
+Order ID
+Buyer
+Recipient
+Phone
+Message
+Status
+Date
+Blockchain TX
+
+If status = pending:
+
+Show button:
+
+Record on Blockchain
+
+Clicking button calls:
+
+POST /api/orders/record
+
+Then update UI.
+
+---
+
+DASHBOARD STATS
+
+Show at top:
+
+Total Orders
+Pending Orders
+Recorded Orders
+
+---
+
+UI STYLE
+
+Use existing site theme:
+
+Background: dark
+Accent: gold
+
+Table:
+
+bg-[#0d0b09]
+border-[#D4AF37]/20
+
+Buttons:
+
+gold gradient
+
+---
+
+FINAL REQUIREMENTS
+
+Ensure project builds successfully.
+
+Run:
+
+npm run build
+
+There should be no errors.
+
+All API routes must be dynamic.
+
+Generate clean, working code.

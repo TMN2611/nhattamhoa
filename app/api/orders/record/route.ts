@@ -1,23 +1,30 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-import { saveCertificateOnChain } from '@/lib/blockchain';
+export const dynamic = "force-dynamic"
 
-const prisma = new PrismaClient();
+import { NextResponse } from 'next/server'
+import { getOrderById, updateOrderStatus } from '@/lib/db'
+import { saveCertificateOnChain } from '@/lib/blockchain'
+import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function POST(req: Request) {
+  if (!validateAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   try {
-    const { orderId } = await req.json();
+    const { orderId } = await req.json()
 
     if (!orderId) {
-      return NextResponse.json({ error: 'Missing orderId' }, { status: 400 });
+      return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
     }
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-    });
+    const order = getOrderById(orderId)
 
     if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    if (order.status === 'recorded') {
+      return NextResponse.json({ error: 'Order already recorded on blockchain' }, { status: 409 })
     }
 
     const txHash = await saveCertificateOnChain(
@@ -25,22 +32,16 @@ export async function POST(req: Request) {
       order.buyerName,
       order.recipientName,
       order.loveLetter
-    );
+    )
 
-    const updatedOrder = await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        status: 'recorded',
-        txHash,
-      },
-    });
+    const updatedOrder = updateOrderStatus(orderId, 'recorded', txHash)
 
     return NextResponse.json({
       success: true,
       order: updatedOrder,
-    });
+    })
   } catch (error: any) {
-    console.error('Record order error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Record order error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

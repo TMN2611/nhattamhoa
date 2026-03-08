@@ -1,17 +1,19 @@
-import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+export const dynamic = "force-dynamic"
 
-const prisma = new PrismaClient();
+import { NextResponse } from 'next/server'
+import { getAllOrders } from '@/lib/db'
+import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function GET(req: Request) {
-  try {
-    const orders = await prisma.order.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+  if (!validateAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
 
-    return NextResponse.json({ success: true, orders });
+  try {
+    const orders = getAllOrders()
+    return NextResponse.json({ success: true, orders })
   } catch (error: any) {
-    console.error('Get orders error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('Get orders error:', error)
+    return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

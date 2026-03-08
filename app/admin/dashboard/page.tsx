@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { isAdminLoggedIn, setAdminSession } from '@/lib/admin-utils'
+import { isAdminLoggedIn, setAdminSession, getAdminToken } from '@/lib/admin-utils'
 
 interface Order {
   id: string
@@ -39,10 +39,12 @@ export default function AdminDashboardPage() {
   }, [router])
 
   async function fetchData() {
+    const token = getAdminToken()
+    const headers = { 'Authorization': `Bearer ${token}` }
     try {
       const [ordersRes, statsRes] = await Promise.all([
-        fetch('/api/orders'),
-        fetch('/api/orders/stats'),
+        fetch('/api/orders', { headers }),
+        fetch('/api/orders/stats', { headers }),
       ])
 
       const ordersData = await ordersRes.json()
@@ -59,10 +61,11 @@ export default function AdminDashboardPage() {
 
   async function recordOnBlockchain(orderId: string) {
     setRecordingId(orderId)
+    const token = getAdminToken()
     try {
       const res = await fetch('/api/orders/record', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
         body: JSON.stringify({ orderId }),
       })
 

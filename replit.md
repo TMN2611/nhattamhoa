@@ -8,7 +8,7 @@ A Vietnamese-language Next.js 16 luxury flower brand website "Nhất Tâm Hoa" (
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Package Manager**: pnpm
-- **Database**: SQLite + Prisma ORM
+- **Database**: SQLite via better-sqlite3 (direct driver)
 - **Blockchain**: Ethers.js for Polygon smart contract interaction
 
 ## Pages
@@ -34,9 +34,12 @@ A Vietnamese-language Next.js 16 luxury flower brand website "Nhất Tâm Hoa" (
 
 ## Database
 
-- **Schema**: Order model with id, buyerName, recipientName, phoneNumber, loveLetter, status, txHash, createdAt
-- **Migrations**: SQLite database initialized at `prisma/dev.db`
+- **Driver**: better-sqlite3 (direct, no ORM adapter issues)
+- **DB File**: `prisma/dev.db` (SQLite)
+- **Schema**: Order table with id, buyerName, recipientName, phoneNumber, loveLetter, status, txHash, createdAt
+- **Helper**: `lib/db.ts` - singleton pattern with auto-table creation
 - **Status Values**: pending, recorded
+- **Note**: Prisma v7 schema retained for reference but API routes use better-sqlite3 directly for reliability
 
 ## API Routes
 
