@@ -38,3 +38,9 @@ deploymentTarget = "autoscale"
 run = ["pnpm", "run", "start"]
 build = ["pnpm", "run", "build"]
 publicDir = "public"
+
+[userenv]
+
+[userenv.shared]
+NEXT_PUBLIC_SUPABASE_URL = "https://boodwpdbinacuhwwvtuq.supabase.co"
+NEXT_PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_5nDvWEkLlTk3h9LP9kDpDw_mBqboDqg"

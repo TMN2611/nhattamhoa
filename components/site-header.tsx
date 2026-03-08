@@ -3,17 +3,14 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, X } from "lucide-react";
+import { ShoppingBag, Menu, X, Search } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 
 const navLinks = [
   { href: "/ve-chung-toi", label: "Về chúng tôi" },
   { href: "/nghe-thuat-bao-ton", label: "Bảo tồn" },
-  { href: "/khoanh-khac", label: "Khoảnh khắc" },
-  { href: "/san-sang", label: "Sẵn sàng" },
-
-  { href: "/nghi-thuc", label: "Nghi thức" },
-  { href: "/chon-vat-chung", label: "Vật chứng" },
+  { href: "/ready", label: "Nghi lễ" },
+  { href: "/lookup", label: "Tra cứu" },
 ];
 
 export function SiteHeader() {
@@ -29,7 +26,6 @@ backdrop-blur-0 lg:backdrop-blur-md
 border-b border-border/50"
     >
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        {/* Mobile menu button */}
         <div className="w-24">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -42,9 +38,8 @@ border-b border-border/50"
               <Menu className="h-5 w-5" />
             )}
           </button>
-          {/* Desktop nav links (left side - first 3) */}
           <div className="hidden lg:flex items-center gap-6">
-            {navLinks.slice(0, 3).map((link) => (
+            {navLinks.slice(0, 2).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -60,7 +55,6 @@ border-b border-border/50"
           </div>
         </div>
 
-        {/* Logo */}
         <Link
           href="/"
           className="flex flex-col items-center"
@@ -74,11 +68,9 @@ border-b border-border/50"
           </span>
         </Link>
 
-        {/* Right side */}
         <div className="flex items-center gap-5 w-24 justify-end">
-          {/* Desktop nav links (right side - last 3) */}
           <div className="hidden lg:flex items-center gap-6 mr-4">
-            {navLinks.slice(3).map((link) => (
+            {navLinks.slice(2).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -107,7 +99,6 @@ border-b border-border/50"
         </div>
       </nav>
 
-      {/* Mobile menu overlay */}
       <div
         className={`lg:hidden fixed inset-0 top-[65px] z-40 transition-all duration-500 ${
           mobileMenuOpen
@@ -115,13 +106,11 @@ border-b border-border/50"
             : "opacity-0 pointer-events-none"
         }`}
       >
-        {/* Backdrop */}
         <div
           className="absolute inset-0 bg-background/95 backdrop-blur-lg"
           onClick={() => setMobileMenuOpen(false)}
         />
 
-        {/* Menu content */}
         <div className="relative z-10 flex flex-col items-center justify-center gap-1 pt-12 px-6">
           {navLinks.map((link, i) => (
             <Link
@@ -145,7 +134,6 @@ border-b border-border/50"
             </Link>
           ))}
 
-          {/* Mobile divider */}
           <div
             className="mt-6 h-px w-20"
             style={{

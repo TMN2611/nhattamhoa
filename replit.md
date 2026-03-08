@@ -1,6 +1,6 @@
 # Project Overview
 
-A Vietnamese-language Next.js 16 luxury flower brand website "Nhất Tâm Hoa" (Eternal Roses). Built with TypeScript, Tailwind CSS v4, shadcn/ui components, Prisma ORM, and blockchain integration on Polygon.
+A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa" (Eternal Roses). Built with TypeScript, Tailwind CSS v4, shadcn/ui components, Supabase database, and blockchain-style certificate hashing.
 
 ## Architecture
 
@@ -8,84 +8,103 @@ A Vietnamese-language Next.js 16 luxury flower brand website "Nhất Tâm Hoa" (
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Package Manager**: pnpm
-- **Database**: SQLite via better-sqlite3 (direct driver)
-- **Blockchain**: Ethers.js for Polygon smart contract interaction
+- **Database**: Supabase (PostgreSQL)
+- **Certificate**: SHA256 hash + PDF generation (jspdf)
+- **AI**: OpenAI API (with fallback templates)
+- **Email**: nodemailer (optional, requires SMTP config)
 
 ## Pages
 
 ### Public Pages
-- `/` - Home page
-- `/san-sang` - Readiness check
-- `/khoanh-khac` - Commitment moments showcase
-- `/nghi-thuc` - Ritual ceremony
-- `/chon-vat-chung` - Product selection
-- `/checkout` - Checkout form
-- `/hoi-dap` - FAQ
-- `/loi-the` - Benefits
-- `/nghe-thuat-bao-ton` - Conservation art
-- `/nghi-thuc` - Ceremony
-- `/quy-uoc` - Conventions
+- `/` - Home page with hero + product grid
+- `/product/[id]` - Product detail (from Supabase, fallback to static)
+- `/ready` - Ritual readiness check (detects returning users)
+- `/moment` - Describe moment/intention
+- `/ritual` - Choose ritual type (Love, Gratitude, Healing, Reconnection)
+- `/offering` - Choose offering (Lotus, Lily, Peony, Rose)
+- `/checkout` - Checkout form + AI message + certificate preview
+- `/lookup` - Certificate code search
+- `/certificate/[code]` - Certificate display + PDF download
 - `/ve-chung-toi` - About us
-- `/product/[id]` - Product detail
+- `/nghe-thuat-bao-ton` - Conservation art
+- `/hoi-dap` - FAQ
 
 ### Admin Pages
 - `/admin/login` - Admin authentication (credentials: adm1/123)
-- `/admin/dashboard` - Order management dashboard
+- `/admin/dashboard` - Orders + Products management (tabs)
 
-## Database
+## Ritual Flow
 
-- **Driver**: better-sqlite3 (direct, no ORM adapter issues)
-- **DB File**: `prisma/dev.db` (SQLite)
-- **Schema**: Order table with id, buyerName, recipientName, phoneNumber, loveLetter, status, txHash, createdAt
-- **Helper**: `lib/db.ts` - singleton pattern with auto-table creation
-- **Status Values**: pending, recorded
-- **Note**: Prisma v7 schema retained for reference but API routes use better-sqlite3 directly for reliability
+### First-time User
+Product Detail → /ready → /moment → /ritual → /offering → /checkout
+
+### Returning User (localStorage `ntt_returning_user`)
+Product Detail → /ready → /checkout (quick ritual)
+
+### Flow Enforcement
+Each step sets `ntt_ritual_step` in localStorage. Pages check the step and redirect to /ready if out of order.
+
+## Database (Supabase)
+
+### Products Table
+id, name, description, price, image_url, category, created_at
+
+### Orders Table
+id, product_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, status, created_at
+
+### Setup
+Run `supabase/migrations/001_create_tables.sql` in Supabase SQL Editor to create tables and seed products.
 
 ## API Routes
 
-- `POST /api/orders/create` - Create new order
-- `GET /api/orders` - List all orders (admin)
-- `POST /api/orders/record` - Record order on blockchain
-- `GET /api/orders/stats` - Dashboard statistics
+### Products
+- `GET /api/products` - List all products
+- `GET /api/products/[id]` - Get single product
+- `POST /api/products` - Create product (admin auth)
+- `PUT /api/products/[id]` - Update product (admin auth)
+- `DELETE /api/products/[id]` - Delete product (admin auth)
 
-## Blockchain Integration
+### Orders
+- `POST /api/orders/create` - Create order (public)
+- `GET /api/orders` - List orders (admin auth)
+- `GET /api/orders/[id]` - Get order
+- `PUT /api/orders/[id]` - Update order (admin auth)
+- `DELETE /api/orders/[id]` - Delete order (admin auth)
+- `POST /api/orders/record` - Update order status (admin auth)
+- `GET /api/orders/stats` - Dashboard stats (admin auth)
 
-- **Smart Contract**: NhatTamCertificate.sol (Polygon network)
-- **Functions**: createCertificate() stores order hash and emits events
-- **Helper**: `lib/blockchain.ts` with saveCertificateOnChain()
-- **Requires**: NEXT_PUBLIC_RPC_URL, NEXT_PUBLIC_CONTRACT_ADDRESS, PRIVATE_KEY
+### Other
+- `POST /api/generate-message` - AI message generation (OpenAI or templates)
+- `GET /api/certificate/[code]` - Certificate lookup
 
-## Customer Flow
+## Certificate System
 
-1. Browse website → Read about ritual
-2. `/san-sang` - Readiness check
-3. `/khoanh-khac` - View commitment moments
-4. `/nghi-thuc` - Understand ritual
-5. `/chon-vat-chung` - Select eternal rose tier
-6. `/checkout` - Submit order
-7. Order stored in database (pending status)
-8. Admin reviews and clicks "Record on Blockchain"
-9. Certificate becomes permanent with blockchain proof
+- **Code**: Generated as NTH-XXXXXXXX (alphanumeric)
+- **Hash**: SHA256 of sender|receiver|message|ritual|timestamp
+- **PDF**: Generated client-side with jspdf (download button)
+- **Lookup**: /lookup → /certificate/[code]
 
-## Admin Workflow
+## Admin Authentication
 
-1. Navigate to `/admin/login`
-2. Login with credentials (adm1/123)
-3. Dashboard shows:
-   - Total Orders, Pending, Recorded stats
-   - Table of all orders with details
-   - "Record on Blockchain" buttons for pending orders
-4. Click button to record order and update status
+- Server-side: Bearer token validation (Base64 of username:password)
+- Client-side: localStorage session + token
+- Credentials: adm1 / 123
+
+## Environment Variables
+
+- `NEXT_PUBLIC_SUPABASE_URL` - Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` - Supabase anon/public key
+- `OPENAI_API_KEY` (optional) - For AI message generation
+- `DATABASE_URL` (legacy) - SQLite path (no longer primary)
 
 ## Dev Setup
 
-- Dev server runs on `0.0.0.0:5000` via `pnpm run dev`
-- Database: SQLite at `prisma/dev.db`
-- Prisma config at `prisma.config.ts` with `DATABASE_URL="file:./prisma/dev.db"`
+- Dev server: `pnpm run dev` on port 5000
+- Build: `pnpm run build`
+- Start: `pnpm run start`
 
 ## Deployment
 
 - Target: autoscale
 - Build: `pnpm run build`
 - Run: `pnpm run start`
-- Requires environment variables: PRIVATE_KEY, NEXT_PUBLIC_RPC_URL, NEXT_PUBLIC_CONTRACT_ADDRESS

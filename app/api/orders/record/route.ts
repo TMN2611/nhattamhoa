@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { getOrderById, updateOrderStatus } from '@/lib/db'
-import { saveCertificateOnChain } from '@/lib/blockchain'
+import { supabase } from '@/lib/supabase'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function POST(req: Request) {
@@ -11,35 +10,26 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { orderId } = await req.json()
+    const { orderId, status } = await req.json()
 
     if (!orderId) {
       return NextResponse.json({ error: 'Missing orderId' }, { status: 400 })
     }
 
-    const order = getOrderById(orderId)
+    const newStatus = status || 'completed'
 
-    if (!order) {
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    const { data, error } = await supabase
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('id', orderId)
+      .select()
+      .single()
+
+    if (error) {
+      return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    if (order.status === 'recorded') {
-      return NextResponse.json({ error: 'Order already recorded on blockchain' }, { status: 409 })
-    }
-
-    const txHash = await saveCertificateOnChain(
-      orderId,
-      order.buyerName,
-      order.recipientName,
-      order.loveLetter
-    )
-
-    const updatedOrder = updateOrderStatus(orderId, 'recorded', txHash)
-
-    return NextResponse.json({
-      success: true,
-      order: updatedOrder,
-    })
+    return NextResponse.json({ success: true, order: data })
   } catch (error: any) {
     console.error('Record order error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
