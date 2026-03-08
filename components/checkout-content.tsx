@@ -141,10 +141,11 @@ export function CheckoutContent() {
       })
 
       const data = await response.json()
+      console.log('Order response:', data)
       if (data.success) {
         setOrderResult({
           orderId: data.orderId,
-          certificate_id: data.certificate_id,
+          certificate_id: data.certificate_id || data.certificate_code,
           blockchain_hash: data.blockchain_hash,
         })
         localStorage.setItem('ntt_returning_user', 'true')
@@ -152,12 +153,17 @@ export function CheckoutContent() {
         localStorage.removeItem('ntt_moment')
         localStorage.removeItem('ntt_ritual_type')
         localStorage.removeItem('ntt_offering')
+        setTimeout(() => setSubmitted(true), 700)
+      } else {
+        console.error('Order failed:', data.error, data.details)
+        setIsFlipping(false)
+        alert('Lỗi tạo đơn hàng: ' + (data.error || 'Vui lòng thử lại'))
       }
     } catch (err) {
       console.error('Failed to create order', err)
+      setIsFlipping(false)
+      alert('Không thể kết nối. Vui lòng thử lại.')
     }
-
-    setTimeout(() => setSubmitted(true), 700)
   }
 
   async function handleDownloadPDF() {

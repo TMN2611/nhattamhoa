@@ -1,0 +1,223 @@
+Fix Supabase database issues for the Nhất Tâm Hoa platform.
+
+Problem:
+Orders are not saving into the database.
+Certificates cannot be looked up.
+
+Use Supabase project:
+https://boodwpdbinacuhwwvtuq.supabase.co
+
+Do the following fixes.
+
+
+================================================
+1 FIX SUPABASE CLIENT
+================================================
+
+Ensure the Supabase client works.
+
+File:
+/lib/supabaseClient.js
+
+Code:
+
+import { createClient } from "@supabase/supabase-js";
+
+const supabaseUrl = "https://boodwpdbinacuhwwvtuq.supabase.co";
+const supabaseKey = "sb_publishable_5nDvWEkLlTk3h9LP9kDpDw_mBqboDqg";
+
+export const supabase = createClient(supabaseUrl, supabaseKey);
+
+
+
+================================================
+2 FIX CREATE ORDER API
+================================================
+
+File:
+
+/api/create-order.js
+
+Function must:
+
+1 generate certificate code
+2 generate blockchain hash
+3 insert order
+4 create certificate record
+
+
+Example logic:
+
+import { supabase } from "@/lib/supabaseClient";
+import crypto from "crypto";
+
+export async function POST(req) {
+
+const body = await req.json();
+
+const certificateCode =
+"NTT-" + Date.now();
+
+const hash = crypto
+.createHash("sha256")
+.update(
+body.sender +
+body.receiver +
+body.message +
+Date.now()
+)
+.digest("hex");
+
+
+const { data, error } = await supabase
+.from("orders")
+.insert([
+{
+sender_name: body.sender,
+receiver_name: body.receiver,
+message: body.message,
+ritual_type: body.ritual,
+offering: body.offering,
+certificate_id: certificateCode,
+blockchain_hash: hash,
+public_vow: body.publicVow
+}
+])
+.select()
+.single();
+
+
+if (error) {
+console.error("Order insert error:", error);
+return Response.json({error});
+}
+
+
+await supabase.from("certificates").insert([
+{
+certificate_code: certificateCode,
+order_id: data.id,
+blockchain_hash: hash
+}
+]);
+
+
+return Response.json({
+success:true,
+certificate_code: certificateCode
+});
+}
+
+
+
+================================================
+3 FIX CHECKOUT SUBMIT
+================================================
+
+Checkout must POST to:
+
+/api/create-order
+
+
+Example:
+
+const response = await fetch("/api/create-order",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+sender:senderName,
+receiver:receiverName,
+message:message,
+ritual:ritualType,
+offering:offering,
+publicVow:publicVow
+})
+});
+
+
+
+================================================
+4 FIX CERTIFICATE LOOKUP PAGE
+================================================
+
+Page:
+
+/certificate/[code]
+
+
+Query Supabase:
+
+const { data, error } = await supabase
+.from("certificates")
+.select("*")
+.eq("certificate_code", code)
+.single();
+
+
+Then load order:
+
+const { data:order } = await supabase
+.from("orders")
+.select("*")
+.eq("id", data.order_id)
+.single();
+
+
+Display:
+
+Sender
+Receiver
+Message
+Ritual
+Certificate Code
+Blockchain Hash
+
+
+
+================================================
+5 FIX LOOKUP PAGE
+================================================
+
+Page:
+
+/lookup
+
+Input certificate code.
+
+Search:
+
+/certificate/[code]
+
+
+
+================================================
+6 ADD DEBUG LOGGING
+================================================
+
+Add console logs when creating order.
+
+console.log("Creating order:", body)
+
+console.log("Supabase response:", data)
+
+
+
+================================================
+7 GOAL
+================================================
+
+Ensure that:
+
+When user completes checkout:
+
+order is saved to Supabase
+
+certificate record is created
+
+certificate code is returned
+
+lookup page works
+
+moments page can display vows.

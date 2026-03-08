@@ -53,8 +53,12 @@ id, name, description, price, image_url, category, created_at
 ### Orders Table
 id, product_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, status, created_at
 
+### Certificates Table
+id, certificate_code, order_id, blockchain_hash, created_at
+
 ### Setup
-Run `supabase/migrations/001_create_tables.sql` in Supabase SQL Editor to create tables and seed products.
+1. If tables don't exist: Run `supabase/migrations/001_create_tables.sql` in Supabase SQL Editor
+2. If tables exist but orders fail: Run `supabase/migrations/002_fix_tables.sql` to add missing columns and fix RLS policies
 
 ## API Routes
 
