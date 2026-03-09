@@ -1,0 +1,214 @@
+You are a senior full-stack engineer.
+Refactor and fix my existing flower-certificate web app.
+
+Tech stack:
+
+* Next.js / React
+* Supabase database
+* Blockchain certificate generation
+* QR verification page
+* Admin dashboard
+
+The current system has multiple issues that must be fixed and redesigned properly.
+
+---
+
+1. DATABASE FIXES
+
+Current errors:
+
+* Cannot delete order because of foreign key constraint
+  certificates_order_id_fkey
+* Cannot update order because column `status` does not exist
+
+Fix database schema.
+
+Orders table must contain:
+
+id
+product_id
+sender_name
+receiver_name
+message
+permanence_type (temporary | permanent)
+status (pending | paid | minting | minted | revoked)
+created_at
+
+Certificates table:
+
+id
+order_id (FK → orders.id)
+certificate_code
+hash
+qr_url
+blockchain_tx
+created_at
+
+Products table:
+
+id
+name
+description
+price
+is_permanent_available (boolean)
+created_at
+
+Rules:
+
+* Orders with certificates cannot be deleted
+* If certificate exists → disable edit
+* Foreign key must protect certificate integrity
+
+---
+
+2. PRODUCT SYSTEM
+
+Products must be stored in the database and used by:
+
+* Home page
+* Offering page
+* Admin panel
+
+Currently these pages are not synchronized.
+
+Fix so all product data loads from the `products` table.
+
+---
+
+3. PRODUCT OPTIONS
+
+Each product must allow 2 options:
+
+Option 1
+Permanent certificate (stored on blockchain)
+
+Option 2
+Temporary certificate (no blockchain)
+
+When creating an order the user selects:
+
+permanence_type
+
+Values:
+
+permanent
+temporary
+
+---
+
+4. PERMANENT ORDER RULE
+
+If a user purchases a permanent certificate:
+
+After the first order is created and confirmed, the following fields can never be edited:
+
+sender_name
+receiver_name
+
+Admin and user must both be blocked from changing them.
+
+Temporary certificates are allowed to be edited.
+
+---
+
+5. ORDER STATUS FLOW
+
+Order lifecycle:
+
+pending
+paid
+minting
+minted
+revoked
+
+Rules:
+
+pending
+admin can edit or delete
+
+paid
+admin can edit message only
+
+minted
+order becomes immutable
+
+---
+
+6. QR CODE FIX
+
+Current QR code cannot scan correctly.
+
+QR must encode a public verification URL:
+
+https://yourdomain.com/verify/{certificate_code}
+
+Verification page must show:
+
+certificate code
+sender
+receiver
+message
+blockchain transaction hash
+verification status
+
+---
+
+7. ADMIN DASHBOARD
+
+Admin panel must allow:
+
+View orders
+Edit orders (when allowed)
+Delete orders (only if certificate not created)
+Mint certificate to blockchain
+Revoke certificate
+
+If order status = minted:
+
+Edit and Delete buttons must be disabled.
+
+---
+
+8. BLOCKCHAIN CERTIFICATE FLOW
+
+Correct business flow:
+
+create order
+status = pending
+
+payment confirmed
+status = paid
+
+generate certificate
+status = minting
+
+record blockchain transaction
+status = minted
+
+generate QR verification
+
+---
+
+9. ADD SAFETY CHECKS
+
+Prevent:
+
+* editing immutable blockchain data
+* deleting orders with certificates
+* mismatched product data between pages
+
+---
+
+10. OUTPUT
+
+Provide:
+
+* SQL migrations
+* updated backend logic
+* frontend logic for options
+* admin dashboard fixes
+* QR generation code
+* verification page implementation
+
+Do not break existing UI styling.
+Only refactor logic and database.

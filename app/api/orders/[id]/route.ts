@@ -5,6 +5,10 @@ import { supabase } from '@/lib/supabase'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  if (!validateAdminRequest(req)) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { id } = await params
 
   try {
@@ -34,6 +38,55 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const body = await req.json()
 
+    const { data: order, error: fetchError } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchError || !order) {
+      return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+    }
+
+    const status = order.status
+    const isPermanent = order.permanence_type === 'permanent'
+
+    if (status === 'minted' || status === 'revoked') {
+      return NextResponse.json(
+        { error: 'Cannot edit a minted or revoked order' },
+        { status: 403 }
+      )
+    }
+
+    if (status === 'minting') {
+      return NextResponse.json(
+        { error: 'Cannot edit an order while minting is in progress' },
+        { status: 403 }
+      )
+    }
+
+    if (status === 'paid') {
+      const allowedFields = ['message']
+      const disallowed = Object.keys(body).filter(k => !allowedFields.includes(k))
+      if (disallowed.length > 0) {
+        return NextResponse.json(
+          { error: `Paid orders can only update: ${allowedFields.join(', ')}. Disallowed: ${disallowed.join(', ')}` },
+          { status: 403 }
+        )
+      }
+    }
+
+    if (isPermanent && (status === 'paid' || status === 'pending')) {
+      const senderReceiverFields = ['sender_name', 'receiver_name']
+      const blocked = Object.keys(body).filter(k => senderReceiverFields.includes(k))
+      if (blocked.length > 0) {
+        return NextResponse.json(
+          { error: `Permanent orders cannot change sender/receiver fields: ${blocked.join(', ')}` },
+          { status: 403 }
+        )
+      }
+    }
+
     const { data, error } = await supabase
       .from('orders')
       .update(body)
@@ -59,6 +112,23 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const { id } = await params
 
   try {
+    const { data: certs, error: certError } = await supabase
+      .from('certificates')
+      .select('id')
+      .eq('order_id', id)
+      .limit(1)
+
+    if (certError) {
+      return NextResponse.json({ error: certError.message }, { status: 500 })
+    }
+
+    if (certs && certs.length > 0) {
+      return NextResponse.json(
+        { error: 'Cannot delete order: a certificate exists for this order' },
+        { status: 403 }
+      )
+    }
+
     const { error } = await supabase
       .from('orders')
       .delete()

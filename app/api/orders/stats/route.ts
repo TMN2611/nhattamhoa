@@ -21,11 +21,15 @@ export async function GET(req: Request) {
     const orders = data || []
     const total = orders.length
     const pending = orders.filter(o => o.status === 'pending').length
-    const completed = orders.filter(o => o.status === 'completed').length
+    const paid = orders.filter(o => o.status === 'paid').length
+    const minting = orders.filter(o => o.status === 'minting').length
+    const minted = orders.filter(o => o.status === 'minted' || o.status === 'completed').length
+    const revoked = orders.filter(o => o.status === 'revoked').length
+    const completed = minted
 
     return NextResponse.json({
       success: true,
-      stats: { total, pending, completed },
+      stats: { total, pending, paid, minting, minted, revoked, completed },
     })
   } catch (error: any) {
     console.error('Stats error:', error)

@@ -25,7 +25,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
         .single()
 
       if (order) {
-        orderData = { ...order, blockchain_hash: certData.blockchain_hash || order.blockchain_hash }
+        orderData = { ...order, blockchain_hash: certData.hash || certData.blockchain_hash || order.blockchain_hash }
       }
     }
 
@@ -53,7 +53,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
 
     const host = req.headers.get('host') || 'nhattamhoa.replit.app'
     const protocol = req.headers.get('x-forwarded-proto') || 'https'
-    const verifyUrl = `${protocol}://${host}/certificate/${code}`
+    const verifyUrl = `${protocol}://${host}/verify/${code}`
 
     const qrDataUrl = await QRCode.toDataURL(verifyUrl, {
       width: 200,

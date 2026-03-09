@@ -28,15 +28,20 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json()
-    const { name, description, price, image_url, category } = body
+    const { name, description, price, image_url, category, is_permanent_available } = body
 
     if (!name || !price) {
       return NextResponse.json({ error: 'Name and price are required' }, { status: 400 })
     }
 
+    const insertData: Record<string, unknown> = { name, description, price, image_url, category }
+    if (typeof is_permanent_available === 'boolean') {
+      insertData.is_permanent_available = is_permanent_available
+    }
+
     const { data, error } = await supabase
       .from('products')
-      .insert({ name, description, price, image_url, category })
+      .insert(insertData)
       .select()
       .single()
 

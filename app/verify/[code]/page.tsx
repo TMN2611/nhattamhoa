@@ -1,0 +1,199 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+import { useParams } from 'next/navigation'
+import Link from 'next/link'
+import { Shield, CheckCircle, XCircle, ArrowLeft } from 'lucide-react'
+
+interface VerifyData {
+  code: string
+  sender: string
+  receiver: string
+  message: string
+  hash: string
+  blockchain_tx: string
+  date: string
+  status: string
+}
+
+export default function VerifyPage() {
+  const params = useParams()
+  const code = params.code as string
+  const [data, setData] = useState<VerifyData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const res = await fetch(`/api/certificate/${code}`)
+        const json = await res.json()
+        if (json.success) {
+          const cert = json.certificate
+          setData({
+            code: cert.code,
+            sender: cert.sender,
+            receiver: cert.receiver,
+            message: cert.message,
+            hash: cert.hash || cert.blockchain_hash || '',
+            blockchain_tx: cert.blockchain_tx || '',
+            date: cert.date,
+            status: cert.status,
+          })
+        } else {
+          setError('Không tìm thấy chứng thư.')
+        }
+      } catch {
+        setError('Có lỗi xảy ra khi xác thực.')
+      } finally {
+        setLoading(false)
+      }
+    }
+    load()
+  }, [code])
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-[#0a0a08] flex items-center justify-center">
+        <p className="text-[#C5A55A]">Đang xác thực chứng thư...</p>
+      </main>
+    )
+  }
+
+  if (error || !data) {
+    return (
+      <main className="min-h-screen bg-[#0a0a08] flex items-center justify-center px-6">
+        <div className="text-center">
+          <XCircle className="h-16 w-16 text-[#A52525] mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-[#F5E6C8] mb-2">Xác thực thất bại</h1>
+          <p className="text-[#A52525] mb-6">{error}</p>
+          <Link href="/" className="text-[#D4AF37] text-sm tracking-wider uppercase hover:text-[#F5E6C8] transition-colors">
+            Về trang chủ
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
+  const isValid = data.status === 'minted' || data.status === 'paid' || data.status === 'completed'
+  const isRevoked = data.status === 'revoked'
+
+  return (
+    <main className="min-h-screen bg-[#0a0a08] py-20 px-6">
+      <div className="max-w-xl mx-auto">
+        <div className="text-center mb-10">
+          <p className="text-xs tracking-[0.35em] uppercase text-[#D4AF37] mb-4">
+            Certificate Verification
+          </p>
+          <h1 className="text-3xl md:text-4xl font-bold text-[#F5E6C8] font-display tracking-wider">
+            NHẤT TÂM HOA
+          </h1>
+        </div>
+
+        <div className="p-[2px] bg-gradient-to-br from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">
+          <div className="bg-[#0d0b09] px-8 py-10">
+            <div className="flex items-center justify-center gap-3 mb-8">
+              {isRevoked ? (
+                <>
+                  <XCircle className="h-8 w-8 text-[#A52525]" />
+                  <span className="text-lg text-[#A52525] font-bold tracking-wider uppercase">Đã thu hồi</span>
+                </>
+              ) : isValid ? (
+                <>
+                  <CheckCircle className="h-8 w-8 text-green-500" />
+                  <span className="text-lg text-green-500 font-bold tracking-wider uppercase">Xác thực thành công</span>
+                </>
+              ) : (
+                <>
+                  <Shield className="h-8 w-8 text-[#C5A55A]" />
+                  <span className="text-lg text-[#C5A55A] font-bold tracking-wider uppercase">Đang xử lý</span>
+                </>
+              )}
+            </div>
+
+            <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mb-8" />
+
+            <div className="space-y-5">
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Mã chứng thư</p>
+                <p className="text-sm text-[#F5E6C8] font-mono">{data.code}</p>
+              </div>
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Người gửi</p>
+                <p className="text-lg text-[#F5E6C8] italic font-display">{data.sender}</p>
+              </div>
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Người nhận</p>
+                <p className="text-lg text-[#F5E6C8] italic font-display">{data.receiver}</p>
+              </div>
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Lời nhắn</p>
+                <p className="text-sm text-[#C5A55A] leading-relaxed italic">{data.message}</p>
+              </div>
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Ngày tạo</p>
+                <p className="text-sm text-[#C5A55A]">
+                  {new Date(data.date).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
+                </p>
+              </div>
+              <div>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Trạng thái</p>
+                <p className={`text-sm font-medium ${isRevoked ? 'text-[#A52525]' : isValid ? 'text-green-500' : 'text-[#C5A55A]'}`}>
+                  {data.status}
+                </p>
+              </div>
+            </div>
+
+            {(data.hash || data.blockchain_tx) && (
+              <>
+                <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent my-8" />
+                <div className="p-4 border border-[#D4AF37]/20 bg-black/40">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Shield className="h-4 w-4 text-[#D4AF37]" />
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37]">
+                      Blockchain Verification
+                    </p>
+                  </div>
+                  {data.hash && (
+                    <div className="mb-2">
+                      <p className="text-[9px] text-[#D4AF37] uppercase tracking-wider mb-1">Hash</p>
+                      <p className="text-[10px] text-[#8A7D65] font-mono break-all">{data.hash}</p>
+                    </div>
+                  )}
+                  {data.blockchain_tx && (
+                    <div>
+                      <p className="text-[9px] text-[#D4AF37] uppercase tracking-wider mb-1">Transaction</p>
+                      <p className="text-[10px] text-[#8A7D65] font-mono break-all">{data.blockchain_tx}</p>
+                    </div>
+                  )}
+                  {isValid && (
+                    <div className="flex items-center gap-1.5 mt-3">
+                      <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[9px] text-green-500 uppercase tracking-widest">Verified on Blockchain</span>
+                    </div>
+                  )}
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-center gap-6 mt-8">
+          <Link
+            href={`/certificate/${data.code}`}
+            className="text-sm text-[#D4AF37] hover:text-[#F5E6C8] transition-colors tracking-wider uppercase"
+          >
+            Xem chứng thư đầy đủ
+          </Link>
+          <Link
+            href="/"
+            className="flex items-center gap-2 text-sm text-[#C5A55A] hover:text-[#D4AF37] transition-colors tracking-wider uppercase"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Trang chủ
+          </Link>
+        </div>
+      </div>
+    </main>
+  )
+}

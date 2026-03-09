@@ -73,12 +73,17 @@ export function CheckoutContent() {
   const [offering, setOffering] = useState('')
   const [moment, setMoment] = useState('')
   const [productId, setProductId] = useState('')
+  const [permanenceType, setPermanenceType] = useState<'temporary' | 'permanent'>('temporary')
 
   useEffect(() => {
     setRitualType(localStorage.getItem('ntt_ritual_type') || '')
     setOffering(localStorage.getItem('ntt_offering') || '')
     setMoment(localStorage.getItem('ntt_moment') || '')
     setProductId(localStorage.getItem('ntt_selected_product') || '')
+    const storedPermanence = localStorage.getItem('ntt_permanence_type')
+    if (storedPermanence === 'permanent' || storedPermanence === 'temporary') {
+      setPermanenceType(storedPermanence)
+    }
   }, [])
 
   const updateField = useCallback(
@@ -137,6 +142,7 @@ export function CheckoutContent() {
           offering: offering,
           product_id: productId || undefined,
           public_vow: publicVow,
+          permanence_type: permanenceType,
         }),
       })
 
@@ -145,8 +151,8 @@ export function CheckoutContent() {
       if (data.success) {
         setOrderResult({
           orderId: data.orderId,
-          certificate_id: data.certificate_id || data.certificate_code,
-          blockchain_hash: data.blockchain_hash,
+          certificate_id: data.order?.certificate_id || null,
+          blockchain_hash: data.order?.blockchain_hash || null,
         })
         localStorage.setItem('ntt_returning_user', 'true')
         localStorage.removeItem('ntt_ritual_step')
@@ -192,24 +198,35 @@ export function CheckoutContent() {
         <CommitmentCertificate
           buyerName={formData.senderName}
           recipientName={formData.receiverName}
-          blockchainData={orderResult ? { orderId: orderResult.certificate_id, txHash: orderResult.blockchain_hash } : null}
+          blockchainData={orderResult?.certificate_id ? { orderId: orderResult.certificate_id, txHash: orderResult.blockchain_hash } : null}
           animate={true}
         />
 
         {orderResult && (
           <div className="space-y-4 w-full max-w-md">
-            <div className="p-4 bg-[#0d0b09] border border-[#D4AF37]/20 text-center">
-              <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2">Mã chứng thư</p>
-              <p className="text-lg text-[#F5E6C8] font-mono">{orderResult.certificate_id}</p>
-            </div>
-
-            <button
-              onClick={handleDownloadPDF}
-              className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] font-medium tracking-wider uppercase text-xs transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
-            >
-              <Download className="h-4 w-4" />
-              Download Certificate PDF
-            </button>
+            {orderResult.certificate_id ? (
+              <>
+                <div className="p-4 bg-[#0d0b09] border border-[#D4AF37]/20 text-center">
+                  <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2">Mã chứng thư</p>
+                  <p className="text-lg text-[#F5E6C8] font-mono">{orderResult.certificate_id}</p>
+                </div>
+                <button
+                  onClick={handleDownloadPDF}
+                  className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] font-medium tracking-wider uppercase text-xs transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+                >
+                  <Download className="h-4 w-4" />
+                  Download Certificate PDF
+                </button>
+              </>
+            ) : (
+              <div className="p-4 bg-[#0d0b09] border border-[#D4AF37]/20 text-center">
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2">Mã đơn hàng</p>
+                <p className="text-sm text-[#F5E6C8] font-mono mb-3">{orderResult.orderId}</p>
+                <p className="text-xs text-[#8A7D65]">
+                  Chứng thư sẽ được tạo sau khi đơn hàng được xác nhận thanh toán và đúc blockchain.
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -243,7 +260,7 @@ export function CheckoutContent() {
             <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
               Hoàn tất nghi lễ hoa
             </h2>
-            {(ritualType || offering) && (
+            {(ritualType || offering || permanenceType) && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {ritualType && (
                   <span className="px-3 py-1 text-xs bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] tracking-wider">
@@ -255,6 +272,13 @@ export function CheckoutContent() {
                     {offering}
                   </span>
                 )}
+                <span className={`px-3 py-1 text-xs border tracking-wider ${
+                  permanenceType === 'permanent'
+                    ? 'bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]'
+                    : 'bg-[#D4AF37]/10 border-[#D4AF37]/20 text-[#8A7D65]'
+                }`}>
+                  {permanenceType === 'permanent' ? 'Vĩnh viễn' : 'Tạm thời'}
+                </span>
               </div>
             )}
           </div>
