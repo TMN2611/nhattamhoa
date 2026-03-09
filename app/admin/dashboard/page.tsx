@@ -44,6 +44,7 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<Stats | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [editForm, setEditForm] = useState({ sender_name: '', receiver_name: '', message: '', status: '' })
   const [showProductForm, setShowProductForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [productForm, setProductForm] = useState({ name: '', description: '', price: '', image_url: '', category: '' })
@@ -99,13 +100,54 @@ export default function AdminDashboardPage() {
   async function deleteOrder(orderId: string) {
     if (!confirm('Bạn có chắc chắn muốn xóa đơn hàng này?')) return
     try {
-      await fetch(`/api/orders/${orderId}`, {
+      const res = await fetch(`/api/orders/${orderId}`, {
         method: 'DELETE',
         headers: headers(),
       })
+      const data = await res.json()
+      if (!data.success) {
+        alert('Lỗi xóa đơn hàng: ' + (data.error || 'Unknown error'))
+      }
       await fetchData()
     } catch (err) {
       console.error('Error deleting order:', err)
+      alert('Không thể xóa đơn hàng')
+    }
+  }
+
+  function startEditOrder(order: Order) {
+    setEditingOrder(order)
+    setEditForm({
+      sender_name: order.sender_name || '',
+      receiver_name: order.receiver_name || '',
+      message: order.message || '',
+      status: order.status || 'pending',
+    })
+  }
+
+  async function saveEditOrder() {
+    if (!editingOrder) return
+    try {
+      const res = await fetch(`/api/orders/${editingOrder.id}`, {
+        method: 'PUT',
+        headers: headers(),
+        body: JSON.stringify({
+          sender_name: editForm.sender_name,
+          receiver_name: editForm.receiver_name,
+          message: editForm.message,
+          status: editForm.status,
+        }),
+      })
+      const data = await res.json()
+      if (data.success) {
+        setEditingOrder(null)
+        await fetchData()
+      } else {
+        alert('Lỗi cập nhật: ' + (data.error || 'Unknown error'))
+      }
+    } catch (err) {
+      console.error('Error saving order:', err)
+      alert('Không thể cập nhật đơn hàng')
     }
   }
 
@@ -266,7 +308,7 @@ export default function AdminDashboardPage() {
                             <CheckCircle className="h-4 w-4" />
                           </button>
                         )}
-                        <button onClick={() => setEditingOrder(editingOrder?.id === order.id ? null : order)} className="p-1.5 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors" title="Xem chi tiết">
+                        <button onClick={() => startEditOrder(order)} className="p-1.5 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors" title="Sửa đơn hàng">
                           <Edit2 className="h-4 w-4" />
                         </button>
                         <button onClick={() => deleteOrder(order.id)} className="p-1.5 text-[#A52525] hover:bg-[#A52525]/10 transition-colors" title="Xóa">
@@ -287,17 +329,51 @@ export default function AdminDashboardPage() {
         {editingOrder && tab === 'orders' && (
           <div className="mt-4 p-6 border border-[#D4AF37]/20 bg-[#0d0b09]">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-[#D4AF37] text-sm tracking-wider uppercase">Chi tiết đơn hàng</h3>
+              <h3 className="text-[#D4AF37] text-sm tracking-wider uppercase">Sửa đơn hàng</h3>
               <button onClick={() => setEditingOrder(null)} className="text-[#8A7D65] hover:text-[#F5E6C8]">
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-              <div><span className="text-[#8A7D65]">SĐT:</span> <span className="text-[#C5A55A] ml-2">{editingOrder.phone}</span></div>
-              <div><span className="text-[#8A7D65]">Cert ID:</span> <span className="text-[#C5A55A] ml-2 font-mono">{editingOrder.certificate_id}</span></div>
-              <div><span className="text-[#8A7D65]">Vật chứng:</span> <span className="text-[#C5A55A] ml-2">{editingOrder.offering || '-'}</span></div>
-              <div className="md:col-span-2"><span className="text-[#8A7D65]">Lời nhắn:</span> <span className="text-[#C5A55A] ml-2 italic">{editingOrder.message}</span></div>
-              <div className="md:col-span-2"><span className="text-[#8A7D65]">Hash:</span> <span className="text-[#D4AF37] ml-2 font-mono text-xs break-all">{editingOrder.blockchain_hash}</span></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="text-[#8A7D65] text-xs mb-1 block">Người gửi</label>
+                <input value={editForm.sender_name} onChange={e => setEditForm(f => ({ ...f, sender_name: e.target.value }))} className="w-full border border-[#D4AF37]/20 bg-black px-3 py-2 text-[#F5E6C8] text-sm focus:outline-none focus:border-[#D4AF37]/60" />
+              </div>
+              <div>
+                <label className="text-[#8A7D65] text-xs mb-1 block">Người nhận</label>
+                <input value={editForm.receiver_name} onChange={e => setEditForm(f => ({ ...f, receiver_name: e.target.value }))} className="w-full border border-[#D4AF37]/20 bg-black px-3 py-2 text-[#F5E6C8] text-sm focus:outline-none focus:border-[#D4AF37]/60" />
+              </div>
+              <div>
+                <label className="text-[#8A7D65] text-xs mb-1 block">Trạng thái</label>
+                <select value={editForm.status} onChange={e => setEditForm(f => ({ ...f, status: e.target.value }))} className="w-full border border-[#D4AF37]/20 bg-black px-3 py-2 text-[#F5E6C8] text-sm focus:outline-none focus:border-[#D4AF37]/60">
+                  <option value="pending">Đang chờ</option>
+                  <option value="completed">Hoàn thành</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[#8A7D65] text-xs mb-1 block">SĐT</label>
+                <p className="text-[#C5A55A] text-sm py-2">{editingOrder.phone || '-'}</p>
+              </div>
+              <div className="md:col-span-2">
+                <label className="text-[#8A7D65] text-xs mb-1 block">Lời nhắn</label>
+                <textarea value={editForm.message} onChange={e => setEditForm(f => ({ ...f, message: e.target.value }))} rows={3} className="w-full border border-[#D4AF37]/20 bg-black px-3 py-2 text-[#F5E6C8] text-sm focus:outline-none focus:border-[#D4AF37]/60 resize-none" />
+              </div>
+              <div className="md:col-span-2 flex gap-2 text-sm">
+                <span className="text-[#8A7D65]">Cert:</span>
+                <span className="text-[#C5A55A] font-mono">{editingOrder.certificate_id}</span>
+              </div>
+              <div className="md:col-span-2 text-xs">
+                <span className="text-[#8A7D65]">Hash:</span>
+                <span className="text-[#D4AF37] ml-1 font-mono break-all">{editingOrder.blockchain_hash}</span>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-4">
+              <button onClick={saveEditOrder} className="px-6 py-2 bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] text-sm tracking-wider uppercase font-medium">
+                Lưu thay đổi
+              </button>
+              <button onClick={() => setEditingOrder(null)} className="px-6 py-2 border border-[#D4AF37]/30 text-[#8A7D65] text-sm tracking-wider uppercase hover:text-[#F5E6C8] transition-colors">
+                Hủy
+              </button>
             </div>
           </div>
         )}

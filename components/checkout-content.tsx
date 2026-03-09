@@ -166,64 +166,9 @@ export function CheckoutContent() {
     }
   }
 
-  async function handleDownloadPDF() {
+  function handleDownloadPDF() {
     if (!orderResult) return
-    const { jsPDF } = await import('jspdf')
-    const doc = new jsPDF()
-
-    doc.setFillColor(10, 10, 8)
-    doc.rect(0, 0, 210, 297, 'F')
-    doc.setDrawColor(212, 175, 55)
-    doc.setLineWidth(1)
-    doc.rect(10, 10, 190, 277)
-    doc.rect(13, 13, 184, 271)
-
-    doc.setTextColor(212, 175, 55)
-    doc.setFontSize(10)
-    doc.text('FLOWER INTENTION CERTIFICATE', 105, 35, { align: 'center' })
-    doc.setTextColor(245, 230, 200)
-    doc.setFontSize(28)
-    doc.text('NHAT TAM HOA', 105, 55, { align: 'center' })
-    doc.setTextColor(212, 175, 55)
-    doc.setFontSize(8)
-    doc.text('ETERNAL ROSES', 105, 63, { align: 'center' })
-
-    doc.setDrawColor(212, 175, 55)
-    doc.line(60, 75, 150, 75)
-
-    let y = 95
-    const fields = [
-      ['Sender', formData.senderName],
-      ['Receiver', formData.receiverName],
-      ['Message', formData.message],
-      ['Ritual', ritualType || 'N/A'],
-      ['Date', new Date().toLocaleDateString('vi-VN')],
-      ['Certificate Code', orderResult.certificate_id],
-      ['Blockchain Hash', orderResult.blockchain_hash],
-    ]
-    for (const [label, value] of fields) {
-      doc.setTextColor(212, 175, 55)
-      doc.setFontSize(8)
-      doc.text(label.toUpperCase(), 30, y)
-      doc.setTextColor(245, 230, 200)
-      doc.setFontSize(11)
-      if (label === 'Message' || label === 'Blockchain Hash') {
-        const lines = doc.splitTextToSize(value || '', 150)
-        doc.text(lines, 30, y + 8)
-        y += 8 + lines.length * 6 + 10
-      } else {
-        doc.text(value || '', 30, y + 8)
-        y += 22
-      }
-    }
-
-    doc.setDrawColor(212, 175, 55)
-    doc.line(60, y + 5, 150, y + 5)
-    doc.setTextColor(197, 165, 90)
-    doc.setFontSize(9)
-    doc.text('MOT DOI, MOT DOA, MOT NGUOI.', 105, y + 18, { align: 'center' })
-
-    doc.save(`certificate-${orderResult.certificate_id}.pdf`)
+    window.open(`/api/certificate/${orderResult.certificate_id}/pdf`, '_blank')
   }
 
   if (submitted) {

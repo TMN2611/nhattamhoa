@@ -1,0 +1,326 @@
+Fix multiple issues in the Nhat Tam Hoa project.
+
+Problems to solve:
+
+1. Header overlaps page content
+2. Admin cannot edit or delete orders
+3. Supabase RLS policies blocking update/delete
+4. Certificate PDF Vietnamese characters broken
+5. Add QR code to each certificate
+6. QR must link to certificate verification page
+7. Ensure order creation + certificate lookup still works
+
+
+
+================================================
+STEP 1 FIX HEADER OVERLAPPING CONTENT
+================================================
+
+Header is using position: fixed.
+
+Update main layout.
+
+File:
+/app/layout.js
+
+Change structure to:
+
+<header className="fixed top-0 left-0 w-full z-50">
+</header>
+
+<main className="pt-32">
+{children}
+</main>
+
+This ensures all content renders below the header.
+
+
+
+------------------------------------------------
+Create separate layout for admin.
+
+File:
+/app/admin/layout.js
+
+
+export default function AdminLayout({ children }) {
+  return (
+    <div className="min-h-screen bg-black pt-20">
+      {children}
+    </div>
+  );
+}
+
+
+
+================================================
+STEP 2 FIX SUPABASE RLS FOR ORDERS
+================================================
+
+Run SQL automatically or show instructions to run in Supabase.
+
+Add policies:
+
+
+alter table orders enable row level security;
+
+create policy "Allow public insert orders"
+on orders
+for insert
+to public
+with check (true);
+
+create policy "Allow public read orders"
+on orders
+for select
+to public
+using (true);
+
+create policy "Allow update orders"
+on orders
+for update
+to public
+using (true)
+with check (true);
+
+create policy "Allow delete orders"
+on orders
+for delete
+to public
+using (true);
+
+
+
+Also enable policies for certificates:
+
+
+alter table certificates enable row level security;
+
+create policy "Allow public read certificates"
+on certificates
+for select
+to public
+using (true);
+
+create policy "Allow public insert certificates"
+on certificates
+for insert
+to public
+with check (true);
+
+
+
+================================================
+STEP 3 FIX ADMIN EDIT + DELETE
+================================================
+
+Admin dashboard must call Supabase update and delete.
+
+Example update:
+
+await supabase
+.from("orders")
+.update({
+sender_name:newSender,
+receiver_name:newReceiver,
+message:newMessage
+})
+.eq("id",orderId)
+
+
+Example delete:
+
+await supabase
+.from("orders")
+.delete()
+.eq("id",orderId)
+
+
+
+================================================
+STEP 4 FIX CERTIFICATE PDF
+================================================
+
+Install dependencies:
+
+npm install pdfkit qrcode
+
+
+Create folder:
+
+/fonts
+
+
+Add font supporting Vietnamese:
+
+DejaVuSans.ttf
+
+
+
+================================================
+STEP 5 GENERATE CERTIFICATE
+================================================
+
+Example certificate generator:
+
+import PDFDocument from "pdfkit"
+import QRCode from "qrcode"
+import fs from "fs"
+
+
+export async function generateCertificate(order){
+
+const certCode = order.certificate_id
+
+const verifyUrl =
+"https://nhattamhoa-tranminhhanhqn.replit.app/certificate/" + certCode
+
+
+const doc = new PDFDocument({
+size:"A4",
+margin:50
+})
+
+
+const filePath =
+"./public/certificates/certificate-" + certCode + ".pdf"
+
+
+doc.pipe(fs.createWriteStream(filePath))
+
+
+doc.font("fonts/DejaVuSans.ttf")
+
+
+doc.fontSize(30)
+.text("NHẤT TÂM HOA",{align:"center"})
+
+
+doc.moveDown()
+
+doc.fontSize(14)
+.text("Flower Intention Certificate",{align:"center"})
+
+
+doc.moveDown(2)
+
+
+doc.text("Sender: " + order.sender_name)
+doc.text("Receiver: " + order.receiver_name)
+
+
+doc.moveDown()
+
+doc.text("Message:")
+doc.text(order.message)
+
+
+
+================================================
+STEP 6 ADD QR CODE
+================================================
+
+const qrImage =
+await QRCode.toDataURL(verifyUrl)
+
+
+doc.image(
+Buffer.from(qrImage.split(",")[1],"base64"),
+420,
+520,
+{width:120}
+)
+
+
+doc.moveDown()
+
+doc.text("Verify certificate:")
+doc.text(verifyUrl)
+
+
+doc.end()
+
+return filePath
+
+}
+
+
+
+================================================
+STEP 7 CERTIFICATE LOOKUP PAGE
+================================================
+
+Page:
+/certificate/[code]
+
+
+Load certificate from Supabase:
+
+
+const {data,error} =
+await supabase
+.from("certificates")
+.select("*")
+.eq("certificate_code",code)
+.single()
+
+
+Then load order:
+
+
+const {data:order} =
+await supabase
+.from("orders")
+.select("*")
+.eq("id",data.order_id)
+.single()
+
+
+Display:
+
+Sender
+Receiver
+Message
+Certificate Code
+Blockchain Hash
+Created Date
+
+
+
+================================================
+STEP 8 RETURN DOWNLOAD LINK
+================================================
+
+After checkout return:
+
+
+{
+success:true,
+certificate_code: certCode,
+download:
+"/certificates/certificate-"+certCode+".pdf"
+}
+
+
+
+================================================
+GOAL
+================================================
+
+After checkout:
+
+Order saved to Supabase
+
+Admin can edit/delete orders
+
+Certificate PDF generated
+
+Vietnamese text displays correctly
+
+QR code generated
+
+Scanning QR opens:
+
+/certificate/[certificate_code]
+
+Certificate page loads data from Supabase.

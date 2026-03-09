@@ -9,9 +9,10 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Package Manager**: pnpm
 - **Database**: Supabase (PostgreSQL)
-- **Certificate**: SHA256 hash + PDF generation (jspdf)
+- **Certificate**: SHA256 hash + server-side PDF generation (pdfkit + qrcode)
 - **AI**: OpenAI API (with fallback templates)
 - **Email**: nodemailer (optional, requires SMTP config)
+- **Font**: DejaVuSans.ttf for Vietnamese support in PDFs
 
 ## Pages
 
@@ -80,14 +81,16 @@ id, certificate_code, order_id, blockchain_hash, created_at
 
 ### Other
 - `POST /api/generate-message` - AI message generation (OpenAI or templates)
-- `GET /api/certificate/[code]` - Certificate lookup
+- `GET /api/certificate/[code]` - Certificate lookup (JSON data)
+- `GET /api/certificate/[code]/pdf` - Certificate PDF download (server-side, Vietnamese text, QR code)
 
 ## Certificate System
 
 - **Code**: Generated as NTH-XXXXXXXX (alphanumeric)
 - **Hash**: SHA256 of sender|receiver|message|ritual|timestamp
-- **PDF**: Generated client-side with jspdf (download button)
+- **PDF**: Generated server-side with pdfkit (Vietnamese font + QR code linking to /certificate/[code])
 - **Lookup**: /lookup → /certificate/[code]
+- **QR Code**: Each PDF contains a QR code linking to the certificate verification page
 
 ## Admin Authentication
 
