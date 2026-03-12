@@ -50,7 +50,7 @@ DO $$
 BEGIN
   IF NOT EXISTS (
     SELECT 1 FROM information_schema.table_constraints
-    WHERE constraint_name = 'certificates_order_id_fkey' AND table_name = 'orders'
+    WHERE constraint_name = 'certificates_order_id_fkey' AND table_name = 'certificates'
   ) THEN
     ALTER TABLE certificates
       ADD CONSTRAINT certificates_order_id_fkey
