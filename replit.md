@@ -8,7 +8,8 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Package Manager**: npm
-- **Database**: Replit built-in PostgreSQL (accessed via `pg` Pool in `lib/db.ts`)
+- **Database (dev)**: Replit built-in PostgreSQL (accessed via `pg` Pool in `lib/db.ts`)
+- **Database (Supabase)**: Supabase PostgreSQL (`lib/supabase.ts` — exports `supabase` for public client, `supabaseAdmin` for service-role operations)
 - **Certificate**: SHA256 hash + server-side PDF generation (pdfkit + qrcode)
 - **AI**: OpenAI API (with fallback templates)
 - **Email**: nodemailer (optional, requires SMTP config)
@@ -18,8 +19,12 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 
 The Replit PostgreSQL database is provisioned automatically. Tables are created by running the SQL in `supabase/migrations/001_create_tables.sql` (for reference). The schema was applied directly to the Replit database at migration time.
 
-### Database Connection
-- Connection is via `lib/db.ts` which exports a `pg.Pool` using `DATABASE_URL` (set automatically by Replit)
+### Database Connections
+- **Replit PostgreSQL**: `lib/db.ts` exports a `pg.Pool` using `DATABASE_URL` (set automatically by Replit)
+- **Supabase**: `lib/supabase.ts` exports `supabase` (anon key, for public reads) and `supabaseAdmin` (service role key, for admin writes)
+  - `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
+  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon/publishable key
+  - `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role key (secret)
 
 ### Tables
 
@@ -28,6 +33,8 @@ The Replit PostgreSQL database is provisioned automatically. Tables are created 
 **orders**: id (uuid), product_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at
 
 **certificates**: id (uuid), certificate_code, order_id, hash, blockchain_hash, blockchain_tx, qr_url, created_at
+
+**customers**: id (uuid), phone, phone_normalized, sender_name, receiver_name, email, total_orders, first_order_at, last_order_at, created_at, updated_at
 
 ### Order Status Lifecycle
 `pending` → `paid` → `minting` → `minted` (or → `revoked` from minted)
