@@ -53,7 +53,9 @@ export default function SelectTokenPage() {
     const product = products.find((p) => p.id === tier.productId)
     if (!product) return
     addToCart(product, recipientName || '')
-    router.push('/checkout')
+    localStorage.setItem('ntt_selected_product', product.id)
+    localStorage.setItem('ntt_flow', 'ritual')
+    router.push('/checkout?flow=ritual')
   }
 
   return (

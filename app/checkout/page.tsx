@@ -1,4 +1,7 @@
-import { CheckoutContent } from "@/components/checkout-content";
+'use client'
+
+import { Suspense } from 'react'
+import { CheckoutContent } from "@/components/checkout-content"
 
 export default function CheckoutPage() {
   return (
@@ -24,7 +27,9 @@ export default function CheckoutPage() {
           }}
         />
       </div>
-      <CheckoutContent />
+      <Suspense>
+        <CheckoutContent />
+      </Suspense>
     </div>
-  );
+  )
 }

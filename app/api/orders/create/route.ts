@@ -17,31 +17,92 @@ export async function POST(req: Request) {
     const product_id = body.product_id || null
     const public_vow = body.public_vow !== undefined ? body.public_vow : (body.publicVow !== undefined ? body.publicVow : true)
     const permanence_type = body.permanence_type || 'temporary'
+    const receiver_phone = body.receiver_phone || null
+    const receiver_address = body.receiver_address || null
+    const quantity = body.quantity || 1
 
     if (!sender_name || !receiver_name || !message) {
       return NextResponse.json({ error: 'Missing required fields: sender_name, receiver_name, message' }, { status: 400 })
     }
 
+    const isValidUUID = product_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product_id)
+
+    const orderData: Record<string, any> = {
+      sender_name,
+      receiver_name,
+      message,
+      phone,
+      ritual_type,
+      offering,
+      public_vow,
+      permanence_type,
+      status: 'pending',
+      product_id: isValidUUID ? product_id : null,
+    }
+
+    if (receiver_phone) orderData.receiver_phone = receiver_phone
+    if (receiver_address) orderData.receiver_address = receiver_address
+    if (quantity > 1) orderData.quantity = quantity
+
     const { data, error } = await supabaseAdmin
       .from('orders')
-      .insert({
-        sender_name,
-        receiver_name,
-        message,
-        phone,
-        ritual_type,
-        offering,
-        public_vow,
-        permanence_type,
-        status: 'pending',
-        product_id: product_id || null
-      })
+      .insert(orderData)
       .select()
       .single()
 
-    if (error) throw error
+    if (error) {
+      if (error.message?.includes('column') && (error.message?.includes('receiver_phone') || error.message?.includes('receiver_address') || error.message?.includes('quantity'))) {
+        console.warn('New columns not yet migrated, retrying without them')
+        const fallbackData = {
+          sender_name,
+          receiver_name,
+          message,
+          phone,
+          ritual_type,
+          offering,
+          public_vow,
+          permanence_type,
+          status: 'pending',
+          product_id: product_id || null,
+        }
+        const { data: fallbackOrder, error: fallbackError } = await supabaseAdmin
+          .from('orders')
+          .insert(fallbackData)
+          .select()
+          .single()
+
+        if (fallbackError) throw fallbackError
+
+        console.log("Order created (without new columns):", JSON.stringify(fallbackOrder))
+        return NextResponse.json({
+          success: true,
+          order: fallbackOrder,
+          orderId: fallbackOrder.id,
+          note: 'receiver_phone, receiver_address, quantity not saved - run migration 005'
+        })
+      }
+      throw error
+    }
 
     console.log("Order created successfully:", JSON.stringify(data))
+
+    try {
+      await fetch(new URL('/api/customers', req.url).toString(), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          phone,
+          sender_name,
+          receiver_name,
+          receiver_phone,
+          receiver_address,
+          last_ai_message: message,
+          increment_orders: true,
+        })
+      })
+    } catch (e) {
+      console.warn('Customer upsert failed (non-critical):', e)
+    }
 
     return NextResponse.json({
       success: true,

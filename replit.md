@@ -30,11 +30,11 @@ The primary database is Supabase PostgreSQL. All API routes use `supabaseAdmin` 
 
 **products**: id (uuid), name, description, price, image_url, category, is_permanent_available (boolean), created_at
 
-**orders**: id (uuid), product_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at
+**orders**: id (uuid), product_id, customer_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at, receiver_phone*, receiver_address*, quantity* (*pending migration 005)
 
 **certificates**: id (uuid), certificate_code, order_id, hash, blockchain_hash, blockchain_tx, qr_url, created_at
 
-**customers**: id (uuid), phone, phone_normalized, sender_name, receiver_name, email, total_orders, first_order_at, last_order_at, created_at, updated_at
+**customers**: id (uuid), phone, phone_normalized, sender_name, receiver_name, email, total_orders, first_order_at, last_order_at, created_at, updated_at, receiver_phone*, receiver_address*, last_ai_message* (*pending migration 005)
 
 ### Order Status Lifecycle
 `pending` → `paid` → `minting` → `minted` (or → `revoked` from minted)
@@ -46,17 +46,35 @@ The primary database is Supabase PostgreSQL. All API routes use `supabaseAdmin` 
 - **permanent type**: `sender_name` and `receiver_name` cannot be changed at any status
 - **Delete**: Blocked if a certificate exists for the order (FK constraint)
 
+## Two Customer Flows
+
+### Gift Flow
+Product (from Gift Collection) → `/product/[id]?flow=gift` → "Đặt ngay" → `/checkout?flow=gift`
+- All fields editable (sender, receiver, receiver_phone, receiver_address required)
+- Returning customers: auto-fills but all fields remain editable
+
+### Ritual Flow
+Product (from Ritual Collection) → `/product/[id]?flow=ritual` → "Bắt đầu nghi lễ" → `/nghi-thuc?product_id=X` → `/chon-vat-chung` → `/checkout?flow=ritual`
+- Returning customers: sender_name and receiver_name are locked
+- receiver_phone and receiver_address are optional
+
+### Customer Recognition
+- Phone number stored in `localStorage` as `ntt_phone`
+- On checkout, phone lookup via `/api/orders/lookup` returns customer data
+- Customer data auto-upserted via `/api/customers` on order creation
+
 ## Pages
 
 ### Public Pages
-- `/` - Home page with hero + 2 sections: "Bộ sưu tập quà tặng" (product grid) + "Không gian nghi lễ cam kết" (vow feed + commitment)
-- `/product/[id]` - Product detail
+- `/` - Home page with hero + 3 sections: "Gift Collection" (product grid) + "Ritual Collection" (product grid with ritual badges) + Live vows + Commitment
+- `/product/[id]` - Product detail with two CTAs based on `?flow=gift|ritual`
 - `/ready` - Ritual readiness with reflective questions + dual buttons
 - `/moment` - Describe moment/intention
 - `/moments` - Vow wall (loads from `/api/vows`, fallback to static)
 - `/nghi-thuc` - Commitment checkboxes (3 promises before continuing); supports `?product_id=` query param to set selected product
+- `/chon-vat-chung` - Select token/tier (sets product and routes to checkout with ritual flow)
 - `/offering` - Choose offering
-- `/checkout` - Checkout form + AI message + certificate preview + public_vow toggle + permanence_type; auto-fills receiver name for returning customers (phone lookup via `/api/orders/lookup`)
+- `/checkout` - Checkout form with flow-aware fields (gift vs ritual), order summary with product image + quantity selector, AI message, certificate preview, public_vow toggle, permanence_type
 - `/lookup` - Certificate code search
 - `/certificate/[code]` - Certificate display + PDF download
 - `/verify/[code]` - Public certificate verification page (QR target)
@@ -84,6 +102,8 @@ Product Detail → /ready → /checkout (quick ritual)
 - `ntt_selected_product` - Selected product ID
 - `ntt_permanence_type` - "temporary" or "permanent"
 - `ntt_returning_user` - Returning user flag
+- `ntt_phone` - Saved phone number for returning customer recognition
+- `ntt_flow` - Current flow type ("gift" or "ritual")
 
 ## API Routes
 
@@ -104,7 +124,12 @@ Product Detail → /ready → /checkout (quick ritual)
 - `POST /api/orders/[id]/revoke` - Revoke order (admin auth)
 - `GET /api/orders/stats` - Dashboard stats (admin auth)
 
+### Customers
+- `GET /api/customers?phone=X` - Lookup customer by phone (public)
+- `POST /api/customers` - Upsert customer (auto-called from order creation)
+
 ### Public
+- `GET /api/orders/lookup?phone=X` - Phone lookup returning sender_name, receiver_name, receiver_phone, receiver_address, last_ai_message, total_orders
 - `GET /api/vows?limit=N` - Public vows feed (used by home page + moments page)
 - `GET /api/certificate/[code]` - Certificate lookup (JSON)
 - `GET /api/certificate/[code]/pdf` - Certificate PDF download

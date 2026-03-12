@@ -1,14 +1,28 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Link from 'next/link'
-import { User, Heart, Phone, PenLine, ShieldCheck, ArrowLeft, Sparkles, Download } from 'lucide-react'
+import Image from 'next/image'
+import { User, Heart, Phone, PenLine, ShieldCheck, ArrowLeft, Sparkles, Download, MapPin, Minus, Plus, Package } from 'lucide-react'
 import { CommitmentCertificate } from '@/components/commitment-certificate'
+import { products as fallbackProducts, formatPrice } from '@/lib/products'
+
+interface Product {
+  id: string
+  name: string
+  price: number
+  image_url?: string
+  image?: string
+  description?: string
+}
 
 interface FormData {
   senderName: string
   receiverName: string
   phone: string
+  receiverPhone: string
+  receiverAddress: string
   message: string
 }
 
@@ -16,9 +30,21 @@ interface FormErrors {
   senderName?: string
   receiverName?: string
   phone?: string
+  receiverPhone?: string
+  receiverAddress?: string
 }
 
-function validateForm(data: FormData): FormErrors {
+interface CustomerData {
+  sender_name: string
+  receiver_name: string
+  receiver_phone?: string
+  receiver_address?: string
+  last_ai_message?: string
+  total_orders: number
+  customer_id?: string
+}
+
+function validateForm(data: FormData, flow: string): FormErrors {
   const errors: FormErrors = {}
   if (!data.senderName.trim()) errors.senderName = 'Vui lòng nhập tên của bạn'
   if (!data.receiverName.trim()) errors.receiverName = 'Vui lòng nhập tên người nhận'
@@ -27,11 +53,23 @@ function validateForm(data: FormData): FormErrors {
   } else if (!/^[0-9]{9,11}$/.test(data.phone.replace(/\s/g, ''))) {
     errors.phone = 'Số điện thoại không hợp lệ'
   }
+  if (flow === 'gift') {
+    if (!data.receiverPhone.trim()) {
+      errors.receiverPhone = 'Vui lòng nhập SĐT người nhận'
+    } else if (!/^[0-9]{9,11}$/.test(data.receiverPhone.replace(/\s/g, ''))) {
+      errors.receiverPhone = 'Số điện thoại không hợp lệ'
+    }
+    if (!data.receiverAddress.trim()) errors.receiverAddress = 'Vui lòng nhập địa chỉ giao hàng'
+  }
   return errors
 }
 
-function isFormComplete(data: FormData): boolean {
-  return data.senderName.trim().length > 0 && data.receiverName.trim().length > 0 && data.phone.trim().length > 0 && data.message.trim().length > 0
+function isFormComplete(data: FormData, flow: string): boolean {
+  const base = data.senderName.trim().length > 0 && data.receiverName.trim().length > 0 && data.phone.trim().length > 0 && data.message.trim().length > 0
+  if (flow === 'gift') {
+    return base && data.receiverPhone.trim().length > 0 && data.receiverAddress.trim().length > 0
+  }
+  return base
 }
 
 function FormInput({ id, label, icon: Icon, type = 'text', placeholder, value, onChange, error, disabled, hint }: {
@@ -58,11 +96,81 @@ function FormInput({ id, label, icon: Icon, type = 'text', placeholder, value, o
   )
 }
 
+function OrderSummary({ product, quantity, onQuantityChange }: { product: Product | null; quantity: number; onQuantityChange: (q: number) => void }) {
+  if (!product) return null
+
+  const unitPrice = product.price
+  const totalPrice = unitPrice * quantity
+
+  return (
+    <div className="border border-[#D4AF37]/20 bg-[#0d0b09] p-5">
+      <p className="text-xs tracking-[0.3em] uppercase text-[#C5A55A] mb-4">
+        Đơn hàng của bạn
+      </p>
+
+      <div className="flex gap-4">
+        <div className="relative w-20 h-24 flex-shrink-0 overflow-hidden bg-[#1a1814]">
+          <Image
+            src={product.image_url || product.image || '/images/product-1.jpg'}
+            alt={product.name}
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-sm font-medium text-[#F5E6C8] truncate">{product.name}</h4>
+          <p className="text-sm text-[#D4AF37] mt-1">{formatPrice(unitPrice)}</p>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-[#D4AF37]/10">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-[#8A7D65]">Số lượng</span>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
+              className="h-8 w-8 flex items-center justify-center border border-[#D4AF37]/20 text-[#C5A55A] hover:border-[#D4AF37]/50 transition-colors"
+              disabled={quantity <= 1}
+            >
+              <Minus className="h-3 w-3" />
+            </button>
+            <span className="text-base text-[#F5E6C8] font-medium w-8 text-center">{quantity}</span>
+            <button
+              type="button"
+              onClick={() => onQuantityChange(quantity + 1)}
+              className="h-8 w-8 flex items-center justify-center border border-[#D4AF37]/20 text-[#C5A55A] hover:border-[#D4AF37]/50 transition-colors"
+            >
+              <Plus className="h-3 w-3" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-4 pt-4 border-t border-[#D4AF37]/10 flex items-center justify-between">
+        <span className="text-sm text-[#C5A55A] tracking-wider">Tổng cộng</span>
+        <span className="text-lg text-[#D4AF37] font-display">{formatPrice(totalPrice)}</span>
+      </div>
+    </div>
+  )
+}
+
 export function CheckoutContent() {
+  const searchParams = useSearchParams()
+  const [flow, setFlow] = useState('gift')
+
+  useEffect(() => {
+    const urlFlow = searchParams.get('flow')
+    const storedFlow = typeof window !== 'undefined' ? localStorage.getItem('ntt_flow') : null
+    setFlow(urlFlow || storedFlow || 'gift')
+  }, [searchParams])
+
   const [formData, setFormData] = useState<FormData>({
     senderName: '',
     receiverName: '',
     phone: '',
+    receiverPhone: '',
+    receiverAddress: '',
     message: '',
   })
   const [errors, setErrors] = useState<FormErrors>({})
@@ -77,42 +185,104 @@ export function CheckoutContent() {
   const [productId, setProductId] = useState('')
   const [permanenceType, setPermanenceType] = useState<'temporary' | 'permanent'>('temporary')
   const [receiverLocked, setReceiverLocked] = useState(false)
+  const [senderLocked, setSenderLocked] = useState(false)
   const [lastLookedUpPhone, setLastLookedUpPhone] = useState('')
+  const [isReturningCustomer, setIsReturningCustomer] = useState(false)
+  const [product, setProduct] = useState<Product | null>(null)
+  const [quantity, setQuantity] = useState(1)
+  const [lookupLoading, setLookupLoading] = useState(false)
 
   useEffect(() => {
     setRitualType(localStorage.getItem('ntt_ritual_type') || '')
     setOffering(localStorage.getItem('ntt_offering') || '')
     setMoment(localStorage.getItem('ntt_moment') || '')
-    setProductId(localStorage.getItem('ntt_selected_product') || '')
+    const storedProduct = localStorage.getItem('ntt_selected_product') || ''
+    setProductId(storedProduct)
     const storedPermanence = localStorage.getItem('ntt_permanence_type')
     if (storedPermanence === 'permanent' || storedPermanence === 'temporary') {
       setPermanenceType(storedPermanence)
     }
+
+    const savedPhone = localStorage.getItem('ntt_phone')
+    if (savedPhone) {
+      setFormData(prev => ({ ...prev, phone: savedPhone }))
+    }
+
+    if (storedProduct) {
+      loadProduct(storedProduct)
+    }
   }, [])
+
+  async function loadProduct(pid: string) {
+    try {
+      const res = await fetch(`/api/products/${pid}`)
+      const data = await res.json()
+      if (data.success && data.product) {
+        setProduct(data.product)
+        return
+      }
+    } catch {}
+    const fallback = fallbackProducts.find(p => p.id === pid)
+    if (fallback) {
+      setProduct({ ...fallback, image_url: fallback.image })
+    }
+  }
 
   useEffect(() => {
     const phone = formData.phone.replace(/\s/g, '')
     if (phone !== lastLookedUpPhone) {
-      if (receiverLocked) {
+      if (receiverLocked || senderLocked) {
         setReceiverLocked(false)
-        setFormData(prev => ({ ...prev, receiverName: '' }))
+        setSenderLocked(false)
+        setIsReturningCustomer(false)
       }
     }
     if (phone.length >= 9 && phone.length <= 11 && /^[0-9]+$/.test(phone) && phone !== lastLookedUpPhone) {
       const timeout = setTimeout(async () => {
+        setLookupLoading(true)
         try {
           const res = await fetch(`/api/orders/lookup?phone=${encodeURIComponent(phone)}`)
           const data = await res.json()
           setLastLookedUpPhone(phone)
-          if (data.success && data.found && data.receiver_name) {
-            setFormData(prev => ({ ...prev, receiverName: data.receiver_name }))
-            setReceiverLocked(true)
+          if (data.success && data.found) {
+            setIsReturningCustomer(true)
+
+            if (flow === 'ritual') {
+              if (data.sender_name) {
+                setFormData(prev => ({ ...prev, senderName: data.sender_name }))
+                setSenderLocked(true)
+              }
+              if (data.receiver_name) {
+                setFormData(prev => ({ ...prev, receiverName: data.receiver_name }))
+                setReceiverLocked(true)
+              }
+            } else {
+              if (data.sender_name) {
+                setFormData(prev => ({ ...prev, senderName: data.sender_name }))
+              }
+              if (data.receiver_name) {
+                setFormData(prev => ({ ...prev, receiverName: data.receiver_name }))
+              }
+            }
+
+            if (data.receiver_phone) {
+              setFormData(prev => ({ ...prev, receiverPhone: data.receiver_phone }))
+            }
+            if (data.receiver_address) {
+              setFormData(prev => ({ ...prev, receiverAddress: data.receiver_address }))
+            }
+
+            localStorage.setItem('ntt_phone', phone)
+          } else {
+            setIsReturningCustomer(false)
           }
-        } catch {}
+        } catch {} finally {
+          setLookupLoading(false)
+        }
       }, 500)
       return () => clearTimeout(timeout)
     }
-  }, [formData.phone, lastLookedUpPhone, receiverLocked])
+  }, [formData.phone, lastLookedUpPhone, receiverLocked, senderLocked, flow, formData.message])
 
   const updateField = useCallback(
     (field: keyof FormData) => (value: string) => {
@@ -149,7 +319,7 @@ export function CheckoutContent() {
   }
 
   async function handleSubmit() {
-    const validationErrors = validateForm(formData)
+    const validationErrors = validateForm(formData, flow)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors)
       return
@@ -166,16 +336,18 @@ export function CheckoutContent() {
           receiver_name: formData.receiverName,
           phone: formData.phone,
           message: formData.message,
-          ritual_type: ritualType,
-          offering: offering,
+          ritual_type: ritualType || (flow === 'gift' ? 'Gift' : null),
+          offering: offering || null,
           product_id: productId || undefined,
           public_vow: publicVow,
           permanence_type: permanenceType,
+          receiver_phone: formData.receiverPhone || null,
+          receiver_address: formData.receiverAddress || null,
+          quantity: quantity,
         }),
       })
 
       const data = await response.json()
-      console.log('Order response:', data)
       if (data.success) {
         setOrderResult({
           orderId: data.orderId,
@@ -183,10 +355,12 @@ export function CheckoutContent() {
           blockchain_hash: data.order?.blockchain_hash || null,
         })
         localStorage.setItem('ntt_returning_user', 'true')
+        localStorage.setItem('ntt_phone', formData.phone.replace(/\s/g, ''))
         localStorage.removeItem('ntt_ritual_step')
         localStorage.removeItem('ntt_moment')
         localStorage.removeItem('ntt_ritual_type')
         localStorage.removeItem('ntt_offering')
+        localStorage.removeItem('ntt_flow')
         setTimeout(() => setSubmitted(true), 700)
       } else {
         console.error('Order failed:', data.error, data.details)
@@ -213,10 +387,10 @@ export function CheckoutContent() {
             <ShieldCheck className="h-7 w-7 text-[#D4AF37]" />
           </div>
           <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37]">
-            Nghi lễ đã hoàn tất
+            {flow === 'gift' ? 'Đặt hàng thành công' : 'Nghi lễ đã hoàn tất'}
           </p>
           <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
-            Lời nguyện của bạn đã được ghi nhận
+            {flow === 'gift' ? 'Đơn hàng đã được ghi nhận' : 'Lời nguyện của bạn đã được ghi nhận'}
           </h2>
           <p className="text-sm text-[#8A7D65] mt-3">
             Chứng thư sẽ được gửi đến email của bạn.
@@ -251,7 +425,7 @@ export function CheckoutContent() {
                 <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2">Mã đơn hàng</p>
                 <p className="text-sm text-[#F5E6C8] font-mono mb-3">{orderResult.orderId}</p>
                 <p className="text-xs text-[#8A7D65]">
-                  Chứng thư sẽ được tạo sau khi đơn hàng được xác nhận thanh toán và đúc blockchain.
+                  Chứng thư sẽ được tạo sau khi đơn hàng được xác nhận thanh toán.
                 </p>
               </div>
             )}
@@ -266,29 +440,54 @@ export function CheckoutContent() {
     )
   }
 
-  const canSubmit = isFormComplete(formData)
+  const canSubmit = isFormComplete(formData, flow)
 
   return (
     <div className={`perspective-container transition-all duration-700 ${isFlipping ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-        <div className="order-2 lg:order-1">
-          <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-6 text-center lg:text-left">
-            Xem trước chứng thư
-          </p>
-          <CommitmentCertificate
-            buyerName={formData.senderName || "Sender's Name"}
-            recipientName={formData.receiverName || "Receiver's Name"}
-            animate={false}
-          />
+        <div className="order-2 lg:order-1 space-y-8">
+          <div>
+            <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-6 text-center lg:text-left">
+              Xem trước chứng thư
+            </p>
+            <CommitmentCertificate
+              buyerName={formData.senderName || "Sender's Name"}
+              recipientName={formData.receiverName || "Receiver's Name"}
+              animate={false}
+            />
+          </div>
+
+          <OrderSummary product={product} quantity={quantity} onQuantityChange={setQuantity} />
         </div>
 
         <div className="order-1 lg:order-2">
           <div className="mb-8">
-            <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-3">Thông tin nghi lễ</p>
+            <div className="flex items-center gap-3 mb-3">
+              <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A]">
+                {flow === 'gift' ? 'Đặt hàng quà tặng' : 'Thông tin nghi lễ'}
+              </p>
+              <span className={`px-2.5 py-0.5 text-[10px] tracking-wider uppercase border ${
+                flow === 'gift'
+                  ? 'border-[#C5A55A]/30 text-[#C5A55A] bg-[#C5A55A]/5'
+                  : 'border-[#D4AF37]/30 text-[#D4AF37] bg-[#D4AF37]/5'
+              }`}>
+                {flow === 'gift' ? 'Quà tặng' : 'Nghi lễ'}
+              </span>
+            </div>
             <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
-              Hoàn tất nghi lễ hoa
+              {flow === 'gift' ? 'Thông tin giao hàng' : 'Hoàn tất nghi lễ hoa'}
             </h2>
-            {(ritualType || offering || permanenceType) && (
+
+            {isReturningCustomer && (
+              <div className="mt-3 px-3 py-2 border border-[#D4AF37]/20 bg-[#D4AF37]/5">
+                <p className="text-xs text-[#D4AF37]">
+                  Chào mừng bạn quay lại! Thông tin đã được điền tự động.
+                  {flow === 'ritual' && ' Tên người gửi và người nhận đã được khóa theo nghi lễ.'}
+                </p>
+              </div>
+            )}
+
+            {flow === 'ritual' && (ritualType || offering || permanenceType) && (
               <div className="mt-3 flex flex-wrap gap-2">
                 {ritualType && (
                   <span className="px-3 py-1 text-xs bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] tracking-wider">
@@ -312,9 +511,87 @@ export function CheckoutContent() {
           </div>
 
           <div className="space-y-5">
-            <FormInput id="sender-name" label="Tên người gửi" icon={User} placeholder="Nhập họ và tên của bạn..." value={formData.senderName} onChange={updateField('senderName')} error={errors.senderName} />
-            <FormInput id="phone" label="Số điện thoại" icon={Phone} type="tel" placeholder="0xxx xxx xxx" value={formData.phone} onChange={updateField('phone')} error={errors.phone} />
-            <FormInput id="receiver-name" label="Tên người nhận" icon={Heart} placeholder="Nhập tên người bạn yêu thương..." value={formData.receiverName} onChange={updateField('receiverName')} error={errors.receiverName} disabled={receiverLocked} hint={receiverLocked ? 'Tên người nhận được điền tự động từ đơn hàng trước đó' : undefined} />
+            <FormInput
+              id="sender-name"
+              label="Tên người gửi"
+              icon={User}
+              placeholder="Nhập họ và tên của bạn..."
+              value={formData.senderName}
+              onChange={updateField('senderName')}
+              error={errors.senderName}
+              disabled={flow === 'ritual' && senderLocked}
+              hint={flow === 'ritual' && senderLocked ? 'Tên người gửi được khóa theo nghi lễ trước đó' : undefined}
+            />
+            <FormInput
+              id="phone"
+              label="Số điện thoại của bạn"
+              icon={Phone}
+              type="tel"
+              placeholder="0xxx xxx xxx"
+              value={formData.phone}
+              onChange={updateField('phone')}
+              error={errors.phone}
+              hint={lookupLoading ? 'Đang tìm thông tin...' : undefined}
+            />
+            <FormInput
+              id="receiver-name"
+              label="Tên người nhận"
+              icon={Heart}
+              placeholder="Nhập tên người bạn yêu thương..."
+              value={formData.receiverName}
+              onChange={updateField('receiverName')}
+              error={errors.receiverName}
+              disabled={flow === 'ritual' && receiverLocked}
+              hint={flow === 'ritual' && receiverLocked ? 'Tên người nhận được khóa theo nghi lễ trước đó' : undefined}
+            />
+
+            {flow === 'gift' && (
+              <>
+                <FormInput
+                  id="receiver-phone"
+                  label="SĐT người nhận"
+                  icon={Phone}
+                  type="tel"
+                  placeholder="Số điện thoại người nhận hàng..."
+                  value={formData.receiverPhone}
+                  onChange={updateField('receiverPhone')}
+                  error={errors.receiverPhone}
+                />
+                <FormInput
+                  id="receiver-address"
+                  label="Địa chỉ giao hàng"
+                  icon={MapPin}
+                  placeholder="Nhập địa chỉ giao hàng đầy đủ..."
+                  value={formData.receiverAddress}
+                  onChange={updateField('receiverAddress')}
+                  error={errors.receiverAddress}
+                />
+              </>
+            )}
+
+            {flow === 'ritual' && (
+              <>
+                <FormInput
+                  id="receiver-phone"
+                  label="SĐT người nhận (tuỳ chọn)"
+                  icon={Phone}
+                  type="tel"
+                  placeholder="Số điện thoại người nhận..."
+                  value={formData.receiverPhone}
+                  onChange={updateField('receiverPhone')}
+                  error={errors.receiverPhone}
+                />
+                <FormInput
+                  id="receiver-address"
+                  label="Địa chỉ giao hàng (tuỳ chọn)"
+                  icon={MapPin}
+                  placeholder="Nhập địa chỉ giao hàng..."
+                  value={formData.receiverAddress}
+                  onChange={updateField('receiverAddress')}
+                  error={errors.receiverAddress}
+                />
+              </>
+            )}
 
             <div>
               <div className="flex items-center justify-between mb-2">
@@ -376,7 +653,7 @@ export function CheckoutContent() {
                 : 'bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]'
             }`}
           >
-            Xác nhận & Thanh toán
+            {flow === 'gift' ? 'Xác nhận đặt hàng' : 'Xác nhận & Thanh toán'}
           </button>
 
           {!canSubmit && (

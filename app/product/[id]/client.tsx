@@ -1,10 +1,10 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Gift, Shield } from 'lucide-react'
 import { products as fallbackProducts, formatPrice } from '@/lib/products'
 
 interface Product {
@@ -19,6 +19,8 @@ interface Product {
 
 export function ProductPageClient({ productId }: { productId: string }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const flow = searchParams.get('flow') || 'gift'
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -47,12 +49,25 @@ export function ProductPageClient({ productId }: { productId: string }) {
     load()
   }, [productId])
 
+  function handleGiftCheckout() {
+    if (product) {
+      localStorage.setItem('ntt_selected_product', product.id)
+      localStorage.setItem('ntt_flow', 'gift')
+      localStorage.removeItem('ntt_ritual_step')
+      localStorage.removeItem('ntt_ritual_type')
+      localStorage.removeItem('ntt_offering')
+      localStorage.removeItem('ntt_moment')
+    }
+    router.push('/checkout?flow=gift')
+  }
+
   function handleBeginRitual() {
     if (product) {
       localStorage.setItem('ntt_selected_product', product.id)
+      localStorage.setItem('ntt_flow', 'ritual')
       localStorage.removeItem('ntt_ritual_step')
     }
-    router.push('/ready')
+    router.push(`/nghi-thuc?product_id=${product?.id}`)
   }
 
   if (loading) {
@@ -125,15 +140,51 @@ export function ProductPageClient({ productId }: { productId: string }) {
               {product.description}
             </p>
 
-            <button
-              onClick={handleBeginRitual}
-              className="w-full py-4 bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] font-medium tracking-[0.2em] uppercase text-sm transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
-            >
-              Begin Ritual
-            </button>
+            <div className="space-y-3">
+              {flow === 'gift' ? (
+                <button
+                  onClick={handleGiftCheckout}
+                  className="w-full py-4 flex items-center justify-center gap-3 bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] font-medium tracking-[0.2em] uppercase text-sm transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
+                >
+                  <Gift className="h-4 w-4" />
+                  Đặt ngay — Tặng quà
+                </button>
+              ) : (
+                <button
+                  onClick={handleBeginRitual}
+                  className="w-full py-4 flex items-center justify-center gap-3 bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] font-medium tracking-[0.2em] uppercase text-sm transition-all duration-500 hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]"
+                >
+                  <Shield className="h-4 w-4" />
+                  Bắt đầu nghi lễ cam kết
+                </button>
+              )}
+
+              {flow === 'gift' && (
+                <button
+                  onClick={handleBeginRitual}
+                  className="w-full py-3 flex items-center justify-center gap-2 border border-[#D4AF37]/30 text-[#C5A55A] text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:border-[#D4AF37]/60 hover:text-[#D4AF37]"
+                >
+                  <Shield className="h-3.5 w-3.5" />
+                  Hoặc bắt đầu nghi lễ cam kết
+                </button>
+              )}
+
+              {flow === 'ritual' && (
+                <button
+                  onClick={handleGiftCheckout}
+                  className="w-full py-3 flex items-center justify-center gap-2 border border-[#D4AF37]/30 text-[#C5A55A] text-xs tracking-[0.2em] uppercase transition-all duration-300 hover:border-[#D4AF37]/60 hover:text-[#D4AF37]"
+                >
+                  <Gift className="h-3.5 w-3.5" />
+                  Hoặc đặt ngay — tặng quà
+                </button>
+              )}
+            </div>
 
             <p className="mt-4 text-center text-xs text-[#6B5F4A] tracking-wider">
-              Bắt đầu hành trình nghi lễ hoa thiêng liêng
+              {flow === 'gift'
+                ? 'Đặt hàng trực tiếp — không cần nghi lễ'
+                : 'Bắt đầu hành trình nghi lễ hoa thiêng liêng'
+              }
             </p>
           </div>
         </div>

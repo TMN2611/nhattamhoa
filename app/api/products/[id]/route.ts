@@ -8,6 +8,12 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
 
   try {
+    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+
+    if (!isUUID) {
+      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
+    }
+
     const { data, error } = await supabaseAdmin
       .from('products')
       .select('*')
@@ -16,16 +22,16 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 
     if (error) {
       if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+        return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
       }
       throw error
     }
     if (!data) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
+      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
     }
     return NextResponse.json({ success: true, product: data })
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
   }
 }
 
