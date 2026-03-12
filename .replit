@@ -45,3 +45,4 @@ publicDir = "public"
 [userenv.shared]
 NEXT_PUBLIC_SUPABASE_URL = "https://boodwpdbinacuhwwvtuq.supabase.co"
 NEXT_PUBLIC_SUPABASE_ANON_KEY = "sb_publishable_5nDvWEkLlTk3h9LP9kDpDw_mBqboDqg"
+SUPABASE_SERVICE_ROLE_KEY = "sb_secret_s9ZCfyDpCw-k7n_3dt3auw_CaIoikcl"
