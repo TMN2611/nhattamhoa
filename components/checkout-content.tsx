@@ -34,8 +34,8 @@ function isFormComplete(data: FormData): boolean {
   return data.senderName.trim().length > 0 && data.receiverName.trim().length > 0 && data.phone.trim().length > 0 && data.message.trim().length > 0
 }
 
-function FormInput({ id, label, icon: Icon, type = 'text', placeholder, value, onChange, error }: {
-  id: string; label: string; icon: React.ComponentType<{ className?: string }>; type?: string; placeholder: string; value: string; onChange: (val: string) => void; error?: string
+function FormInput({ id, label, icon: Icon, type = 'text', placeholder, value, onChange, error, disabled, hint }: {
+  id: string; label: string; icon: React.ComponentType<{ className?: string }>; type?: string; placeholder: string; value: string; onChange: (val: string) => void; error?: string; disabled?: boolean; hint?: string
 }) {
   return (
     <div>
@@ -49,8 +49,10 @@ function FormInput({ id, label, icon: Icon, type = 'text', placeholder, value, o
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        className="w-full border border-[#D4AF37]/20 bg-[#0d0b09] px-4 py-3.5 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none focus:border-[#D4AF37]/60 transition-colors font-serif text-base"
+        disabled={disabled}
+        className={`w-full border border-[#D4AF37]/20 bg-[#0d0b09] px-4 py-3.5 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none focus:border-[#D4AF37]/60 transition-colors font-serif text-base ${disabled ? 'opacity-60 cursor-not-allowed bg-[#1a1814]' : ''}`}
       />
+      {hint && <p className="mt-1.5 text-xs text-[#D4AF37]/70">{hint}</p>}
       {error && <p className="mt-1.5 text-xs text-[#A52525]">{error}</p>}
     </div>
   )
@@ -74,6 +76,8 @@ export function CheckoutContent() {
   const [moment, setMoment] = useState('')
   const [productId, setProductId] = useState('')
   const [permanenceType, setPermanenceType] = useState<'temporary' | 'permanent'>('temporary')
+  const [receiverLocked, setReceiverLocked] = useState(false)
+  const [lastLookedUpPhone, setLastLookedUpPhone] = useState('')
 
   useEffect(() => {
     setRitualType(localStorage.getItem('ntt_ritual_type') || '')
@@ -85,6 +89,30 @@ export function CheckoutContent() {
       setPermanenceType(storedPermanence)
     }
   }, [])
+
+  useEffect(() => {
+    const phone = formData.phone.replace(/\s/g, '')
+    if (phone !== lastLookedUpPhone) {
+      if (receiverLocked) {
+        setReceiverLocked(false)
+        setFormData(prev => ({ ...prev, receiverName: '' }))
+      }
+    }
+    if (phone.length >= 9 && phone.length <= 11 && /^[0-9]+$/.test(phone) && phone !== lastLookedUpPhone) {
+      const timeout = setTimeout(async () => {
+        try {
+          const res = await fetch(`/api/orders/lookup?phone=${encodeURIComponent(phone)}`)
+          const data = await res.json()
+          setLastLookedUpPhone(phone)
+          if (data.success && data.found && data.receiver_name) {
+            setFormData(prev => ({ ...prev, receiverName: data.receiver_name }))
+            setReceiverLocked(true)
+          }
+        } catch {}
+      }, 500)
+      return () => clearTimeout(timeout)
+    }
+  }, [formData.phone, lastLookedUpPhone, receiverLocked])
 
   const updateField = useCallback(
     (field: keyof FormData) => (value: string) => {
@@ -277,7 +305,7 @@ export function CheckoutContent() {
                     ? 'bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]'
                     : 'bg-[#D4AF37]/10 border-[#D4AF37]/20 text-[#8A7D65]'
                 }`}>
-                  {permanenceType === 'permanent' ? 'Vĩnh viễn' : 'Tạm thời'}
+                  {permanenceType === 'permanent' ? 'Thiên Niên' : 'Duyên Khởi'}
                 </span>
               </div>
             )}
@@ -285,8 +313,8 @@ export function CheckoutContent() {
 
           <div className="space-y-5">
             <FormInput id="sender-name" label="Tên người gửi" icon={User} placeholder="Nhập họ và tên của bạn..." value={formData.senderName} onChange={updateField('senderName')} error={errors.senderName} />
-            <FormInput id="receiver-name" label="Tên người nhận" icon={Heart} placeholder="Nhập tên người bạn yêu thương..." value={formData.receiverName} onChange={updateField('receiverName')} error={errors.receiverName} />
             <FormInput id="phone" label="Số điện thoại" icon={Phone} type="tel" placeholder="0xxx xxx xxx" value={formData.phone} onChange={updateField('phone')} error={errors.phone} />
+            <FormInput id="receiver-name" label="Tên người nhận" icon={Heart} placeholder="Nhập tên người bạn yêu thương..." value={formData.receiverName} onChange={updateField('receiverName')} error={errors.receiverName} disabled={receiverLocked} hint={receiverLocked ? 'Tên người nhận được điền tự động từ đơn hàng trước đó' : undefined} />
 
             <div>
               <div className="flex items-center justify-between mb-2">

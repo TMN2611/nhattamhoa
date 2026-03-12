@@ -147,7 +147,7 @@ export default function OfferingPage() {
                     : 'border-[#D4AF37]/20 bg-[#0d0b09] text-[#8A7D65] hover:border-[#D4AF37]/40'
                 }`}
               >
-                <p className="text-sm font-medium mb-1">Tạm thời</p>
+                <p className="text-sm font-medium mb-1">Duyên Khởi</p>
                 <p className="text-[10px] text-[#8A7D65]">Có thể chỉnh sửa sau</p>
               </button>
               <button
@@ -161,7 +161,7 @@ export default function OfferingPage() {
                       : 'border-[#D4AF37]/20 bg-[#0d0b09] text-[#8A7D65] hover:border-[#D4AF37]/40'
                 }`}
               >
-                <p className="text-sm font-medium mb-1">Vĩnh viễn</p>
+                <p className="text-sm font-medium mb-1">Thiên Niên</p>
                 <p className="text-[10px] text-[#8A7D65]">
                   {canSelectPermanent ? 'Không thể thay đổi' : 'Không khả dụng'}
                 </p>

@@ -42,14 +42,14 @@ The Replit PostgreSQL database is provisioned automatically. Tables are created 
 ## Pages
 
 ### Public Pages
-- `/` - Home page with hero + product grid + live vow feed
+- `/` - Home page with hero + 2 sections: "Bộ sưu tập quà tặng" (product grid) + "Không gian nghi lễ cam kết" (vow feed + commitment)
 - `/product/[id]` - Product detail
 - `/ready` - Ritual readiness with reflective questions + dual buttons
 - `/moment` - Describe moment/intention
 - `/moments` - Vow wall (loads from `/api/vows`, fallback to static)
-- `/ritual` - Commitment checkboxes (3 promises before continuing)
+- `/nghi-thuc` - Commitment checkboxes (3 promises before continuing); supports `?product_id=` query param to set selected product
 - `/offering` - Choose offering
-- `/checkout` - Checkout form + AI message + certificate preview + public_vow toggle + permanence_type
+- `/checkout` - Checkout form + AI message + certificate preview + public_vow toggle + permanence_type; auto-fills receiver name for returning customers (phone lookup via `/api/orders/lookup`)
 - `/lookup` - Certificate code search
 - `/certificate/[code]` - Certificate display + PDF download
 - `/verify/[code]` - Public certificate verification page (QR target)

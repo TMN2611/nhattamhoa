@@ -345,9 +345,9 @@ export default function AdminDashboardPage() {
                       <td className="px-4 py-3 text-[#C5A55A] text-sm">{order.receiver_name}</td>
                       <td className="px-4 py-3 text-[#8A7D65] text-xs">
                         {order.permanence_type === 'permanent' ? (
-                          <span className="px-2 py-0.5 bg-[#D4AF37]/20 text-[#D4AF37]">Vĩnh viễn</span>
+                          <span className="px-2 py-0.5 bg-[#D4AF37]/20 text-[#D4AF37]">Thiên Niên</span>
                         ) : (
-                          <span className="px-2 py-0.5 bg-[#555040]/30 text-[#8A7D65]">Tạm thời</span>
+                          <span className="px-2 py-0.5 bg-[#555040]/30 text-[#8A7D65]">Duyên Khởi</span>
                         )}
                       </td>
                       <td className="px-4 py-3 text-sm">

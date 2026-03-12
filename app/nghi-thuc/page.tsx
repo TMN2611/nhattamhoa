@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Check, Shield } from "lucide-react";
 import { FadeInSection, GoldDivider, PageHero } from "@/components/shared-ui";
 
@@ -23,10 +23,18 @@ const commitments = [
   },
 ];
 
-export default function RitualPage() {
+function RitualPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [checked, setChecked] = useState<Record<string, boolean>>({});
   const allChecked = commitments.every((c) => checked[c.id]);
+
+  useEffect(() => {
+    const productIdFromUrl = searchParams.get('product_id');
+    if (productIdFromUrl) {
+      localStorage.setItem('ntt_selected_product', productIdFromUrl);
+    }
+  }, [searchParams]);
 
   function toggleCommitment(id: string) {
     setChecked((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -63,7 +71,6 @@ export default function RitualPage() {
         </FadeInSection>
       </section>
 
-      {/* Commitment checkboxes */}
       <section className="px-6 pb-20 md:pb-28">
         <div className="mx-auto max-w-xl flex flex-col gap-5">
           {commitments.map((item, i) => (
@@ -77,7 +84,6 @@ export default function RitualPage() {
                 }`}
               >
                 <div className="flex items-start gap-4">
-                  {/* Checkbox */}
                   <div
                     className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center border transition-all duration-300 ${
                       checked[item.id]
@@ -91,9 +97,7 @@ export default function RitualPage() {
                   </div>
                   <div>
                     <p
-                      className={`text-base md:text-lg font-display transition-colors duration-300 ${
-                        checked[item.id] ? "" : ""
-                      }`}
+                      className="text-base md:text-lg font-display transition-colors duration-300"
                       style={{
                         color: checked[item.id] ? "#F5E6C8" : "#C5A55A",
                       }}
@@ -113,7 +117,6 @@ export default function RitualPage() {
           ))}
         </div>
 
-        {/* Confirm button */}
         <FadeInSection delay={500}>
           <div className="mx-auto max-w-xl mt-10">
             <GoldDivider className="mb-10" />
@@ -143,5 +146,13 @@ export default function RitualPage() {
         </FadeInSection>
       </section>
     </>
+  );
+}
+
+export default function RitualPage() {
+  return (
+    <Suspense>
+      <RitualPageContent />
+    </Suspense>
   );
 }

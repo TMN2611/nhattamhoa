@@ -40,30 +40,18 @@ export function ProductGrid() {
 
   if (loading) {
     return (
-      <section id="collection" className="mx-auto max-w-7xl px-6 py-24 md:py-32">
-        <div className="mb-16 text-center">
-          <p className="text-sm tracking-[0.4em] uppercase text-gold-dim mb-4">The Collection</p>
-          <h2 className="text-3xl md:text-5xl font-light text-foreground">Bộ sưu tập hoa hồng bất tử</h2>
-        </div>
+      <div className="mx-auto max-w-7xl px-6 pb-24 md:pb-32">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[1, 2, 3].map((i) => (
             <div key={i} className="aspect-[4/5] bg-[#1a1814] animate-pulse" />
           ))}
         </div>
-      </section>
+      </div>
     )
   }
 
   return (
-    <section id="collection" className="mx-auto max-w-7xl px-6 py-24 md:py-32">
-      <div className="mb-16 text-center">
-        <p className="text-sm tracking-[0.4em] uppercase text-gold-dim mb-4">The Collection</p>
-        <h2 className="text-3xl md:text-5xl font-light text-foreground text-balance">Bộ sưu tập hoa hồng bất tử</h2>
-        <p className="mx-auto mt-4 max-w-md text-muted-foreground leading-relaxed">
-          Mỗi bông hoa được tuyển chọn và bảo tồn bằng quy trình đặc biệt, giữ nguyên vẻ đẹp qua năm tháng.
-        </p>
-      </div>
-
+    <div className="mx-auto max-w-7xl px-6 pb-24 md:pb-32">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {products.map((product) => (
           <Link
@@ -91,6 +79,6 @@ export function ProductGrid() {
           </Link>
         ))}
       </div>
-    </section>
+    </div>
   )
 }
