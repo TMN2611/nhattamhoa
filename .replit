@@ -38,7 +38,6 @@ externalPort = 80
 deploymentTarget = "autoscale"
 run = ["pnpm", "run", "start"]
 build = ["pnpm", "run", "build"]
-publicDir = "public"
 
 [userenv]
 
