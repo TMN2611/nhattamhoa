@@ -1,8 +1,3 @@
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || ''
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || ''
-
-export function getSupabaseAdmin() {
-  return createClient(supabaseUrl, supabaseAnonKey)
-}
+// Supabase admin has been replaced with Replit's built-in PostgreSQL database.
+// Use lib/db.ts (pg Pool) for all database access.
+export {}

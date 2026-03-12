@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import pool from '@/lib/db'
 
 export async function POST(req: Request) {
   try {
@@ -22,33 +22,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing required fields: sender_name, receiver_name, message' }, { status: 400 })
     }
 
-    const orderData: Record<string, unknown> = {
-      sender_name,
-      receiver_name,
-      message,
-      phone,
-      ritual_type,
-      offering,
-      public_vow,
-      permanence_type,
-      status: 'pending',
-    }
-    if (product_id) orderData.product_id = product_id
+    const { rows } = await pool.query(
+      `INSERT INTO orders (sender_name, receiver_name, message, phone, ritual_type, offering, public_vow, permanence_type, status, product_id)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9)
+       RETURNING *`,
+      [sender_name, receiver_name, message, phone, ritual_type, offering, public_vow, permanence_type, product_id || null]
+    )
 
-    const { data, error } = await supabase
-      .from('orders')
-      .insert(orderData)
-      .select()
-      .single()
-
-    if (error) {
-      console.error("Order insert failed:", JSON.stringify(error))
-      return NextResponse.json({
-        error: error.message || 'Failed to create order',
-        details: error,
-      }, { status: 500 })
-    }
-
+    const data = rows[0]
     console.log("Order created successfully:", JSON.stringify(data))
 
     return NextResponse.json({

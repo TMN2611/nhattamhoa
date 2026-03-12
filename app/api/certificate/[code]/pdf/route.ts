@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import pool from '@/lib/db'
 import path from 'path'
 import fs from 'fs'
 
@@ -11,32 +11,31 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   try {
     let orderData: any = null
 
-    const { data: certData } = await supabase
-      .from('certificates')
-      .select('*')
-      .eq('certificate_code', code)
-      .single()
+    const { rows: certRows } = await pool.query(
+      'SELECT * FROM certificates WHERE certificate_code = $1',
+      [code]
+    )
 
-    if (certData) {
-      const { data: order } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', certData.order_id)
-        .single()
+    if (certRows.length > 0) {
+      const certData = certRows[0]
+      const { rows: orderRows } = await pool.query(
+        'SELECT * FROM orders WHERE id = $1',
+        [certData.order_id]
+      )
 
-      if (order) {
+      if (orderRows.length > 0) {
+        const order = orderRows[0]
         orderData = { ...order, blockchain_hash: certData.hash || certData.blockchain_hash || order.blockchain_hash }
       }
     }
 
     if (!orderData) {
-      const { data: order } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('certificate_id', code)
-        .single()
+      const { rows: orderRows } = await pool.query(
+        'SELECT * FROM orders WHERE certificate_id = $1',
+        [code]
+      )
 
-      if (order) orderData = order
+      if (orderRows.length > 0) orderData = orderRows[0]
     }
 
     if (!orderData) {

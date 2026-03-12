@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import pool from '@/lib/db'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,17 +12,11 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
 
   try {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (error) {
+    const { rows } = await pool.query('SELECT * FROM orders WHERE id = $1', [id])
+    if (rows.length === 0) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
-
-    return NextResponse.json({ success: true, order: data })
+    return NextResponse.json({ success: true, order: rows[0] })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -38,16 +32,12 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const body = await req.json()
 
-    const { data: order, error: fetchError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (fetchError || !order) {
+    const { rows: existing } = await pool.query('SELECT * FROM orders WHERE id = $1', [id])
+    if (existing.length === 0) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
+    const order = existing[0]
     const status = order.status
     const isPermanent = order.permanence_type === 'permanent'
 
@@ -87,18 +77,22 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
       }
     }
 
-    const { data, error } = await supabase
-      .from('orders')
-      .update(body)
-      .eq('id', id)
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    const allowedFields = ['sender_name', 'receiver_name', 'message', 'phone', 'ritual_type', 'offering', 'public_vow', 'permanence_type', 'status', 'certificate_id', 'blockchain_hash', 'product_id']
+    const updates = Object.keys(body).filter(k => allowedFields.includes(k))
+    if (updates.length === 0) {
+      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
     }
 
-    return NextResponse.json({ success: true, order: data })
+    const setClauses = updates.map((k, i) => `${k} = $${i + 1}`).join(', ')
+    const values = updates.map(k => body[k])
+    values.push(id)
+
+    const { rows } = await pool.query(
+      `UPDATE orders SET ${setClauses} WHERE id = $${values.length} RETURNING *`,
+      values
+    )
+
+    return NextResponse.json({ success: true, order: rows[0] })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -112,32 +106,19 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const { id } = await params
 
   try {
-    const { data: certs, error: certError } = await supabase
-      .from('certificates')
-      .select('id')
-      .eq('order_id', id)
-      .limit(1)
+    const { rows: certs } = await pool.query(
+      'SELECT id FROM certificates WHERE order_id = $1 LIMIT 1',
+      [id]
+    )
 
-    if (certError) {
-      return NextResponse.json({ error: certError.message }, { status: 500 })
-    }
-
-    if (certs && certs.length > 0) {
+    if (certs.length > 0) {
       return NextResponse.json(
         { error: 'Cannot delete order: a certificate exists for this order' },
         { status: 403 }
       )
     }
 
-    const { error } = await supabase
-      .from('orders')
-      .delete()
-      .eq('id', id)
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
+    await pool.query('DELETE FROM orders WHERE id = $1', [id])
     return NextResponse.json({ success: true })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })

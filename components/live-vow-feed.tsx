@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { liveFeedText } from '@/content/momentsText'
 
 interface Vow {
@@ -70,16 +69,12 @@ export function LiveVowFeed() {
 
   async function loadVows() {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('sender_name,receiver_name,message,public_vow,created_at')
-        .eq('public_vow', true)
-        .order('created_at', { ascending: false })
-        .limit(3)
+      const res = await fetch('/api/vows')
+      const json = await res.json()
 
-      if (!error && data && data.length > 0) {
-        setVows(data)
-        setCardsVisible(new Array(data.length).fill(false))
+      if (json.success && json.vows && json.vows.length > 0) {
+        setVows(json.vows)
+        setCardsVisible(new Array(json.vows.length).fill(false))
       } else {
         setVows(fallbackVows)
         setCardsVisible(new Array(fallbackVows.length).fill(false))

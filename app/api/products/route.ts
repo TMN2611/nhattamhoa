@@ -1,20 +1,15 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import pool from '@/lib/db'
+import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function GET() {
   try {
-    const { data, error } = await supabase
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: true })
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, products: data })
+    const { rows } = await pool.query(
+      'SELECT * FROM products ORDER BY created_at ASC'
+    )
+    return NextResponse.json({ success: true, products: rows })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -22,7 +17,6 @@ export async function GET() {
 
 export async function POST(req: Request) {
   try {
-    const { validateAdminRequest } = await import('@/lib/admin-utils')
     if (!validateAdminRequest(req)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -34,22 +28,15 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Name and price are required' }, { status: 400 })
     }
 
-    const insertData: Record<string, unknown> = { name, description, price, image_url, category }
-    if (typeof is_permanent_available === 'boolean') {
-      insertData.is_permanent_available = is_permanent_available
-    }
+    const { rows } = await pool.query(
+      `INSERT INTO products (name, description, price, image_url, category, is_permanent_available)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [name, description ?? null, price, image_url ?? null, category ?? null,
+        typeof is_permanent_available === 'boolean' ? is_permanent_available : true]
+    )
 
-    const { data, error } = await supabase
-      .from('products')
-      .insert(insertData)
-      .select()
-      .single()
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    return NextResponse.json({ success: true, product: data })
+    return NextResponse.json({ success: true, product: rows[0] })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

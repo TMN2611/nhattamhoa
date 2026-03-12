@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import pool from '@/lib/db'
 
 export async function GET(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
@@ -9,22 +9,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   console.log("Certificate lookup for code:", code)
 
   try {
-    const { data: certData, error: certError } = await supabase
-      .from('certificates')
-      .select('*')
-      .eq('certificate_code', code)
-      .single()
+    const { rows: certRows } = await pool.query(
+      'SELECT * FROM certificates WHERE certificate_code = $1',
+      [code]
+    )
 
-    if (certData && !certError) {
+    if (certRows.length > 0) {
+      const certData = certRows[0]
       console.log("Found certificate record:", JSON.stringify(certData))
 
-      const { data: order, error: orderError } = await supabase
-        .from('orders')
-        .select('*')
-        .eq('id', certData.order_id)
-        .single()
+      const { rows: orderRows } = await pool.query(
+        'SELECT * FROM orders WHERE id = $1',
+        [certData.order_id]
+      )
 
-      if (order && !orderError) {
+      if (orderRows.length > 0) {
+        const order = orderRows[0]
         console.log("Found order:", JSON.stringify(order))
         return NextResponse.json({
           success: true,
@@ -48,13 +48,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
 
     console.log("Certificate not found in certificates table, trying orders table directly")
 
-    const { data: orderDirect, error: orderDirectError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('certificate_id', code)
-      .single()
+    const { rows: orderDirectRows } = await pool.query(
+      'SELECT * FROM orders WHERE certificate_id = $1',
+      [code]
+    )
 
-    if (orderDirect && !orderDirectError) {
+    if (orderDirectRows.length > 0) {
+      const orderDirect = orderDirectRows[0]
       console.log("Found order directly:", JSON.stringify(orderDirect))
       return NextResponse.json({
         success: true,
@@ -75,7 +75,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
       })
     }
 
-    console.log("Certificate not found anywhere. Cert error:", certError, "Order error:", orderDirectError)
+    console.log("Certificate not found anywhere.")
     return NextResponse.json({ error: 'Certificate not found' }, { status: 404 })
   } catch (error: any) {
     console.error("Certificate lookup error:", error)

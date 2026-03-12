@@ -1,21 +1,5 @@
-import { supabase } from './supabase'
-
+// init-db.ts: Tables are now managed via the Replit PostgreSQL database.
+// Schema was created directly via SQL. This file is no longer needed.
 export async function ensureTablesExist() {
-  const { error: productsError } = await supabase
-    .from('products')
-    .select('id')
-    .limit(1)
-
-  if (productsError) {
-    console.warn('Products table may not exist:', productsError.message)
-  }
-
-  const { error: ordersError } = await supabase
-    .from('orders')
-    .select('id')
-    .limit(1)
-
-  if (ordersError) {
-    console.warn('Orders table may not exist:', ordersError.message)
-  }
+  // No-op: tables are provisioned at startup via the Replit database.
 }

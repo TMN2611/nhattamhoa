@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { momentsPageText } from '@/content/momentsText'
-import { supabase } from '@/lib/supabase'
 
 interface VowCard {
   sender_name: string
@@ -26,16 +25,12 @@ export default function MomentsPage() {
 
   async function loadVows() {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select('sender_name,receiver_name,message,public_vow')
-        .eq('public_vow', true)
-        .order('created_at', { ascending: false })
-        .limit(6)
+      const res = await fetch('/api/vows?limit=6')
+      const json = await res.json()
 
-      if (!error && data && data.length > 0) {
-        setVows(data)
-        setCardsVisible(new Array(data.length).fill(false))
+      if (json.success && json.vows && json.vows.length > 0) {
+        setVows(json.vows)
+        setCardsVisible(new Array(json.vows.length).fill(false))
       } else {
         const fallback = momentsPageText.fallbackCards.map(c => ({
           sender_name: c.sender,

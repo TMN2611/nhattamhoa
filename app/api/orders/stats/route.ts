@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import pool from '@/lib/db'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function GET(req: Request) {
@@ -10,21 +10,14 @@ export async function GET(req: Request) {
   }
 
   try {
-    const { data, error } = await supabase
-      .from('orders')
-      .select('status')
-
-    if (error) {
-      return NextResponse.json({ error: error.message }, { status: 500 })
-    }
-
-    const orders = data || []
+    const { rows } = await pool.query('SELECT status FROM orders')
+    const orders = rows
     const total = orders.length
-    const pending = orders.filter(o => o.status === 'pending').length
-    const paid = orders.filter(o => o.status === 'paid').length
-    const minting = orders.filter(o => o.status === 'minting').length
-    const minted = orders.filter(o => o.status === 'minted' || o.status === 'completed').length
-    const revoked = orders.filter(o => o.status === 'revoked').length
+    const pending = orders.filter((o: any) => o.status === 'pending').length
+    const paid = orders.filter((o: any) => o.status === 'paid').length
+    const minting = orders.filter((o: any) => o.status === 'minting').length
+    const minted = orders.filter((o: any) => o.status === 'minted' || o.status === 'completed').length
+    const revoked = orders.filter((o: any) => o.status === 'revoked').length
     const completed = minted
 
     return NextResponse.json({
