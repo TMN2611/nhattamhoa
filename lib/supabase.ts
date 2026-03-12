@@ -1,3 +1,12 @@
-// Supabase has been replaced with Replit's built-in PostgreSQL database.
-// All database calls now go through lib/db.ts using the pg Pool.
-export {}
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.warn('Supabase credentials not configured. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY.')
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+
+export default supabase
