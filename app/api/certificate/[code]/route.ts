@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
@@ -9,22 +9,26 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   console.log("Certificate lookup for code:", code)
 
   try {
-    const { rows: certRows } = await pool.query(
-      'SELECT * FROM certificates WHERE certificate_code = $1',
-      [code]
-    )
+    const { data: certData, error: certErr } = await supabaseAdmin
+      .from('certificates')
+      .select('*')
+      .eq('certificate_code', code)
+      .single()
 
-    if (certRows.length > 0) {
-      const certData = certRows[0]
+    if (certErr && certErr.code !== 'PGRST116') throw certErr
+
+    if (certData) {
       console.log("Found certificate record:", JSON.stringify(certData))
 
-      const { rows: orderRows } = await pool.query(
-        'SELECT * FROM orders WHERE id = $1',
-        [certData.order_id]
-      )
+      const { data: order, error: orderErr } = await supabaseAdmin
+        .from('orders')
+        .select('*')
+        .eq('id', certData.order_id)
+        .single()
 
-      if (orderRows.length > 0) {
-        const order = orderRows[0]
+      if (orderErr && orderErr.code !== 'PGRST116') throw orderErr
+
+      if (order) {
         console.log("Found order:", JSON.stringify(order))
         return NextResponse.json({
           success: true,
@@ -48,13 +52,15 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
 
     console.log("Certificate not found in certificates table, trying orders table directly")
 
-    const { rows: orderDirectRows } = await pool.query(
-      'SELECT * FROM orders WHERE certificate_id = $1',
-      [code]
-    )
+    const { data: orderDirect, error: directErr } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('certificate_id', code)
+      .single()
 
-    if (orderDirectRows.length > 0) {
-      const orderDirect = orderDirectRows[0]
+    if (directErr && directErr.code !== 'PGRST116') throw directErr
+
+    if (orderDirect) {
       console.log("Found order directly:", JSON.stringify(orderDirect))
       return NextResponse.json({
         success: true,

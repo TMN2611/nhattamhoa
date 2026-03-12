@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase'
 
 function normalizePhone(phone: string): string {
   return phone.replace(/[^0-9]/g, '')
@@ -22,16 +22,23 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
     }
 
-    const { rows } = await pool.query(
-      `SELECT receiver_name FROM orders WHERE REGEXP_REPLACE(phone, '[^0-9]', '', 'g') = $1 ORDER BY created_at DESC LIMIT 1`,
-      [phone]
-    )
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select('receiver_name, phone')
+      .order('created_at', { ascending: false })
 
-    if (rows.length > 0) {
+    if (error) throw error
+
+    const match = (data || []).find(row => {
+      const normalized = (row.phone || '').replace(/[^0-9]/g, '')
+      return normalized === phone
+    })
+
+    if (match) {
       return NextResponse.json({
         success: true,
         found: true,
-        receiver_name: rows[0].receiver_name
+        receiver_name: match.receiver_name
       })
     }
 

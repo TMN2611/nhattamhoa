@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,11 +12,21 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params
 
   try {
-    const { rows: orderRows } = await pool.query('SELECT * FROM orders WHERE id = $1', [id])
-    if (orderRows.length === 0) {
+    const { data: order, error: fetchErr } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchErr) {
+      if (fetchErr.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      }
+      throw fetchErr
+    }
+    if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
-    const order = orderRows[0]
 
     if (order.status === 'revoked') {
       return NextResponse.json({ error: 'Order is already revoked' }, { status: 400 })
@@ -26,12 +36,15 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       return NextResponse.json({ error: `Can only revoke minted orders. Current status: ${order.status}` }, { status: 400 })
     }
 
-    const { rows } = await pool.query(
-      "UPDATE orders SET status = 'revoked' WHERE id = $1 RETURNING *",
-      [id]
-    )
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .update({ status: 'revoked' })
+      .eq('id', id)
+      .select()
+      .single()
 
-    return NextResponse.json({ success: true, order: rows[0] })
+    if (error) throw error
+    return NextResponse.json({ success: true, order: data })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }

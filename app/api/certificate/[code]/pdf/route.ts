@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase'
 import path from 'path'
 import fs from 'fs'
 
@@ -11,31 +11,38 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   try {
     let orderData: any = null
 
-    const { rows: certRows } = await pool.query(
-      'SELECT * FROM certificates WHERE certificate_code = $1',
-      [code]
-    )
+    const { data: certData, error: certErr } = await supabaseAdmin
+      .from('certificates')
+      .select('*')
+      .eq('certificate_code', code)
+      .single()
 
-    if (certRows.length > 0) {
-      const certData = certRows[0]
-      const { rows: orderRows } = await pool.query(
-        'SELECT * FROM orders WHERE id = $1',
-        [certData.order_id]
-      )
+    if (certErr && certErr.code !== 'PGRST116') throw certErr
 
-      if (orderRows.length > 0) {
-        const order = orderRows[0]
+    if (certData) {
+      const { data: order, error: orderErr } = await supabaseAdmin
+        .from('orders')
+        .select('*')
+        .eq('id', certData.order_id)
+        .single()
+
+      if (orderErr && orderErr.code !== 'PGRST116') throw orderErr
+
+      if (order) {
         orderData = { ...order, blockchain_hash: certData.hash || certData.blockchain_hash || order.blockchain_hash }
       }
     }
 
     if (!orderData) {
-      const { rows: orderRows } = await pool.query(
-        'SELECT * FROM orders WHERE certificate_id = $1',
-        [code]
-      )
+      const { data: orderDirect, error: directErr } = await supabaseAdmin
+        .from('orders')
+        .select('*')
+        .eq('certificate_id', code)
+        .single()
 
-      if (orderRows.length > 0) orderData = orderRows[0]
+      if (directErr && directErr.code !== 'PGRST116') throw directErr
+
+      if (orderDirect) orderData = orderDirect
     }
 
     if (!orderData) {

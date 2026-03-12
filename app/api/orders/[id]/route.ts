@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -12,11 +12,22 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
   const { id } = await params
 
   try {
-    const { rows } = await pool.query('SELECT * FROM orders WHERE id = $1', [id])
-    if (rows.length === 0) {
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      }
+      throw error
+    }
+    if (!data) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
-    return NextResponse.json({ success: true, order: rows[0] })
+    return NextResponse.json({ success: true, order: data })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -32,12 +43,22 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
   try {
     const body = await req.json()
 
-    const { rows: existing } = await pool.query('SELECT * FROM orders WHERE id = $1', [id])
-    if (existing.length === 0) {
+    const { data: order, error: fetchErr } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (fetchErr) {
+      if (fetchErr.code === 'PGRST116') {
+        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
+      }
+      throw fetchErr
+    }
+    if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
 
-    const order = existing[0]
     const status = order.status
     const isPermanent = order.permanence_type === 'permanent'
 
@@ -78,21 +99,24 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
     }
 
     const allowedFields = ['sender_name', 'receiver_name', 'message', 'phone', 'ritual_type', 'offering', 'public_vow', 'permanence_type', 'status', 'certificate_id', 'blockchain_hash', 'product_id']
-    const updates = Object.keys(body).filter(k => allowedFields.includes(k))
-    if (updates.length === 0) {
+    const updates: Record<string, any> = {}
+    for (const k of allowedFields) {
+      if (k in body) updates[k] = body[k]
+    }
+
+    if (Object.keys(updates).length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
     }
 
-    const setClauses = updates.map((k, i) => `${k} = $${i + 1}`).join(', ')
-    const values = updates.map(k => body[k])
-    values.push(id)
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single()
 
-    const { rows } = await pool.query(
-      `UPDATE orders SET ${setClauses} WHERE id = $${values.length} RETURNING *`,
-      values
-    )
-
-    return NextResponse.json({ success: true, order: rows[0] })
+    if (error) throw error
+    return NextResponse.json({ success: true, order: data })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
@@ -106,19 +130,27 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
   const { id } = await params
 
   try {
-    const { rows: certs } = await pool.query(
-      'SELECT id FROM certificates WHERE order_id = $1 LIMIT 1',
-      [id]
-    )
+    const { data: certs, error: certCheckErr } = await supabaseAdmin
+      .from('certificates')
+      .select('id')
+      .eq('order_id', id)
+      .limit(1)
 
-    if (certs.length > 0) {
+    if (certCheckErr) throw certCheckErr
+
+    if (certs && certs.length > 0) {
       return NextResponse.json(
         { error: 'Cannot delete order: a certificate exists for this order' },
         { status: 403 }
       )
     }
 
-    await pool.query('DELETE FROM orders WHERE id = $1', [id])
+    const { error } = await supabaseAdmin
+      .from('orders')
+      .delete()
+      .eq('id', id)
+
+    if (error) throw error
     return NextResponse.json({ success: true })
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 })

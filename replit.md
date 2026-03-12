@@ -1,6 +1,6 @@
 # Project Overview
 
-A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa" (Eternal Roses). Built with TypeScript, Tailwind CSS v4, shadcn/ui components, Replit PostgreSQL database, and blockchain-style certificate hashing.
+A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa" (Eternal Roses). Built with TypeScript, Tailwind CSS v4, shadcn/ui components, Supabase PostgreSQL database, and blockchain-style certificate hashing.
 
 ## Architecture
 
@@ -8,8 +8,8 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Package Manager**: npm
-- **Database (dev)**: Replit built-in PostgreSQL (accessed via `pg` Pool in `lib/db.ts`)
-- **Database (Supabase)**: Supabase PostgreSQL (`lib/supabase.ts` — exports `supabase` for public client, `supabaseAdmin` for service-role operations)
+- **Database**: Supabase PostgreSQL (`lib/supabase.ts` — exports `supabase` for public client, `supabaseAdmin` for service-role operations). All API routes use Supabase as primary database.
+- **Database (legacy)**: Replit built-in PostgreSQL (`lib/db.ts`) — no longer used by any API routes
 - **Certificate**: SHA256 hash + server-side PDF generation (pdfkit + qrcode)
 - **AI**: OpenAI API (with fallback templates)
 - **Email**: nodemailer (optional, requires SMTP config)
@@ -17,14 +17,14 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 
 ## Database Setup
 
-The Replit PostgreSQL database is provisioned automatically. Tables are created by running the SQL in `supabase/migrations/001_create_tables.sql` (for reference). The schema was applied directly to the Replit database at migration time.
+The primary database is Supabase PostgreSQL. All API routes use `supabaseAdmin` from `lib/supabase.ts`. The Replit PostgreSQL is still provisioned but no longer used by any API routes.
 
-### Database Connections
-- **Replit PostgreSQL**: `lib/db.ts` exports a `pg.Pool` using `DATABASE_URL` (set automatically by Replit)
-- **Supabase**: `lib/supabase.ts` exports `supabase` (anon key, for public reads) and `supabaseAdmin` (service role key, for admin writes)
+### Database Connection
+- **Supabase (primary)**: `lib/supabase.ts` exports `supabase` (anon key, for public reads) and `supabaseAdmin` (service role key, for admin writes)
   - `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
   - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon/publishable key
   - `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role key (secret)
+- **Replit PostgreSQL (legacy)**: `lib/db.ts` exports a `pg.Pool` using `DATABASE_URL` — no longer used
 
 ### Tables
 

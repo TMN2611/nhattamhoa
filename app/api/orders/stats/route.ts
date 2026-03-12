@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabaseAdmin } from '@/lib/supabase'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function GET(req: Request) {
@@ -10,8 +10,13 @@ export async function GET(req: Request) {
   }
 
   try {
-    const { rows } = await pool.query('SELECT status FROM orders')
-    const orders = rows
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select('status')
+
+    if (error) throw error
+
+    const orders = data || []
     const total = orders.length
     const pending = orders.filter((o: any) => o.status === 'pending').length
     const paid = orders.filter((o: any) => o.status === 'paid').length
