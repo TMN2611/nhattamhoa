@@ -48,7 +48,7 @@ export async function GET(req: Request) {
 
     const { data: orders, error: orderError } = await supabaseAdmin
       .from('orders')
-      .select('receiver_name, sender_name, phone')
+      .select('receiver_name, sender_name, phone, receiver_phone, receiver_address')
       .eq('phone', phone)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -61,6 +61,8 @@ export async function GET(req: Request) {
         found: true,
         receiver_name: orders[0].receiver_name,
         sender_name: orders[0].sender_name,
+        receiver_phone: orders[0].receiver_phone || null,
+        receiver_address: orders[0].receiver_address || null,
         total_orders: 0,
       })
     }
