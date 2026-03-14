@@ -1,97 +1,121 @@
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
-import { validateAdminRequest } from '@/lib/admin-utils'
+import { NextResponse } from "next/server";
+import { supabaseAdmin } from "@/lib/supabase";
+import { validateAdminRequest } from "@/lib/admin-utils";
 
-export async function GET(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params
+export async function GET(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
 
   try {
-    const isUUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+    const isUUID =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+        id,
+      );
 
     if (!isUUID) {
-      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
+      return NextResponse.json(
+        { success: false, error: "Product not found" },
+        { status: 404 },
+      );
     }
 
     const { data, error } = await supabaseAdmin
-      .from('products')
-      .select('*')
-      .eq('id', id)
-      .single()
+      .from("products")
+      .select("*")
+      .eq("id", id)
+      .single();
 
     if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
+      if (error.code === "PGRST116") {
+        return NextResponse.json(
+          { success: false, error: "Product not found" },
+          { status: 404 },
+        );
       }
-      throw error
+      throw error;
     }
-    if (!data) {
-      return NextResponse.json({ success: false, error: 'Product not found' }, { status: 404 })
-    }
-    return NextResponse.json({ success: true, product: data })
+    return NextResponse.json({ success: true, product: data });
   } catch (error: any) {
-    return NextResponse.json({ success: false, error: error.message }, { status: 500 })
+    return NextResponse.json(
+      { success: false, error: error.message },
+      { status: 500 },
+    );
   }
 }
 
-export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function PUT(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   if (!validateAdminRequest(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params
+  const { id } = await params;
 
   try {
-    const body = await req.json()
-    const allowedFields = ['name', 'description', 'price', 'image_url', 'category', 'is_permanent_available']
-    const updates: Record<string, any> = {}
+    const body = await req.json();
+    // THÊM 'product_type' VÀO DANH SÁCH CHO PHÉP CẬP NHẬT
+    const allowedFields = [
+      "name",
+      "description",
+      "price",
+      "image_url",
+      "category",
+      "is_permanent_available",
+      "product_type",
+    ];
+    const updates: Record<string, any> = {};
+
     for (const k of allowedFields) {
-      if (k in body) updates[k] = body[k]
+      if (k in body) updates[k] = body[k];
     }
 
     if (Object.keys(updates).length === 0) {
-      return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 })
+      return NextResponse.json(
+        { error: "No valid fields to update" },
+        { status: 400 },
+      );
     }
 
     const { data, error } = await supabaseAdmin
-      .from('products')
+      .from("products")
       .update(updates)
-      .eq('id', id)
+      .eq("id", id)
       .select()
-      .single()
+      .single();
 
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-      }
-      throw error
-    }
-    if (!data) {
-      return NextResponse.json({ error: 'Product not found' }, { status: 404 })
-    }
-    return NextResponse.json({ success: true, product: data })
+    if (error) throw error;
+
+    return NextResponse.json({ success: true, product: data });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
-export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(
+  req: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
   if (!validateAdminRequest(req)) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await params
+  const { id } = await params;
 
   try {
     const { error } = await supabaseAdmin
-      .from('products')
+      .from("products")
       .delete()
-      .eq('id', id)
+      .eq("id", id);
 
-    if (error) throw error
-    return NextResponse.json({ success: true })
+    if (error) throw error;
+    return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

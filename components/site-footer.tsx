@@ -1,20 +1,21 @@
-import Link from 'next/link'
+import Link from "next/link";
 
 const footerLinks = {
-  'Nghi thức': [
-    { href: '/san-sang', label: 'Bạn Đã Sẵn Sàng?' },
-    { href: '/chon-vat-chung', label: 'Chọn Vật Chứng' },
-    { href: '/nghi-thuc', label: 'Nghi Thức Lựa Chọn' },
-    { href: '/loi-the', label: 'Lời Thề Đã Trao' },
-    { href: '/kich-hoat', label: 'Kích Hoạt Lời Thề' },
+  "Nghi thức": [
+    //{ href: "/san-sang", label: "Bạn Đã Sẵn Sàng?" },
+    //{ href: "/chon-vat-chung", label: "Chọn Vật Chứng" },
+    //{ href: '/nghi-thuc', label: 'Nghi Thức Lựa Chọn' },
+    //{ href: "/loi-the", label: "Lời Thề Đã Trao" },
+    //{ href: "/kich-hoat", label: "Kích Hoạt Lời Thề" },
+    { href: "/khoanh-khac", label: "Khoảnh Khắc Đã Chọn" },
   ],
-  'Khám phá': [
-    { href: '/ve-chung-toi', label: 'Về Nhất Tâm Hoa' },
-    { href: '/nghe-thuat-bao-ton', label: 'Nghệ Thuật Bảo Tồn' },
-    { href: '/khoanh-khac', label: 'Khoảnh Khắc Đã Chọn' },
-    { href: '/hoi-dap', label: 'Câu Hỏi Thường Gặp' },
+  "Khám phá": [
+    { href: "/ve-chung-toi", label: "Về Nhất Tâm Hoa" },
+    { href: "/nghe-thuat-bao-ton", label: "Nghệ Thuật Bảo Tồn" },
+
+    { href: "/hoi-dap", label: "Câu Hỏi Thường Gặp" },
   ],
-}
+};
 
 export function SiteFooter() {
   return (
@@ -32,17 +33,20 @@ export function SiteFooter() {
               </p>
             </Link>
             <p className="mt-6 max-w-xs text-sm leading-relaxed text-muted-foreground text-center md:text-left">
-              Mỗi bông hồng là một lời hứa. Mỗi lời hứa là một đời.
-              Nhất Tâm Hoa - dành cho những tình yêu vĩnh cửu.
+              Mỗi bông hồng là một lời hứa. Mỗi lời hứa là một đời. Nhất Tâm Hoa
+              - dành cho những tình yêu vĩnh cửu.
             </p>
           </div>
 
           {/* Link columns */}
           {Object.entries(footerLinks).map(([category, links]) => (
-            <div key={category} className="flex flex-col items-center md:items-start">
+            <div
+              key={category}
+              className="flex flex-col items-center md:items-start"
+            >
               <p
                 className="text-xs tracking-[0.3em] uppercase mb-5"
-                style={{ color: '#C5A55A' }}
+                style={{ color: "#C5A55A" }}
               >
                 {category}
               </p>
@@ -65,13 +69,16 @@ export function SiteFooter() {
         <div className="mt-14 pt-8 border-t border-border/20 flex flex-col items-center gap-6">
           <div
             className="h-px w-16"
-            style={{ background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)' }}
+            style={{
+              background:
+                "linear-gradient(90deg, transparent, #D4AF37, transparent)",
+            }}
           />
           <p className="text-xs text-muted-foreground">
-            {'2026 Nhất Tâm Hoa. Tất cả quyền được bảo lưu.'}
+            {"2026 Nhất Tâm Hoa. Tất cả quyền được bảo lưu."}
           </p>
         </div>
       </div>
     </footer>
-  )
+  );
 }
