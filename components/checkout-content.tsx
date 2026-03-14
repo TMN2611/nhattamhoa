@@ -57,7 +57,7 @@ interface CustomerData {
   customer_id?: string;
 }
 
-function validateForm(data: FormData, flow: string): FormErrors {
+function validateForm(data: FormData): FormErrors {
   const errors: FormErrors = {};
   if (!data.senderName.trim()) errors.senderName = "Vui lòng nhập tên của bạn";
   if (!data.receiverName.trim())
@@ -67,32 +67,25 @@ function validateForm(data: FormData, flow: string): FormErrors {
   } else if (!/^[0-9]{9,11}$/.test(data.phone.replace(/\s/g, ""))) {
     errors.phone = "Số điện thoại không hợp lệ";
   }
-  if (flow === "gift") {
-    if (!data.receiverPhone.trim()) {
-      errors.receiverPhone = "Vui lòng nhập SĐT người nhận";
-    } else if (!/^[0-9]{9,11}$/.test(data.receiverPhone.replace(/\s/g, ""))) {
-      errors.receiverPhone = "Số điện thoại không hợp lệ";
-    }
-    if (!data.receiverAddress.trim())
-      errors.receiverAddress = "Vui lòng nhập địa chỉ giao hàng";
+  if (!data.receiverPhone.trim()) {
+    errors.receiverPhone = "Vui lòng nhập SĐT người nhận";
+  } else if (!/^[0-9]{9,11}$/.test(data.receiverPhone.replace(/\s/g, ""))) {
+    errors.receiverPhone = "Số điện thoại không hợp lệ";
   }
+  if (!data.receiverAddress.trim())
+    errors.receiverAddress = "Vui lòng nhập địa chỉ giao hàng";
   return errors;
 }
 
-function isFormComplete(data: FormData, flow: string): boolean {
-  const base =
+function isFormComplete(data: FormData): boolean {
+  return (
     data.senderName.trim().length > 0 &&
     data.receiverName.trim().length > 0 &&
     data.phone.trim().length > 0 &&
-    data.message.trim().length > 0;
-  if (flow === "gift") {
-    return (
-      base &&
-      data.receiverPhone.trim().length > 0 &&
-      data.receiverAddress.trim().length > 0
-    );
-  }
-  return base;
+    data.message.trim().length > 0 &&
+    data.receiverPhone.trim().length > 0 &&
+    data.receiverAddress.trim().length > 0
+  );
 }
 
 function FormInput({
@@ -425,7 +418,7 @@ export function CheckoutContent() {
   }
 
   async function handleSubmit() {
-    const validationErrors = validateForm(formData, flow);
+    const validationErrors = validateForm(formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       return;
@@ -567,7 +560,7 @@ export function CheckoutContent() {
     );
   }
 
-  const canSubmit = isFormComplete(formData, flow);
+  const canSubmit = isFormComplete(formData);
 
   return (
     <div
@@ -694,53 +687,25 @@ export function CheckoutContent() {
               }
             />
 
-            {flow === "gift" && (
-              <>
-                <FormInput
-                  id="receiver-phone"
-                  label="SĐT người nhận"
-                  icon={Phone}
-                  type="tel"
-                  placeholder="Số điện thoại người nhận hàng..."
-                  value={formData.receiverPhone}
-                  onChange={updateField("receiverPhone")}
-                  error={errors.receiverPhone}
-                />
-                <FormInput
-                  id="receiver-address"
-                  label="Địa chỉ giao hàng"
-                  icon={MapPin}
-                  placeholder="Nhập địa chỉ giao hàng đầy đủ..."
-                  value={formData.receiverAddress}
-                  onChange={updateField("receiverAddress")}
-                  error={errors.receiverAddress}
-                />
-              </>
-            )}
-
-            {flow === "ritual" && (
-              <>
-                <FormInput
-                  id="receiver-phone"
-                  label="SĐT người nhận (tuỳ chọn)"
-                  icon={Phone}
-                  type="tel"
-                  placeholder="Số điện thoại người nhận..."
-                  value={formData.receiverPhone}
-                  onChange={updateField("receiverPhone")}
-                  error={errors.receiverPhone}
-                />
-                <FormInput
-                  id="receiver-address"
-                  label="Địa chỉ giao hàng (tuỳ chọn)"
-                  icon={MapPin}
-                  placeholder="Nhập địa chỉ giao hàng..."
-                  value={formData.receiverAddress}
-                  onChange={updateField("receiverAddress")}
-                  error={errors.receiverAddress}
-                />
-              </>
-            )}
+            <FormInput
+              id="receiver-phone"
+              label="SĐT người nhận"
+              icon={Phone}
+              type="tel"
+              placeholder="Số điện thoại người nhận hàng..."
+              value={formData.receiverPhone}
+              onChange={updateField("receiverPhone")}
+              error={errors.receiverPhone}
+            />
+            <FormInput
+              id="receiver-address"
+              label="Địa chỉ giao hàng"
+              icon={MapPin}
+              placeholder="Nhập địa chỉ giao hàng đầy đủ..."
+              value={formData.receiverAddress}
+              onChange={updateField("receiverAddress")}
+              error={errors.receiverAddress}
+            />
 
             <div>
               <div className="flex items-center justify-between mb-2">
