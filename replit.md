@@ -30,11 +30,11 @@ The primary database is Supabase PostgreSQL. All API routes use `supabaseAdmin` 
 
 **products**: id (uuid), name, description, price, image_url, category, is_permanent_available (boolean), created_at
 
-**orders**: id (uuid), product_id, customer_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at, receiver_phone*, receiver_address*, quantity* (*pending migration 005)
+**orders**: id (uuid), product_id, customer_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at, receiver_phone, receiver_address, quantity
 
 **certificates**: id (uuid), certificate_code, order_id, hash, blockchain_hash, blockchain_tx, qr_url, created_at
 
-**customers**: id (uuid), phone, phone_normalized, sender_name, receiver_name, email, total_orders, first_order_at, last_order_at, created_at, updated_at, receiver_phone*, receiver_address*, last_ai_message* (*pending migration 005)
+**customers**: id (uuid), phone, phone_normalized, sender_name, receiver_name, email, total_orders, first_order_at, last_order_at, created_at, updated_at, receiver_phone, receiver_address, last_ai_message
 
 ### Order Status Lifecycle
 `pending` → `paid` → `minting` → `minted` (or → `revoked` from minted)

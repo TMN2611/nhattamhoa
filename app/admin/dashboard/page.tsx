@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Trash2,
@@ -20,9 +20,12 @@ import {
   Phone,
   MapPin,
   Clock,
-  ChevronDown,
   ChevronUp,
   Eye,
+  Upload,
+  Image as ImageIcon,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   isAdminLoggedIn,
@@ -115,6 +118,11 @@ function isFieldLocked(order: Order, field: string): boolean {
   return false;
 }
 
+function getTodayISO() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("vi-VN", {
     day: "2-digit",
@@ -126,6 +134,214 @@ function formatDate(dateStr: string) {
 function formatDateISO(dateStr: string) {
   const d = new Date(dateStr);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function formatDisplayDate(isoDate: string) {
+  const [y, m, d] = isoDate.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function ConfirmModal({
+  open,
+  title,
+  message,
+  confirmText,
+  onConfirm,
+  onCancel,
+  loading,
+}: {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmText: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  loading?: boolean;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+      <div className="bg-[#0d0b09] border border-[#D4AF37]/30 p-6 max-w-md w-full mx-4 shadow-2xl">
+        <h3 className="text-lg font-display text-[#F5E6C8] mb-2">{title}</h3>
+        <p className="text-sm text-[#8A7D65] mb-6">{message}</p>
+        <div className="flex gap-3 justify-end">
+          <button
+            onClick={onCancel}
+            disabled={loading}
+            className="px-5 py-2 border border-[#D4AF37]/20 text-[#8A7D65] text-sm uppercase hover:bg-[#D4AF37]/5 transition-colors disabled:opacity-40"
+          >
+            Hủy
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="px-5 py-2 bg-[#D4AF37] text-black text-sm uppercase font-bold flex items-center gap-2 hover:bg-[#C5A55A] transition-colors disabled:opacity-60"
+          >
+            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DateNavigator({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (date: string) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const today = getTodayISO();
+
+  function shiftDay(delta: number) {
+    const d = new Date(value);
+    d.setDate(d.getDate() + delta);
+    onChange(
+      `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
+    );
+  }
+
+  const isToday = value === today;
+
+  return (
+    <div className="flex items-center gap-1 border border-[#D4AF37]/20 bg-[#0d0b09] px-2 py-1">
+      <button
+        onClick={() => shiftDay(-1)}
+        className="p-1.5 text-[#8A7D65] hover:text-[#D4AF37] transition-colors"
+        title="Ngày trước"
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </button>
+      <button
+        onClick={() => inputRef.current?.showPicker()}
+        className="flex items-center gap-2 px-2 py-1 text-sm text-[#F5E6C8] hover:text-[#D4AF37] transition-colors min-w-[120px] justify-center"
+      >
+        <Calendar className="h-3.5 w-3.5 text-[#8A7D65]" />
+        {isToday ? "Hôm nay" : formatDisplayDate(value)}
+      </button>
+      <input
+        ref={inputRef}
+        type="date"
+        value={value}
+        max={today}
+        onChange={(e) => e.target.value && onChange(e.target.value)}
+        className="sr-only"
+      />
+      <button
+        onClick={() => shiftDay(1)}
+        disabled={isToday}
+        className="p-1.5 text-[#8A7D65] hover:text-[#D4AF37] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+        title="Ngày sau"
+      >
+        <ChevronRight className="h-4 w-4" />
+      </button>
+      {!isToday && (
+        <button
+          onClick={() => onChange(today)}
+          className="text-[10px] px-2 py-1 text-[#D4AF37] border border-[#D4AF37]/20 hover:bg-[#D4AF37]/10 transition-colors uppercase"
+        >
+          Hôm nay
+        </button>
+      )}
+    </div>
+  );
+}
+
+function ImageUploader({
+  currentUrl,
+  onUploaded,
+}: {
+  currentUrl: string;
+  onUploaded: (url: string) => void;
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [preview, setPreview] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setPreview(URL.createObjectURL(file));
+    setUploading(true);
+
+    try {
+      const form = new FormData();
+      form.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getAdminToken()}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        onUploaded(data.url);
+      } else {
+        alert("Lỗi upload: " + (data.error || "Không rõ"));
+        setPreview(null);
+      }
+    } catch (err) {
+      alert("Lỗi upload ảnh");
+      setPreview(null);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  const displayUrl = preview || currentUrl;
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] text-[#8A7D65] uppercase">Hình ảnh sản phẩm</label>
+      <div className="flex gap-3 items-start">
+        <div
+          className="w-20 h-20 border border-[#D4AF37]/20 bg-black/50 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-[#D4AF37]/40 transition-colors"
+          onClick={() => fileRef.current?.click()}
+        >
+          {displayUrl ? (
+            <img
+              src={displayUrl}
+              alt="Preview"
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <ImageIcon className="h-6 w-6 text-[#8A7D65]/40" />
+          )}
+        </div>
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="flex items-center gap-2 px-3 py-2 border border-[#D4AF37]/20 text-[#D4AF37] text-xs uppercase hover:bg-[#D4AF37]/10 transition-colors disabled:opacity-40"
+          >
+            {uploading ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            ) : (
+              <Upload className="h-3.5 w-3.5" />
+            )}
+            {uploading ? "Đang tải..." : "Chọn ảnh"}
+          </button>
+          {currentUrl && (
+            <div className="text-[10px] text-[#8A7D65] truncate" title={currentUrl}>
+              {currentUrl}
+            </div>
+          )}
+        </div>
+      </div>
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        onChange={handleFile}
+        className="hidden"
+      />
+    </div>
+  );
 }
 
 export default function AdminDashboardPage() {
@@ -158,8 +374,14 @@ export default function AdminDashboardPage() {
   const [searchPhone, setSearchPhone] = useState("");
   const [filterType, setFilterType] = useState<"all" | "gift" | "ritual">("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
-  const [filterDate, setFilterDate] = useState<string>("");
+  const [filterDate, setFilterDate] = useState<string>(getTodayISO());
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    open: boolean;
+    orderId: string;
+    orderLabel: string;
+  }>({ open: false, orderId: "", orderLabel: "" });
 
   useEffect(() => {
     if (!isAdminLoggedIn()) {
@@ -223,9 +445,19 @@ export default function AdminDashboardPage() {
     return res.json();
   }
 
-  async function markPaid(orderId: string) {
+  function openPayConfirm(order: Order) {
+    setConfirmModal({
+      open: true,
+      orderId: order.id,
+      orderLabel: `${order.sender_name} → ${order.receiver_name}`,
+    });
+  }
+
+  async function confirmMarkPaid() {
+    const { orderId } = confirmModal;
     setActionLoading(orderId);
     await apiCall(`/api/orders/${orderId}`, "PUT", { status: "paid" });
+    setConfirmModal({ open: false, orderId: "", orderLabel: "" });
     await fetchData();
     setActionLoading(null);
   }
@@ -378,7 +610,7 @@ export default function AdminDashboardPage() {
       result = result.filter((o) => o.status === filterStatus);
     }
 
-    if (filterDate) {
+    if (filterDate && !searchPhone.trim()) {
       result = result.filter((o) => formatDateISO(o.created_at) === filterDate);
     }
 
@@ -512,17 +744,14 @@ export default function AdminDashboardPage() {
                     placeholder="Danh mục"
                     className="border border-[#D4AF37]/20 bg-black px-4 py-2 text-[#F5E6C8] text-sm outline-none"
                   />
-                  <input
-                    value={productForm.image_url}
-                    onChange={(e) =>
-                      setProductForm((p) => ({
-                        ...p,
-                        image_url: e.target.value,
-                      }))
-                    }
-                    placeholder="URL hình ảnh"
-                    className="md:col-span-2 border border-[#D4AF37]/20 bg-black px-4 py-2 text-[#F5E6C8] text-sm outline-none"
-                  />
+                  <div className="md:col-span-2">
+                    <ImageUploader
+                      currentUrl={productForm.image_url}
+                      onUploaded={(url) =>
+                        setProductForm((p) => ({ ...p, image_url: url }))
+                      }
+                    />
+                  </div>
                   <textarea
                     value={productForm.description}
                     onChange={(e) =>
@@ -553,6 +782,7 @@ export default function AdminDashboardPage() {
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-[#D4AF37]/10 text-[#D4AF37] text-[10px] uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left">Ảnh</th>
                     <th className="px-4 py-4 text-left">Sản phẩm</th>
                     <th className="px-4 py-4 text-left">Loại</th>
                     <th className="px-4 py-4 text-left">Giá</th>
@@ -565,6 +795,21 @@ export default function AdminDashboardPage() {
                       key={product.id}
                       className="border-b border-[#D4AF37]/10 hover:bg-[#1a1712] transition-colors"
                     >
+                      <td className="px-4 py-3">
+                        <div className="w-12 h-12 bg-black/50 border border-[#D4AF37]/10 overflow-hidden">
+                          {product.image_url ? (
+                            <img
+                              src={product.image_url}
+                              alt={product.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <ImageIcon className="h-4 w-4 text-[#8A7D65]/30" />
+                            </div>
+                          )}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-[#F5E6C8] text-sm font-medium">
                         {product.name}
                       </td>
@@ -638,8 +883,8 @@ export default function AdminDashboardPage() {
               </div>
             )}
 
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6">
-              <div className="relative">
+            <div className="flex flex-col md:flex-row gap-3 mb-6">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A7D65]" />
                 <input
                   type="text"
@@ -648,13 +893,21 @@ export default function AdminDashboardPage() {
                   placeholder="Tìm theo SĐT..."
                   className="w-full pl-10 pr-4 py-2.5 border border-[#D4AF37]/20 bg-[#0d0b09] text-[#F5E6C8] text-sm outline-none focus:border-[#D4AF37]/50 placeholder-[#8A7D65]/60"
                 />
+                {searchPhone && (
+                  <button
+                    onClick={() => setSearchPhone("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2"
+                  >
+                    <X className="h-3.5 w-3.5 text-[#8A7D65] hover:text-[#D4AF37]" />
+                  </button>
+                )}
               </div>
               <div className="relative">
                 <Filter className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A7D65]" />
                 <select
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value as any)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-[#D4AF37]/20 bg-[#0d0b09] text-[#F5E6C8] text-sm outline-none focus:border-[#D4AF37]/50 cursor-pointer appearance-none"
+                  className="w-full md:w-auto pl-10 pr-8 py-2.5 border border-[#D4AF37]/20 bg-[#0d0b09] text-[#F5E6C8] text-sm outline-none focus:border-[#D4AF37]/50 cursor-pointer appearance-none"
                 >
                   <option value="all">Tất cả loại</option>
                   <option value="gift">🎁 Gift</option>
@@ -666,7 +919,7 @@ export default function AdminDashboardPage() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-[#D4AF37]/20 bg-[#0d0b09] text-[#F5E6C8] text-sm outline-none focus:border-[#D4AF37]/50 cursor-pointer appearance-none"
+                  className="w-full md:w-auto pl-10 pr-8 py-2.5 border border-[#D4AF37]/20 bg-[#0d0b09] text-[#F5E6C8] text-sm outline-none focus:border-[#D4AF37]/50 cursor-pointer appearance-none"
                 >
                   <option value="all">Tất cả trạng thái</option>
                   {Object.entries(STATUS_LABELS).map(([key, label]) => (
@@ -674,43 +927,31 @@ export default function AdminDashboardPage() {
                   ))}
                 </select>
               </div>
-              <div className="relative">
-                <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-[#8A7D65]" />
-                <input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 border border-[#D4AF37]/20 bg-[#0d0b09] text-[#F5E6C8] text-sm outline-none focus:border-[#D4AF37]/50 cursor-pointer"
-                />
-                {filterDate && (
-                  <button
-                    onClick={() => setFilterDate("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2"
-                  >
-                    <X className="h-3.5 w-3.5 text-[#8A7D65] hover:text-[#D4AF37]" />
-                  </button>
-                )}
-              </div>
+              <DateNavigator
+                value={filterDate}
+                onChange={setFilterDate}
+              />
             </div>
 
-            {(searchPhone || filterType !== "all" || filterStatus !== "all" || filterDate) && (
-              <div className="flex items-center justify-between mb-4 text-sm">
-                <span className="text-[#8A7D65]">
-                  Hiển thị {filteredOrders.length} / {orders.length} đơn hàng
-                </span>
+            <div className="flex items-center justify-between mb-4 text-sm">
+              <span className="text-[#8A7D65]">
+                {searchPhone.trim()
+                  ? `Tìm thấy ${filteredOrders.length} đơn hàng`
+                  : `${filteredOrders.length} đơn hàng ngày ${filterDate === getTodayISO() ? "hôm nay" : formatDisplayDate(filterDate)}`}
+              </span>
+              {(searchPhone || filterType !== "all" || filterStatus !== "all") && (
                 <button
                   onClick={() => {
                     setSearchPhone("");
                     setFilterType("all");
                     setFilterStatus("all");
-                    setFilterDate("");
                   }}
                   className="text-[#D4AF37] hover:underline text-xs uppercase"
                 >
                   Xóa bộ lọc
                 </button>
-              </div>
-            )}
+              )}
+            </div>
 
             {editingOrder && (
               <div className="mb-6 p-6 border border-[#D4AF37]/20 bg-[#0d0b09]">
@@ -781,7 +1022,9 @@ export default function AdminDashboardPage() {
                   {filteredOrders.length === 0 && (
                     <tr>
                       <td colSpan={7} className="px-4 py-12 text-center text-[#8A7D65]">
-                        Không tìm thấy đơn hàng nào
+                        {searchPhone.trim()
+                          ? "Không tìm thấy đơn hàng nào với SĐT này"
+                          : `Không có đơn hàng nào ngày ${filterDate === getTodayISO() ? "hôm nay" : formatDisplayDate(filterDate)}`}
                       </td>
                     </tr>
                   )}
@@ -792,7 +1035,7 @@ export default function AdminDashboardPage() {
                     const isExpanded = expandedOrder === order.id;
 
                     return (
-                      <tr key={order.id} className="border-b border-[#D4AF37]/10 hover:bg-[#1a1712]/50 transition-colors group">
+                      <tr key={order.id} className="border-b border-[#D4AF37]/10 hover:bg-[#1a1712]/50 transition-colors">
                         <td className="px-4 py-3 text-[#8A7D65] whitespace-nowrap">
                           {formatDate(order.created_at)}
                         </td>
@@ -884,8 +1127,8 @@ export default function AdminDashboardPage() {
                             </button>
                             {order.status === "pending" && (
                               <button
-                                onClick={() => markPaid(order.id)}
-                                title="Đã thanh toán"
+                                onClick={() => openPayConfirm(order)}
+                                title="Xác nhận thanh toán"
                                 disabled={actionLoading === order.id}
                                 className="p-1.5 text-blue-400 hover:bg-blue-400/10 transition-colors disabled:opacity-40"
                               >
@@ -932,6 +1175,16 @@ export default function AdminDashboardPage() {
           </>
         )}
       </div>
+
+      <ConfirmModal
+        open={confirmModal.open}
+        title="Xác nhận thanh toán"
+        message={`Bạn xác nhận đơn hàng "${confirmModal.orderLabel}" đã thanh toán? Sau khi xác nhận, một số thông tin sẽ bị khóa chỉnh sửa.`}
+        confirmText="Xác nhận đã thanh toán"
+        onConfirm={confirmMarkPaid}
+        onCancel={() => setConfirmModal({ open: false, orderId: "", orderLabel: "" })}
+        loading={actionLoading === confirmModal.orderId}
+      />
     </main>
   );
 }
