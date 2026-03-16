@@ -2,8 +2,7 @@ export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
 import { validateAdminRequest } from '@/lib/admin-utils'
-import { writeFile } from 'fs/promises'
-import { join } from 'path'
+import { supabaseAdmin } from '@/lib/supabase'
 
 export async function POST(req: Request) {
   if (!validateAdminRequest(req)) {
@@ -36,12 +35,25 @@ export async function POST(req: Request) {
     const safeName = `product-${Date.now()}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
-    const publicDir = join(process.cwd(), 'public', 'images')
-    await writeFile(join(publicDir, safeName), buffer)
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from('products')
+      .upload(safeName, buffer, {
+        contentType: file.type,
+        upsert: false,
+      })
+
+    if (uploadError) {
+      console.error('Supabase upload error:', uploadError)
+      throw new Error(uploadError.message)
+    }
+
+    const { data: urlData } = supabaseAdmin.storage
+      .from('products')
+      .getPublicUrl(safeName)
 
     return NextResponse.json({
       success: true,
-      url: `/images/${safeName}`,
+      url: urlData.publicUrl,
     })
   } catch (error: any) {
     console.error('Upload error:', error)
