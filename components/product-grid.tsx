@@ -59,7 +59,7 @@ export function ProductGrid({ flow = "gift" }: ProductGridProps) {
   if (loading) {
     return (
       <div className="mx-auto max-w-7xl px-6 pb-24 md:pb-32">
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {[1, 2, 3].map((i) => (
             <div key={i} className="aspect-[4/5] bg-[#1a1814] animate-pulse" />
           ))}
@@ -83,7 +83,7 @@ export function ProductGrid({ flow = "gift" }: ProductGridProps) {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {products.map((product) => (
             <Link
               key={product.id}
@@ -108,7 +108,7 @@ export function ProductGrid({ flow = "gift" }: ProductGridProps) {
 
                 {/* Badge phân loại */}
                 <div
-                  className={`absolute top-3 right-3 px-2.5 py-1 text-[10px] tracking-[0.2em] uppercase font-medium shadow-sm ${
+                  className={`absolute top-0 right-3 px-2.5 py-0 text-[10px] tracking-[0.1em] uppercase font-medium shadow-sm ${
                     flow === "ritual"
                       ? "bg-[#D4AF37] text-[#0a0a08]"
                       : "bg-black/60 text-white backdrop-blur-md border border-white/10"
