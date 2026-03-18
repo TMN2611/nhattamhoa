@@ -1,0 +1,10 @@
+{
+  "network": "amoy",
+  "networkName": "Polygon Amoy Testnet (FREE)",
+  "contractAddress": "0x7Ec23f56591d0246bc1a3358916809174b70a76E",
+  "rpcUrl": "https://rpc-amoy.polygon.technology",
+  "deployer": "0xadd031c3eDa1aF82CF87a9c20dfe3491b7B9752d",
+  "deployedAt": "2026-03-18T13:42:48.111Z",
+  "txHash": "0x3e02a21ceb365c2a292ce16101dee66190037b326843760a9adee6b375cab63b",
+  "explorer": "https://amoy.polygonscan.com/address/0x7Ec23f56591d0246bc1a3358916809174b70a76E"
+}
