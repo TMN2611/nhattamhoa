@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import pool from '@/lib/db'
 
 function normalizePhone(phone: string): string {
   return phone.replace(/[^0-9]/g, '')
@@ -21,17 +21,17 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
     }
 
-    const { data: match, error } = await supabaseAdmin
-      .from('customers')
-      .select('id, phone, sender_name, receiver_name, receiver_phone, receiver_address, total_orders')
-      .eq('phone_normalized', phone)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const { rows } = await pool.query(
+      `SELECT id, phone, sender_name, receiver_name, receiver_phone, receiver_address, total_orders
+       FROM customers
+       WHERE phone_normalized = $1
+       ORDER BY updated_at DESC
+       LIMIT 1`,
+      [phone]
+    )
 
-    if (error && error.code !== 'PGRST116') throw error
-
-    if (match) {
+    if (rows.length > 0) {
+      const match = rows[0]
       return NextResponse.json({
         success: true,
         found: true,
@@ -67,55 +67,57 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'sender_name and receiver_name are required' }, { status: 400 })
     }
 
-    const { data: match, error: lookupErr } = await supabaseAdmin
-      .from('customers')
-      .select('*')
-      .eq('phone_normalized', phone)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const { rows: existing } = await pool.query(
+      `SELECT * FROM customers WHERE phone_normalized = $1 ORDER BY updated_at DESC LIMIT 1`,
+      [phone]
+    )
 
-    if (lookupErr && lookupErr.code !== 'PGRST116') {
-      console.warn('Customer lookup failed, trying insert:', lookupErr.message)
-    }
+    if (existing.length > 0) {
+      const match = existing[0]
+      const newTotal = (match.total_orders || 0) + (body.increment_orders ? 1 : 0)
+      const lastOrderAt = body.increment_orders ? new Date().toISOString() : match.last_order_at
 
-    const customerData: Record<string, any> = {
-      phone,
-      sender_name: body.sender_name,
-      receiver_name: body.receiver_name,
-    }
+      const updates: string[] = [
+        'sender_name = $2',
+        'receiver_name = $3',
+        'total_orders = $4',
+        'last_order_at = $5',
+      ]
+      const values: any[] = [match.id, body.sender_name, body.receiver_name, newTotal, lastOrderAt]
+      let idx = 6
 
-    if (body.receiver_phone !== undefined) customerData.receiver_phone = body.receiver_phone
-    if (body.receiver_address !== undefined) customerData.receiver_address = body.receiver_address
-    if (body.last_ai_message !== undefined) customerData.last_ai_message = body.last_ai_message
-    if (body.email !== undefined) customerData.email = body.email
+      if (body.receiver_phone !== undefined) { updates.push(`receiver_phone = $${idx++}`); values.push(body.receiver_phone) }
+      if (body.receiver_address !== undefined) { updates.push(`receiver_address = $${idx++}`); values.push(body.receiver_address) }
+      if (body.last_ai_message !== undefined) { updates.push(`last_ai_message = $${idx++}`); values.push(body.last_ai_message) }
+      if (body.email !== undefined) { updates.push(`email = $${idx++}`); values.push(body.email) }
 
-    if (match) {
-      customerData.total_orders = (match.total_orders || 0) + (body.increment_orders ? 1 : 0)
-      customerData.last_order_at = body.increment_orders ? new Date().toISOString() : match.last_order_at
-
-      const { data, error } = await supabaseAdmin
-        .from('customers')
-        .update(customerData)
-        .eq('id', match.id)
-        .select()
-        .single()
-
-      if (error) throw error
-      return NextResponse.json({ success: true, customer: data, upserted: 'updated' })
+      const { rows: updated } = await pool.query(
+        `UPDATE customers SET ${updates.join(', ')} WHERE id = $1 RETURNING *`,
+        values
+      )
+      return NextResponse.json({ success: true, customer: updated[0], upserted: 'updated' })
     } else {
-      customerData.total_orders = body.increment_orders ? 1 : 0
-      customerData.first_order_at = new Date().toISOString()
-      customerData.last_order_at = body.increment_orders ? new Date().toISOString() : null
+      const columns = ['phone', 'sender_name', 'receiver_name', 'total_orders', 'first_order_at', 'last_order_at']
+      const vals: any[] = [
+        phone,
+        body.sender_name,
+        body.receiver_name,
+        body.increment_orders ? 1 : 0,
+        new Date().toISOString(),
+        body.increment_orders ? new Date().toISOString() : null,
+      ]
 
-      const { data, error } = await supabaseAdmin
-        .from('customers')
-        .insert(customerData)
-        .select()
-        .single()
+      if (body.receiver_phone !== undefined) { columns.push('receiver_phone'); vals.push(body.receiver_phone) }
+      if (body.receiver_address !== undefined) { columns.push('receiver_address'); vals.push(body.receiver_address) }
+      if (body.last_ai_message !== undefined) { columns.push('last_ai_message'); vals.push(body.last_ai_message) }
+      if (body.email !== undefined) { columns.push('email'); vals.push(body.email) }
 
-      if (error) throw error
-      return NextResponse.json({ success: true, customer: data, upserted: 'created' })
+      const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ')
+      const { rows: created } = await pool.query(
+        `INSERT INTO customers (${columns.join(', ')}) VALUES (${placeholders}) RETURNING *`,
+        vals
+      )
+      return NextResponse.json({ success: true, customer: created[0], upserted: 'created' })
     }
   } catch (error: any) {
     console.error('Customer upsert error:', error)

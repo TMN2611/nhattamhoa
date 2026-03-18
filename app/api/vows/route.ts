@@ -1,22 +1,23 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import pool from "@/lib/db";
 
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
     const limit = parseInt(searchParams.get("limit") || "6", 10);
 
-    const { data, error } = await supabaseAdmin
-      .from("orders")
-      .select("sender_name, receiver_name, message, public_vow, created_at")
-      .eq("public_vow", true)
-      .order("created_at", { ascending: false })
-      .limit(limit);
+    const { rows } = await pool.query(
+      `SELECT sender_name, receiver_name, message, public_vow, created_at
+       FROM orders
+       WHERE public_vow = true
+       ORDER BY created_at DESC
+       LIMIT $1`,
+      [limit]
+    );
 
-    if (error) throw error;
-    return NextResponse.json({ success: true, vows: data });
+    return NextResponse.json({ success: true, vows: rows });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

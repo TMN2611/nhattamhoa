@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import pool from '@/lib/db'
 
 function normalizePhone(phone: string): string {
   return phone.replace(/[^0-9]/g, '')
@@ -22,19 +22,14 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
     }
 
-    const { data: customer, error: custErr } = await supabaseAdmin
-      .from('customers')
-      .select('sender_name, receiver_name, receiver_phone, receiver_address, total_orders')
-      .eq('phone_normalized', phone)
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const { rows: customerRows } = await pool.query(
+      `SELECT sender_name, receiver_name, receiver_phone, receiver_address, total_orders
+       FROM customers WHERE phone_normalized = $1 ORDER BY updated_at DESC LIMIT 1`,
+      [phone]
+    )
 
-    if (custErr && custErr.code !== 'PGRST116') {
-      console.warn('Customer lookup error (falling back to orders):', custErr.message)
-    }
-
-    if (customer) {
+    if (customerRows.length > 0) {
+      const customer = customerRows[0]
       return NextResponse.json({
         success: true,
         found: true,
@@ -46,23 +41,21 @@ export async function GET(req: Request) {
       })
     }
 
-    const { data: orders, error: orderError } = await supabaseAdmin
-      .from('orders')
-      .select('receiver_name, sender_name, phone, receiver_phone, receiver_address')
-      .eq('phone', phone)
-      .order('created_at', { ascending: false })
-      .limit(1)
+    const { rows: orderRows } = await pool.query(
+      `SELECT receiver_name, sender_name, phone, receiver_phone, receiver_address
+       FROM orders WHERE phone = $1 ORDER BY created_at DESC LIMIT 1`,
+      [phone]
+    )
 
-    if (orderError) throw orderError
-
-    if (orders && orders.length > 0) {
+    if (orderRows.length > 0) {
+      const order = orderRows[0]
       return NextResponse.json({
         success: true,
         found: true,
-        receiver_name: orders[0].receiver_name,
-        sender_name: orders[0].sender_name,
-        receiver_phone: orders[0].receiver_phone || null,
-        receiver_address: orders[0].receiver_address || null,
+        receiver_name: order.receiver_name,
+        sender_name: order.sender_name,
+        receiver_phone: order.receiver_phone || null,
+        receiver_address: order.receiver_address || null,
         total_orders: 0,
       })
     }

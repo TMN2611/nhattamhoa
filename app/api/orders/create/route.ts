@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import pool from '@/lib/db'
 
 export async function POST(req: Request) {
   try {
@@ -27,65 +27,31 @@ export async function POST(req: Request) {
 
     const isValidUUID = product_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product_id)
 
-    const orderData: Record<string, any> = {
-      sender_name,
-      receiver_name,
-      message,
-      phone,
-      ritual_type,
-      offering,
-      public_vow,
-      permanence_type,
-      status: 'pending',
-      product_id: isValidUUID ? product_id : null,
-    }
+    const { rows } = await pool.query(
+      `INSERT INTO orders
+        (sender_name, receiver_name, message, phone, ritual_type, offering, public_vow, permanence_type, status, product_id, receiver_phone, receiver_address, quantity)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, $10, $11, $12)
+       RETURNING *`,
+      [
+        sender_name,
+        receiver_name,
+        message,
+        phone,
+        ritual_type,
+        offering,
+        public_vow,
+        permanence_type,
+        isValidUUID ? product_id : null,
+        receiver_phone,
+        receiver_address,
+        quantity,
+      ]
+    )
 
-    if (receiver_phone) orderData.receiver_phone = receiver_phone
-    if (receiver_address) orderData.receiver_address = receiver_address
-    if (quantity > 1) orderData.quantity = quantity
-
-    const { data, error } = await supabaseAdmin
-      .from('orders')
-      .insert(orderData)
-      .select()
-      .single()
-
-    if (error) {
-      if (error.message?.includes('column') && (error.message?.includes('receiver_phone') || error.message?.includes('receiver_address') || error.message?.includes('quantity'))) {
-        console.warn('New columns not yet migrated, retrying without them')
-        const fallbackData = {
-          sender_name,
-          receiver_name,
-          message,
-          phone,
-          ritual_type,
-          offering,
-          public_vow,
-          permanence_type,
-          status: 'pending',
-          product_id: product_id || null,
-        }
-        const { data: fallbackOrder, error: fallbackError } = await supabaseAdmin
-          .from('orders')
-          .insert(fallbackData)
-          .select()
-          .single()
-
-        if (fallbackError) throw fallbackError
-
-        console.log("Order created (without new columns):", JSON.stringify(fallbackOrder))
-        return NextResponse.json({
-          success: true,
-          order: fallbackOrder,
-          orderId: fallbackOrder.id,
-          note: 'receiver_phone, receiver_address, quantity not saved - run migration 005'
-        })
-      }
-      throw error
-    }
-
+    const data = rows[0]
     console.log("Order created successfully:", JSON.stringify(data))
 
+    // Upsert customer (non-critical)
     try {
       await fetch(new URL('/api/customers', req.url).toString(), {
         method: 'POST',

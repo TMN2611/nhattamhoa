@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import { supabaseAdmin } from '@/lib/supabase'
+import pool from '@/lib/db'
 import { validateAdminRequest } from '@/lib/admin-utils'
 import { generateCertificateCode, generateBlockchainHash } from '@/lib/certificate'
 import { saveCertificateOnChain } from '@/lib/blockchain'
@@ -14,21 +14,11 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
   const { id } = await params
 
   try {
-    const { data: order, error: fetchErr } = await supabaseAdmin
-      .from('orders')
-      .select('*')
-      .eq('id', id)
-      .single()
-
-    if (fetchErr) {
-      if (fetchErr.code === 'PGRST116') {
-        return NextResponse.json({ error: 'Order not found' }, { status: 404 })
-      }
-      throw fetchErr
-    }
-    if (!order) {
+    const { rows: orderRows } = await pool.query('SELECT * FROM orders WHERE id = $1 LIMIT 1', [id])
+    if (orderRows.length === 0) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 })
     }
+    const order = orderRows[0]
 
     if (order.status !== 'pending' && order.status !== 'paid') {
       const messages: Record<string, string> = {
@@ -44,11 +34,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const priorStatus = order.status
 
-    const { error: mintingErr } = await supabaseAdmin
-      .from('orders')
-      .update({ status: 'minting' })
-      .eq('id', id)
-    if (mintingErr) throw mintingErr
+    await pool.query("UPDATE orders SET status = 'minting' WHERE id = $1", [id])
 
     const certCode = generateCertificateCode()
     const now = new Date().toISOString()
@@ -77,45 +63,25 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     let cert: any
     try {
-      const { data: certData, error: certErr } = await supabaseAdmin
-        .from('certificates')
-        .insert({
-          certificate_code: certCode,
-          order_id: id,
-          hash,
-          blockchain_hash: hash,
-          blockchain_tx: blockchainTx,
-          qr_url: qrUrl
-        })
-        .select()
-        .single()
-
-      if (certErr) throw certErr
-      cert = certData
+      const { rows: certRows } = await pool.query(
+        `INSERT INTO certificates (certificate_code, order_id, hash, blockchain_hash, blockchain_tx, qr_url)
+         VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+        [certCode, id, hash, hash, blockchainTx, qrUrl]
+      )
+      cert = certRows[0]
     } catch (certErr: any) {
-      await supabaseAdmin
-        .from('orders')
-        .update({ status: priorStatus })
-        .eq('id', id)
+      await pool.query('UPDATE orders SET status = $1 WHERE id = $2', [priorStatus, id])
       return NextResponse.json({ error: certErr.message }, { status: 500 })
     }
 
-    const { error: mintedErr } = await supabaseAdmin
-      .from('orders')
-      .update({
-        status: 'minted',
-        certificate_id: certCode,
-        blockchain_hash: blockchainTx || hash
-      })
-      .eq('id', id)
-    if (mintedErr) throw mintedErr
+    await pool.query(
+      "UPDATE orders SET status = 'minted', certificate_id = $1, blockchain_hash = $2 WHERE id = $3",
+      [certCode, blockchainTx || hash, id]
+    )
 
     return NextResponse.json({ success: true, certificate: cert })
   } catch (error: any) {
-    await supabaseAdmin
-      .from('orders')
-      .update({ status: 'pending' })
-      .eq('id', id)
+    await pool.query("UPDATE orders SET status = 'pending' WHERE id = $1", [id])
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 }

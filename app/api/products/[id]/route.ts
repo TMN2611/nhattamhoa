@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { supabaseAdmin } from "@/lib/supabase";
+import pool from "@/lib/db";
 import { validateAdminRequest } from "@/lib/admin-utils";
 
 export async function GET(
@@ -12,9 +12,7 @@ export async function GET(
 
   try {
     const isUUID =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-        id,
-      );
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
 
     if (!isUUID) {
       return NextResponse.json(
@@ -23,22 +21,14 @@ export async function GET(
       );
     }
 
-    const { data, error } = await supabaseAdmin
-      .from("products")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      if (error.code === "PGRST116") {
-        return NextResponse.json(
-          { success: false, error: "Product not found" },
-          { status: 404 },
-        );
-      }
-      throw error;
+    const { rows } = await pool.query("SELECT * FROM products WHERE id = $1 LIMIT 1", [id]);
+    if (rows.length === 0) {
+      return NextResponse.json(
+        { success: false, error: "Product not found" },
+        { status: 404 },
+      );
     }
-    return NextResponse.json({ success: true, product: data });
+    return NextResponse.json({ success: true, product: rows[0] });
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message },
@@ -59,7 +49,6 @@ export async function PUT(
 
   try {
     const body = await req.json();
-    // THÊM 'product_type' VÀO DANH SÁCH CHO PHÉP CẬP NHẬT
     const allowedFields = [
       "name",
       "description",
@@ -69,29 +58,32 @@ export async function PUT(
       "is_permanent_available",
       "product_type",
     ];
-    const updates: Record<string, any> = {};
+
+    const setClauses: string[] = [];
+    const values: any[] = [];
+    let idx = 1;
 
     for (const k of allowedFields) {
-      if (k in body) updates[k] = body[k];
+      if (k in body) {
+        setClauses.push(`${k} = $${idx++}`);
+        values.push(body[k]);
+      }
     }
 
-    if (Object.keys(updates).length === 0) {
+    if (setClauses.length === 0) {
       return NextResponse.json(
         { error: "No valid fields to update" },
         { status: 400 },
       );
     }
 
-    const { data, error } = await supabaseAdmin
-      .from("products")
-      .update(updates)
-      .eq("id", id)
-      .select()
-      .single();
+    values.push(id);
+    const { rows } = await pool.query(
+      `UPDATE products SET ${setClauses.join(", ")} WHERE id = $${idx} RETURNING *`,
+      values,
+    );
 
-    if (error) throw error;
-
-    return NextResponse.json({ success: true, product: data });
+    return NextResponse.json({ success: true, product: rows[0] });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
@@ -108,12 +100,7 @@ export async function DELETE(
   const { id } = await params;
 
   try {
-    const { error } = await supabaseAdmin
-      .from("products")
-      .delete()
-      .eq("id", id);
-
-    if (error) throw error;
+    await pool.query("DELETE FROM products WHERE id = $1", [id]);
     return NextResponse.json({ success: true });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

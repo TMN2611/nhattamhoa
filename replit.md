@@ -1,40 +1,36 @@
 # Project Overview
 
-A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa" (Eternal Roses). Built with TypeScript, Tailwind CSS v4, shadcn/ui components, Supabase PostgreSQL database, and blockchain-style certificate hashing.
+A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa" (Eternal Roses). Built with TypeScript, Tailwind CSS v4, shadcn/ui components, Replit's built-in PostgreSQL database, and blockchain-style certificate hashing.
 
 ## Architecture
 
 - **Framework**: Next.js 16 (App Router, Turbopack)
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui
-- **Package Manager**: npm
-- **Database**: Supabase PostgreSQL (`lib/supabase.ts` — exports `supabase` for public client, `supabaseAdmin` for service-role operations). All API routes use Supabase as primary database.
-- **Database (legacy)**: Replit built-in PostgreSQL (`lib/db.ts`) — no longer used by any API routes
+- **Package Manager**: pnpm
+- **Database**: Replit built-in PostgreSQL (`lib/db.ts` — exports a `pg.Pool` using `DATABASE_URL`). All API routes use this directly.
 - **Certificate**: SHA256 hash + server-side PDF generation (pdfkit + qrcode)
 - **AI**: OpenAI API (with fallback templates)
 - **Email**: nodemailer (optional, requires SMTP config)
-- **Font**: fonts/DejaVuSans.ttf (actually NotoSans-Regular.ttf, 569KB) for Vietnamese support in PDFs
+- **Font**: fonts/DejaVuSans.ttf for Vietnamese support in PDFs
 
 ## Database Setup
 
-The primary database is Supabase PostgreSQL. All API routes use `supabaseAdmin` from `lib/supabase.ts`. The Replit PostgreSQL is still provisioned but no longer used by any API routes.
+All data is stored in Replit's built-in PostgreSQL. The connection string is automatically available via `DATABASE_URL`.
 
 ### Database Connection
-- **Supabase (primary)**: `lib/supabase.ts` exports `supabase` (anon key, for public reads) and `supabaseAdmin` (service role key, for admin writes)
-  - `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
-  - `NEXT_PUBLIC_SUPABASE_ANON_KEY` — Supabase anon/publishable key
-  - `SUPABASE_SERVICE_ROLE_KEY` — Supabase service role key (secret)
-- **Replit PostgreSQL (legacy)**: `lib/db.ts` exports a `pg.Pool` using `DATABASE_URL` — no longer used
+- `lib/db.ts` exports a `pg.Pool` using `DATABASE_URL` (set automatically by Replit)
+- No external database services are used
 
 ### Tables
 
-**products**: id (uuid), name, description, price, image_url, category, is_permanent_available (boolean), created_at
+**products**: id (uuid), name, description, price, image_url, category, is_permanent_available (boolean), product_type, created_at
 
 **orders**: id (uuid), product_id, customer_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at, receiver_phone, receiver_address, quantity
 
 **certificates**: id (uuid), certificate_code, order_id, hash, blockchain_hash, blockchain_tx, qr_url, created_at
 
-**customers**: id (uuid), phone, phone_normalized, sender_name, receiver_name, email, total_orders, first_order_at, last_order_at, created_at, updated_at, receiver_phone, receiver_address, last_ai_message
+**customers**: id (uuid), phone, phone_normalized (generated), sender_name, receiver_name, email, total_orders, first_order_at, last_order_at, created_at, updated_at, receiver_phone, receiver_address, last_ai_message, fixed_receiver_name
 
 ### Order Status Lifecycle
 `pending` → `paid` → `minting` → `minted` (or → `revoked` from minted)
@@ -125,16 +121,17 @@ Product Detail → /ready → /checkout (quick ritual)
 - `GET /api/orders/stats` - Dashboard stats (admin auth)
 
 ### Customers
-- `GET /api/customers?phone=X` - Lookup customer by phone (public)
+- `GET /api/customers?phone=X` - Lookup customer by phone
 - `POST /api/customers` - Upsert customer (auto-called from order creation)
 
 ### Public
-- `GET /api/orders/lookup?phone=X` - Phone lookup returning sender_name, receiver_name, receiver_phone, receiver_address, last_ai_message, total_orders
+- `GET /api/orders/lookup?phone=X` - Phone lookup returning sender_name, receiver_name, receiver_phone, receiver_address, total_orders
 - `GET /api/vows?limit=N` - Public vows feed (used by home page + moments page)
 - `GET /api/certificate/[code]` - Certificate lookup (JSON)
 - `GET /api/certificate/[code]/pdf` - Certificate PDF download
 - `POST /api/generate-message` - AI message generation (OpenAI or templates)
 - `POST /api/create-certificate` - Blockchain certificate creation
+- `POST /api/upload` - Image upload (admin auth), saves to /public/uploads/
 
 ## Certificate System
 
@@ -159,6 +156,6 @@ Product Detail → /ready → /checkout (quick ritual)
 
 ## Dev Setup
 
-- Dev server: `npm run dev` on port 5000
-- Build: `npm run build`
-- Start: `npm run start`
+- Dev server: `pnpm run dev` on port 5000
+- Build: `pnpm run build`
+- Start: `pnpm run start`
