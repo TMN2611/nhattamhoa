@@ -9,7 +9,7 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Package Manager**: pnpm
 - **Database**: Replit built-in PostgreSQL (`lib/db.ts` — exports a `pg.Pool` using `DATABASE_URL`). All API routes use this directly.
-- **Certificate**: SHA256 hash + server-side PDF generation (pdfkit + qrcode)
+- **Certificate**: Real Polygon blockchain (Amoy testnet) + SHA256 hash + server-side PDF generation (pdfkit + qrcode)
 - **AI**: OpenAI API (with fallback templates)
 - **Email**: nodemailer (optional, requires SMTP config)
 - **Font**: fonts/DejaVuSans.ttf for Vietnamese support in PDFs
@@ -41,6 +41,36 @@ All data is stored in Replit's built-in PostgreSQL. The connection string is aut
 - **paid**: Only `message` field can be updated
 - **permanent type**: `sender_name` and `receiver_name` cannot be changed at any status
 - **Delete**: Blocked if a certificate exists for the order (FK constraint)
+
+## Blockchain Certificate System
+
+Real Polygon blockchain integration for immutable certificate storage.
+
+### Deployed Contract
+- **Network**: Polygon Amoy Testnet (free, EVM-compatible)
+- **Contract**: `0x7Ec23f56591d0246bc1a3358916809174b70a76E`
+- **Explorer**: https://amoy.polygonscan.com/address/0x7Ec23f56591d0246bc1a3358916809174b70a76E
+- **Deployment info**: `blockchain/deployment-amoy.json`
+- **Compiled ABI**: `blockchain/compiled.json`
+
+### Environment Variables Required
+- `PRIVATE_KEY` (Replit Secret) — wallet private key for signing transactions
+- `NEXT_PUBLIC_RPC_URL` — set to `https://rpc-amoy.polygon.technology`
+- `NEXT_PUBLIC_CONTRACT_ADDRESS` — set to the deployed contract address above
+- `NEXT_PUBLIC_BLOCKCHAIN_NETWORK` — set to `amoy`
+
+### Key Files
+- `contracts/NhatTamCertificate.sol` — Solidity smart contract
+- `lib/blockchain.ts` — `saveCertificateOnChain()` — sends real on-chain tx; falls back to simulated hash if env vars missing
+- `scripts/compile-contract.js` — compiles contract (pnpm blockchain:compile)
+- `scripts/generate-wallet.js` — generates new wallet (pnpm blockchain:wallet)
+- `scripts/deploy-contract.js` — deploys to Amoy or mainnet (pnpm blockchain:deploy)
+
+### Mint Flow
+Order (status=paid) → POST /api/orders/[id]/mint → saveCertificateOnChain() → Polygon tx confirmed → certificate saved to DB with blockchain_tx → order status = minted
+
+### Verify Page
+`/verify/[code]` — shows certificate with clickable "Xem trên Polygon Blockchain ↗" link to PolygonScan
 
 ## Two Customer Flows
 

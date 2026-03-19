@@ -162,14 +162,22 @@ export default function VerifyPage() {
                   )}
                   {data.blockchain_tx && (
                     <div>
-                      <p className="text-[9px] text-[#D4AF37] uppercase tracking-wider mb-1">Transaction</p>
-                      <p className="text-[10px] text-[#8A7D65] font-mono break-all">{data.blockchain_tx}</p>
+                      <p className="text-[9px] text-[#D4AF37] uppercase tracking-wider mb-1">Transaction Hash</p>
+                      <p className="text-[10px] text-[#8A7D65] font-mono break-all mb-1">{data.blockchain_tx}</p>
+                      <a
+                        href={`https://amoy.polygonscan.com/tx/${data.blockchain_tx}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-[9px] text-[#D4AF37] hover:text-[#F5E6C8] uppercase tracking-widest underline underline-offset-2 transition-colors"
+                      >
+                        Xem trên Polygon Blockchain ↗
+                      </a>
                     </div>
                   )}
                   {isValid && (
                     <div className="flex items-center gap-1.5 mt-3">
                       <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                      <span className="text-[9px] text-green-500 uppercase tracking-widest">Verified on Blockchain</span>
+                      <span className="text-[9px] text-green-500 uppercase tracking-widest">Verified on Polygon Blockchain</span>
                     </div>
                   )}
                 </div>
