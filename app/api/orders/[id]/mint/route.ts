@@ -4,7 +4,7 @@ import { NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 import { validateAdminRequest } from '@/lib/admin-utils'
 import { generateCertificateCode, generateBlockchainHash } from '@/lib/certificate'
-import { saveCertificateOnChain } from '@/lib/blockchain'
+import { saveCertificateOnChain, checkWalletBalance } from '@/lib/blockchain'
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   if (!validateAdminRequest(req)) {
@@ -33,6 +33,32 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const priorStatus = order.status
 
+    // Check wallet balance before attempting mint
+    const balanceCheck = await checkWalletBalance()
+    if (!balanceCheck.isConfigured) {
+      return NextResponse.json(
+        {
+          error: 'Blockchain not configured',
+          details: 'Missing PRIVATE_KEY, NEXT_PUBLIC_RPC_URL, or NEXT_PUBLIC_CONTRACT_ADDRESS'
+        },
+        { status: 500 }
+      )
+    }
+
+    if (!balanceCheck.hasBalance) {
+      return NextResponse.json(
+        {
+          error: 'Insufficient MATIC in blockchain wallet',
+          details: `Wallet ${balanceCheck.address} has 0 MATIC. Please fund the wallet to continue minting.`,
+          wallet: balanceCheck.address,
+          currentBalance: balanceCheck.formatted,
+          action: 'Fund wallet and retry'
+        },
+        { status: 402 }
+      )
+    }
+
+    // Mark as "minting" to prevent concurrent mint attempts
     await supabase.from('orders').update({ status: 'minting' }).eq('id', id)
 
     const certCode = generateCertificateCode()
@@ -47,15 +73,70 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     })
 
     let blockchainTx: string | null = null
+
     try {
+      // Attempt blockchain transaction
       blockchainTx = await saveCertificateOnChain(
         id,
         order.sender_name || '',
         order.receiver_name || '',
         order.message || ''
       )
-    } catch (e) {
-      console.warn('Blockchain save failed, continuing without tx:', e)
+      console.log(`[MINT SUCCESS] Order ${id} minted to blockchain: ${blockchainTx}`)
+    } catch (blockchainError: any) {
+      console.error(`[MINT FAILED] Order ${id} blockchain error:`, blockchainError.message)
+
+      // Rollback status to prior (paid or pending)
+      await supabase.from('orders').update({ status: priorStatus }).eq('id', id)
+
+      const errorName = blockchainError.name || 'BlockchainError'
+
+      if (errorName === 'InsufficientFunds') {
+        const balance = await checkWalletBalance()
+        return NextResponse.json(
+          {
+            error: 'Insufficient MATIC in wallet',
+            details: blockchainError.message,
+            wallet: balance.address,
+            currentBalance: balance.formatted,
+            requiredAction: 'Fund wallet with MATIC and retry mint',
+            orderId: id,
+            orderStatus: priorStatus
+          },
+          { status: 402 }
+        )
+      }
+
+      if (errorName === 'BlockchainNotConfigured') {
+        return NextResponse.json(
+          {
+            error: 'Blockchain not configured',
+            details: blockchainError.message
+          },
+          { status: 500 }
+        )
+      }
+
+      // Generic blockchain error - order rolled back to prior status
+      return NextResponse.json(
+        {
+          error: 'Blockchain transaction failed',
+          details: blockchainError.message,
+          orderId: id,
+          orderStatus: priorStatus,
+          retryable: true
+        },
+        { status: 502 }
+      )
+    }
+
+    // Only create certificate if blockchain succeeded
+    if (!blockchainTx) {
+      await supabase.from('orders').update({ status: priorStatus }).eq('id', id)
+      return NextResponse.json(
+        { error: 'Blockchain transaction hash not received' },
+        { status: 502 }
+      )
     }
 
     const qrUrl = `/verify/${certCode}`
@@ -74,22 +155,33 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
       .single()
 
     if (certErr) {
+      console.error(`[MINT ERROR] Certificate creation failed for order ${id}:`, certErr.message)
+      // Rollback order status since certificate failed
       await supabase.from('orders').update({ status: priorStatus }).eq('id', id)
-      return NextResponse.json({ error: certErr.message }, { status: 500 })
+      return NextResponse.json({ error: 'Failed to create certificate: ' + certErr.message }, { status: 500 })
     }
 
+    // Mark order as minted
     await supabase
       .from('orders')
       .update({
         status: 'minted',
         certificate_id: certCode,
-        blockchain_hash: blockchainTx || hash,
+        blockchain_hash: blockchainTx,
       })
       .eq('id', id)
 
+    console.log(`[MINT COMPLETE] Order ${id} successfully minted`)
+
     return NextResponse.json({ success: true, certificate: cert })
   } catch (error: any) {
-    await supabase.from('orders').update({ status: 'pending' }).eq('id', id)
-    return NextResponse.json({ error: error.message }, { status: 500 })
+    console.error(`[MINT EXCEPTION] Unexpected error:`, error)
+    // Try to rollback status
+    try {
+      await supabase.from('orders').update({ status: 'paid' }).eq('id', id)
+    } catch (rollbackErr) {
+      console.error('Failed to rollback status:', rollbackErr)
+    }
+    return NextResponse.json({ error: 'Unexpected error: ' + error.message }, { status: 500 })
   }
 }
