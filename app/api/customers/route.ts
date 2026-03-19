@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
 function normalizePhone(phone: string): string {
   return phone.replace(/[^0-9]/g, '')
@@ -21,17 +21,17 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
     }
 
-    const { rows } = await pool.query(
-      `SELECT id, phone, sender_name, receiver_name, receiver_phone, receiver_address, total_orders
-       FROM customers
-       WHERE phone_normalized = $1
-       ORDER BY updated_at DESC
-       LIMIT 1`,
-      [phone]
-    )
+    const { data, error } = await supabase
+      .from('customers')
+      .select('id, phone, sender_name, receiver_name, receiver_phone, receiver_address, total_orders')
+      .eq('phone_normalized', phone)
+      .order('updated_at', { ascending: false })
+      .limit(1)
 
-    if (rows.length > 0) {
-      const match = rows[0]
+    if (error) throw error
+
+    if (data && data.length > 0) {
+      const match = data[0]
       return NextResponse.json({
         success: true,
         found: true,
@@ -67,57 +67,63 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'sender_name and receiver_name are required' }, { status: 400 })
     }
 
-    const { rows: existing } = await pool.query(
-      `SELECT * FROM customers WHERE phone_normalized = $1 ORDER BY updated_at DESC LIMIT 1`,
-      [phone]
-    )
+    const { data: existing } = await supabase
+      .from('customers')
+      .select('*')
+      .eq('phone_normalized', phone)
+      .order('updated_at', { ascending: false })
+      .limit(1)
 
-    if (existing.length > 0) {
+    if (existing && existing.length > 0) {
       const match = existing[0]
       const newTotal = (match.total_orders || 0) + (body.increment_orders ? 1 : 0)
       const lastOrderAt = body.increment_orders ? new Date().toISOString() : match.last_order_at
 
-      const updates: string[] = [
-        'sender_name = $2',
-        'receiver_name = $3',
-        'total_orders = $4',
-        'last_order_at = $5',
-      ]
-      const values: any[] = [match.id, body.sender_name, body.receiver_name, newTotal, lastOrderAt]
-      let idx = 6
+      const updates: Record<string, any> = {
+        sender_name: body.sender_name,
+        receiver_name: body.receiver_name,
+        total_orders: newTotal,
+        last_order_at: lastOrderAt,
+        updated_at: new Date().toISOString(),
+      }
 
-      if (body.receiver_phone !== undefined) { updates.push(`receiver_phone = $${idx++}`); values.push(body.receiver_phone) }
-      if (body.receiver_address !== undefined) { updates.push(`receiver_address = $${idx++}`); values.push(body.receiver_address) }
-      if (body.last_ai_message !== undefined) { updates.push(`last_ai_message = $${idx++}`); values.push(body.last_ai_message) }
-      if (body.email !== undefined) { updates.push(`email = $${idx++}`); values.push(body.email) }
+      if (body.receiver_phone !== undefined) updates.receiver_phone = body.receiver_phone
+      if (body.receiver_address !== undefined) updates.receiver_address = body.receiver_address
+      if (body.last_ai_message !== undefined) updates.last_ai_message = body.last_ai_message
+      if (body.email !== undefined) updates.email = body.email
 
-      const { rows: updated } = await pool.query(
-        `UPDATE customers SET ${updates.join(', ')} WHERE id = $1 RETURNING *`,
-        values
-      )
-      return NextResponse.json({ success: true, customer: updated[0], upserted: 'updated' })
+      const { data: updated, error } = await supabase
+        .from('customers')
+        .update(updates)
+        .eq('id', match.id)
+        .select('*')
+        .single()
+
+      if (error) throw error
+      return NextResponse.json({ success: true, customer: updated, upserted: 'updated' })
     } else {
-      const columns = ['phone', 'sender_name', 'receiver_name', 'total_orders', 'first_order_at', 'last_order_at']
-      const vals: any[] = [
+      const insert: Record<string, any> = {
         phone,
-        body.sender_name,
-        body.receiver_name,
-        body.increment_orders ? 1 : 0,
-        new Date().toISOString(),
-        body.increment_orders ? new Date().toISOString() : null,
-      ]
+        sender_name: body.sender_name,
+        receiver_name: body.receiver_name,
+        total_orders: body.increment_orders ? 1 : 0,
+        first_order_at: new Date().toISOString(),
+        last_order_at: body.increment_orders ? new Date().toISOString() : null,
+      }
 
-      if (body.receiver_phone !== undefined) { columns.push('receiver_phone'); vals.push(body.receiver_phone) }
-      if (body.receiver_address !== undefined) { columns.push('receiver_address'); vals.push(body.receiver_address) }
-      if (body.last_ai_message !== undefined) { columns.push('last_ai_message'); vals.push(body.last_ai_message) }
-      if (body.email !== undefined) { columns.push('email'); vals.push(body.email) }
+      if (body.receiver_phone !== undefined) insert.receiver_phone = body.receiver_phone
+      if (body.receiver_address !== undefined) insert.receiver_address = body.receiver_address
+      if (body.last_ai_message !== undefined) insert.last_ai_message = body.last_ai_message
+      if (body.email !== undefined) insert.email = body.email
 
-      const placeholders = vals.map((_, i) => `$${i + 1}`).join(', ')
-      const { rows: created } = await pool.query(
-        `INSERT INTO customers (${columns.join(', ')}) VALUES (${placeholders}) RETURNING *`,
-        vals
-      )
-      return NextResponse.json({ success: true, customer: created[0], upserted: 'created' })
+      const { data: created, error } = await supabase
+        .from('customers')
+        .insert(insert)
+        .select('*')
+        .single()
+
+      if (error) throw error
+      return NextResponse.json({ success: true, customer: created, upserted: 'created' })
     }
   } catch (error: any) {
     console.error('Customer upsert error:', error)

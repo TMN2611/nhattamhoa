@@ -8,7 +8,7 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 - **Language**: TypeScript
 - **Styling**: Tailwind CSS v4 + shadcn/ui
 - **Package Manager**: pnpm
-- **Database**: Replit built-in PostgreSQL (`lib/db.ts` — exports a `pg.Pool` using `DATABASE_URL`). All API routes use this directly.
+- **Database**: Supabase PostgreSQL (`lib/supabase.ts` — exports a Supabase server client using `SUPABASE_SERVICE_ROLE_KEY`). All API routes use `@supabase/supabase-js` query builder.
 - **Certificate**: Real Polygon blockchain (Amoy testnet) + SHA256 hash + server-side PDF generation (pdfkit + qrcode)
 - **AI**: OpenAI API (with fallback templates)
 - **Email**: nodemailer (optional, requires SMTP config)
@@ -16,11 +16,18 @@ A Vietnamese-language Next.js 16 luxury flower ritual platform "Nhất Tâm Hoa"
 
 ## Database Setup
 
-All data is stored in Replit's built-in PostgreSQL. The connection string is automatically available via `DATABASE_URL`.
+All data is stored in **Supabase** (PostgreSQL). The Supabase client is initialized in `lib/supabase.ts`.
 
 ### Database Connection
-- `lib/db.ts` exports a `pg.Pool` using `DATABASE_URL` (set automatically by Replit)
-- No external database services are used
+- `lib/supabase.ts` exports a `supabase` server client using `NEXT_PUBLIC_SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`
+- All API routes import `{ supabase } from '@/lib/supabase'` and use the Supabase JS query builder
+- Browser client (anon key) available via `createBrowserClient()` for future client-side use
+- Supabase project: `boodwpdbinacuhwwvtuq.supabase.co`
+
+### Environment Variables Required
+- `NEXT_PUBLIC_SUPABASE_URL` — Supabase project URL
+- `NEXT_PUBLIC_SUPABASE_ANON_KEY` — public anon key (for browser client)
+- `SUPABASE_SERVICE_ROLE_KEY` — service role key (bypasses RLS, used server-side only)
 
 ### Tables
 

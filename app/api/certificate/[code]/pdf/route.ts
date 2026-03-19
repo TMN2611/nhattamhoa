@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 import path from 'path'
 import fs from 'fs'
 
@@ -11,29 +11,34 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   try {
     let orderData: any = null
 
-    const { rows: certRows } = await pool.query(
-      'SELECT * FROM certificates WHERE certificate_code = $1 LIMIT 1',
-      [code]
-    )
+    const { data: certRows } = await supabase
+      .from('certificates')
+      .select('*')
+      .eq('certificate_code', code)
+      .limit(1)
 
-    if (certRows.length > 0) {
+    if (certRows && certRows.length > 0) {
       const certData = certRows[0]
-      const { rows: orderRows } = await pool.query(
-        'SELECT * FROM orders WHERE id = $1 LIMIT 1',
-        [certData.order_id]
-      )
-      if (orderRows.length > 0) {
+      const { data: orderRows } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', certData.order_id)
+        .limit(1)
+
+      if (orderRows && orderRows.length > 0) {
         const order = orderRows[0]
         orderData = { ...order, blockchain_hash: certData.hash || certData.blockchain_hash || order.blockchain_hash }
       }
     }
 
     if (!orderData) {
-      const { rows: orderRows } = await pool.query(
-        'SELECT * FROM orders WHERE certificate_id = $1 LIMIT 1',
-        [code]
-      )
-      if (orderRows.length > 0) orderData = orderRows[0]
+      const { data: orderRows } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('certificate_id', code)
+        .limit(1)
+
+      if (orderRows && orderRows.length > 0) orderData = orderRows[0]
     }
 
     if (!orderData) {
@@ -77,8 +82,6 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
     doc.rect(20, 20, 555, 802).stroke()
     doc.strokeColor('#D4AF37').lineWidth(0.5)
     doc.rect(25, 25, 545, 792).stroke()
-
-    const cx = 297.5
 
     doc.fillColor('#D4AF37').fontSize(10)
     doc.text('FLOWER INTENTION CERTIFICATE', 0, 55, { align: 'center', width: 595 })

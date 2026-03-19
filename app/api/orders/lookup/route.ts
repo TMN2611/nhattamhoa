@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
 function normalizePhone(phone: string): string {
   return phone.replace(/[^0-9]/g, '')
@@ -22,13 +22,14 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Invalid phone' }, { status: 400 })
     }
 
-    const { rows: customerRows } = await pool.query(
-      `SELECT sender_name, receiver_name, receiver_phone, receiver_address, total_orders
-       FROM customers WHERE phone_normalized = $1 ORDER BY updated_at DESC LIMIT 1`,
-      [phone]
-    )
+    const { data: customerRows } = await supabase
+      .from('customers')
+      .select('sender_name, receiver_name, receiver_phone, receiver_address, total_orders')
+      .eq('phone_normalized', phone)
+      .order('updated_at', { ascending: false })
+      .limit(1)
 
-    if (customerRows.length > 0) {
+    if (customerRows && customerRows.length > 0) {
       const customer = customerRows[0]
       return NextResponse.json({
         success: true,
@@ -41,13 +42,14 @@ export async function GET(req: Request) {
       })
     }
 
-    const { rows: orderRows } = await pool.query(
-      `SELECT receiver_name, sender_name, phone, receiver_phone, receiver_address
-       FROM orders WHERE phone = $1 ORDER BY created_at DESC LIMIT 1`,
-      [phone]
-    )
+    const { data: orderRows } = await supabase
+      .from('orders')
+      .select('receiver_name, sender_name, phone, receiver_phone, receiver_address')
+      .eq('phone', phone)
+      .order('created_at', { ascending: false })
+      .limit(1)
 
-    if (orderRows.length > 0) {
+    if (orderRows && orderRows.length > 0) {
       const order = orderRows[0]
       return NextResponse.json({
         success: true,

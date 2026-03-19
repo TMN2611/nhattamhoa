@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
 export async function GET(req: Request, { params }: { params: Promise<{ code: string }> }) {
   const { code } = await params
@@ -9,27 +9,29 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
   console.log("Certificate lookup for code:", code)
 
   try {
-    const { rows: certRows } = await pool.query(
-      'SELECT * FROM certificates WHERE certificate_code = $1 LIMIT 1',
-      [code]
-    )
+    const { data: certRows } = await supabase
+      .from('certificates')
+      .select('*')
+      .eq('certificate_code', code)
+      .limit(1)
 
-    if (certRows.length > 0) {
+    if (certRows && certRows.length > 0) {
       const certData = certRows[0]
       console.log("Found certificate record:", JSON.stringify(certData))
 
-      const { rows: orderRows } = await pool.query(
-        'SELECT * FROM orders WHERE id = $1 LIMIT 1',
-        [certData.order_id]
-      )
+      const { data: orderRows } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', certData.order_id)
+        .limit(1)
 
-      if (orderRows.length > 0) {
+      if (orderRows && orderRows.length > 0) {
         const order = orderRows[0]
         console.log("Found order:", JSON.stringify(order))
         return NextResponse.json({
           success: true,
           certificate: {
-            code: code,
+            code,
             sender: order.sender_name,
             receiver: order.receiver_name,
             message: order.message,
@@ -48,12 +50,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
 
     console.log("Certificate not found in certificates table, trying orders table directly")
 
-    const { rows: orderRows } = await pool.query(
-      'SELECT * FROM orders WHERE certificate_id = $1 LIMIT 1',
-      [code]
-    )
+    const { data: orderRows } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('certificate_id', code)
+      .limit(1)
 
-    if (orderRows.length > 0) {
+    if (orderRows && orderRows.length > 0) {
       const orderDirect = orderRows[0]
       console.log("Found order directly:", JSON.stringify(orderDirect))
       return NextResponse.json({

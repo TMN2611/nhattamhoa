@@ -1,7 +1,7 @@
 export const dynamic = "force-dynamic"
 
 import { NextResponse } from 'next/server'
-import pool from '@/lib/db'
+import { supabase } from '@/lib/supabase'
 
 export async function POST(req: Request) {
   try {
@@ -27,12 +27,9 @@ export async function POST(req: Request) {
 
     const isValidUUID = product_id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(product_id)
 
-    const { rows } = await pool.query(
-      `INSERT INTO orders
-        (sender_name, receiver_name, message, phone, ritual_type, offering, public_vow, permanence_type, status, product_id, receiver_phone, receiver_address, quantity)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'pending', $9, $10, $11, $12)
-       RETURNING *`,
-      [
+    const { data, error } = await supabase
+      .from('orders')
+      .insert({
         sender_name,
         receiver_name,
         message,
@@ -41,17 +38,19 @@ export async function POST(req: Request) {
         offering,
         public_vow,
         permanence_type,
-        isValidUUID ? product_id : null,
+        status: 'pending',
+        product_id: isValidUUID ? product_id : null,
         receiver_phone,
         receiver_address,
         quantity,
-      ]
-    )
+      })
+      .select('*')
+      .single()
 
-    const data = rows[0]
+    if (error) throw error
+
     console.log("Order created successfully:", JSON.stringify(data))
 
-    // Upsert customer (non-critical)
     try {
       await fetch(new URL('/api/customers', req.url).toString(), {
         method: 'POST',
