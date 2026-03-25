@@ -35,12 +35,12 @@ export async function POST(req: Request) {
 
   const results: string[] = []
 
-  const dbUrl = process.env.DATABASE_URL
+  const dbUrl = process.env.SUPABASE_DB_URL
   if (!dbUrl) {
-    return NextResponse.json({ error: 'DATABASE_URL not set' }, { status: 500 })
+    return NextResponse.json({ error: 'SUPABASE_DB_URL not set' }, { status: 500 })
   }
 
-  const pool = new Pool({ connectionString: dbUrl, max: 1, connectionTimeoutMillis: 10000 })
+  const pool = new Pool({ connectionString: dbUrl, max: 1, connectionTimeoutMillis: 10000, ssl: { rejectUnauthorized: false } })
 
   try {
     const client = await pool.connect()
