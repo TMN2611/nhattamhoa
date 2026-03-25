@@ -1,0 +1,51 @@
+PART 1: CRITICAL DATABASE FIX (SUPABASE LINKING)
+Current Status: The system cannot save images (Banners/Product Edits) and is throwing a "Could not find table 'public.banners' in the schema cache" error (Image 12). This indicates a disconnection between the app logic and Supabase.
+
+Action Required: Re-establish a stable, correct connection to Supabase for all data operations.
+
+Banner Table Fix:
+
+Verify the existence of the public.banners table in Supabase. If missing, create it.
+
+Ensure the banners API endpoint (/api/banners) is correctly using the Supabase client to fetch, add, and delete data. Fix the error preventing the save.
+
+Product Table Review: Verify the public.products table exists and the API endpoints can successfully save product edits, including multi-image updates.
+
+PART 2: THEME SYSTEM & VISUAL POLISH (LIGHT MODE DEFAULT)
+Goal: Implement a unified theme system with Light Mode as default. Eliminate broken visual states.
+
+Global Theme Config:
+
+Set Light Mode as the default theme for all new users.
+
+Implement a theme toggle switch (Sun/Moon icon) accessible in the main navigation.
+
+Visual Audit & Fix (Light Mode Priority):
+
+NO Broken Visuals: Ensure NO form containers, inputs, or cards retain black backgrounds in Light Mode. Forms must match the surrounding light interface. Currently broken.
+
+Contrast Fix: Dim, small, or low-contrast text is unreadable (Image 13 reference is a major issue). Increase global contrast and fix font sizes for labels, captions, and descriptions.
+
+Header Mobile solid: The Header background on mobile devices must be solid (non-transparent) to ensure navigation items remain visible over any background.
+
+PART 3: REVISED PRODUCT DETAIL & PURCHASE FLOW
+Goal: Clarify the purchasing path and implement Sticky Right layout.
+
+Product Detail Buttons: Show "Mua ngay" (Buy Now) and "Giỏ hàng" (Add to Cart) buttons only on the Product Detail page. Remove complex purchase options.
+
+Ritual Flow Integration: Both buttons must lead directly into the sequential "Ritual/Commitment" flow for that specific product, matching existing flows.
+
+Sticky Layout (Desktop): On the Product Detail page, refactor into two main columns: Left scrolls (Images/Desc), Right stays Fixed/Sticky (Price/Buttons). Ensure buttons do not overlap Footer.
+
+PART 4: ULTIMATE BLOCKCHAIN CERTIFICATE EXPERIENCE
+Goal: Create a high-value, desirable digital certificate with real utility.
+
+Certificate Lookup Upgrade: Add a lookup field allowing customers to search for their certificate using their Phone Number.
+
+UX Education: On the lookup results/certificate page, provide clear, step-by-step instructions (with images/diagrams) on "How to verify this certificate vĩnh viễn on the public Polygon Blockchain".
+
+Desirable Visuals: Redesign the certificate to feel premium and tech-inspired. Incorporate subtle blockchain-themed design elements to make it a coveted digital item.
+
+Scannable QR Code: Generate a unique, scannable QR code for every single certificate. Scanning this QR code must link directly to the certificate's unique verification URL on the Nhat Tam Hoa website.
+
+Perfect PDF Export: The PDF download function must generate a file that is an exact visual replica of the on-screen certificate, including responsiveness to the current theme (Light/Dark).
