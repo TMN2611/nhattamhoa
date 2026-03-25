@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ShoppingBag, Menu, X, Search } from "lucide-react";
+import { ShoppingBag, Menu, X, Sun, Moon } from "lucide-react";
+import { useTheme } from "next-themes";
 import { useCart } from "@/lib/cart-context";
 
 const navLinks = [
@@ -17,6 +18,10 @@ export function SiteHeader() {
   const { itemCount } = useCart();
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
 
   return (
     <header
@@ -81,6 +86,19 @@ export function SiteHeader() {
               </Link>
             ))}
           </div>
+          {mounted && (
+            <button
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+              aria-label={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-4 w-4" />
+              ) : (
+                <Moon className="h-4 w-4" />
+              )}
+            </button>
+          )}
           <Link
             href="/checkout"
             className="relative text-muted-foreground hover:text-foreground transition-colors"

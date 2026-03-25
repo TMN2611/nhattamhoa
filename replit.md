@@ -31,6 +31,8 @@ All data is stored in **Supabase** (PostgreSQL). The Supabase client is initiali
 
 ### Tables
 
+**banners**: id (uuid), title, image_url, link_url, is_active (boolean), sort_order (int), created_at
+
 **products**: id (uuid), name, description, price, image_url, category, is_permanent_available (boolean), product_type, extra_images (jsonb array of URLs), description_images (jsonb array of URLs), created_at
 
 **orders**: id (uuid), product_id, customer_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at, receiver_phone, receiver_address, quantity
@@ -183,9 +185,18 @@ Product Detail → /ready → /checkout (quick ritual)
 - Client-side: localStorage session + token
 - Credentials: adm1 / 123
 
+## Theme System
+
+- **Provider**: `next-themes` wrapped in `components/theme-provider.tsx`, integrated in `app/layout.tsx`
+- **Default**: Dark theme (`:root` in `globals.css`) — darkness is the brand identity
+- **Light theme**: `.light` class in `globals.css` — cream/ivory variant
+- **Toggle**: Sun/Moon icon in site header (`components/site-header.tsx`)
+- **Persistence**: `next-themes` auto-persists via localStorage
+
 ## Environment Variables
 
 - `DATABASE_URL` - Replit PostgreSQL connection string (set automatically)
+- `SUPABASE_DB_URL` - Supabase direct database connection string (for migrations)
 - `OPENAI_API_KEY` (optional) - For AI message generation
 - `NEXT_PUBLIC_RPC_URL` (optional) - Blockchain RPC URL
 - `PRIVATE_KEY` (optional) - Blockchain wallet private key
