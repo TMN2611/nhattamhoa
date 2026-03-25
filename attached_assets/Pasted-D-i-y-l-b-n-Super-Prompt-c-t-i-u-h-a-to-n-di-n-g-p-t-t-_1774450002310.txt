@@ -1,0 +1,61 @@
+Dưới đây là bản Super-Prompt được tối ưu hóa toàn diện, gộp tất cả các yêu cầu về logic Blockchain, UI/UX, và tính năng Admin của bạn. Tôi đã cấu trúc lại để Replit Agent có thể hiểu và thực thi chính xác từng phần mà không làm hỏng các tính năng cũ.
+
+Bạn hãy copy đoạn dưới đây vào ô chat của Replit Agent:
+
+⚠️ TO REPLIT AGENT: ULTIMATE FULL-STACK UPGRADE FOR "NHAT TAM HOA" ⚠️
+Please implement the following comprehensive updates to the project. Ensure visual consistency, mobile optimization, and secure logic.
+
+1. BLOCKCHAIN & ADMIN ORDER LOGIC
+Minting Restriction: In the Admin Dashboard, the "Mint Blockchain" (Đúc Blockchain) button must be disabled by default. It can only be clicked after an order has been marked as "Confirmed/Paid" (Đã xác nhận thanh toán).
+
+Confirmation Popup: When clicking the "Mint" button, display a confirmation popup (similar to the Payment confirmation) asking: "Bạn có chắc chắn muốn đúc chứng thư này lên Blockchain không? Hành động này không thể hoàn tác."
+
+Product Edit UI: When editing a product in Admin, the edit form must appear as a Floating Modal (Popup) centered on the screen with an overlay, instead of appearing below the product list. It must have a clear "Close" (X) button.
+
+2. DUAL THEME & TYPOGRAPHY SYSTEM
+Default Mode: Set Light Mode as the default theme for all new users.
+
+Visual Polish: Audit every component (Inputs, Buttons, Cards, Modals, Forms).
+
+Ensure Light Mode has NO "dark patches" (e.g., black backgrounds on light inputs).
+
+Improve text contrast across both themes. Fix all "dim" or "too small" text to be clearly readable.
+
+Mobile Header: The Header background on mobile devices must be solid (non-transparent) to ensure visibility of navigation items.
+
+3. ADVANCED PRODUCT & MEDIA MANAGEMENT
+Multi-Section Image Uploads: In both "Add Product" and "Edit Product" forms, implement multi-image support for:
+
+Additional Images (Ảnh bổ sung)
+
+Description Details (Ảnh mô tả chi tiết)
+
+Size/Dimensions (Ảnh kích thước)
+
+Policies (Ảnh chính sách đổi trả)
+
+Care Instructions (Cách bảo quản): Each instruction step is represented by one image.
+
+Dual-Source Upload: Every image field must support two options:
+
+Paste Image URL.
+
+Upload directly from the device (PC/Mobile). Implement the backend handler for local file storage.
+
+Banner Management: Add a new Admin section to manage "Banners". Support adding banners via URL or direct file upload.
+
+4. REVISED PRODUCT DETAIL & PURCHASE FLOW
+Sticky Layout: On the Product Detail page (Desktop), the Left side (Images, Description, Care steps) scrolls, while the Right side (Price, Purchase buttons) stays Sticky/Fixed.
+
+Purchase Buttons: Show "Mua ngay" and "Giỏ hàng" only on the Product Detail page. Do not show them on the Home or Grid pages.
+
+Footer Safety: Ensure these buttons do not overlap or hide the Footer when the user scrolls to the bottom of the page.
+
+Ritual Flow Integration: Both buttons must lead directly into the "Ritual/Commitment" flow for that specific product.
+
+5. RECIPIENT AUTO-LOAD LOGIC
+Strict Ritual Rule: * The system must automatically load the recipient's name from the first-ever Ritual order by default.
+
+In the Ritual Flow: This name becomes read-only (cannot be edited) to enforce the "One Person, One Lifetime" philosophy.
+
+If a recipient is already "Locked" in the database, auto-fill it into the Product Detail/Checkout screens.

@@ -68,7 +68,7 @@ border-b border-border/50"
           </span>
         </Link>
 
-        <div className="flex items-center gap-5 w-24 justify-end">
+        <div className="flex items-center gap-5 justify-end">
           <div className="hidden lg:flex items-center gap-6 mr-4">
             {navLinks.slice(2).map((link) => (
               <Link
