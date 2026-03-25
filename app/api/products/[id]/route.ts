@@ -33,7 +33,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 
   try {
     const body = await req.json();
-    const allowedFields = ["name", "description", "price", "image_url", "category", "is_permanent_available", "product_type"];
+    const allowedFields = ["name", "description", "price", "image_url", "category", "is_permanent_available", "product_type", "extra_images", "description_images"];
     const updates: Record<string, any> = {};
 
     for (const k of allowedFields) {

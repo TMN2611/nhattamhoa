@@ -17,6 +17,7 @@ import {
   Minus,
   Plus,
   Package,
+  Lock,
 } from "lucide-react";
 import { CommitmentCertificate } from "@/components/commitment-certificate";
 import { products as fallbackProducts, formatPrice } from "@/lib/products";
@@ -99,6 +100,8 @@ function FormInput({
   error,
   disabled,
   hint,
+  locked,
+  lockReason,
 }: {
   id: string;
   label: string;
@@ -110,6 +113,8 @@ function FormInput({
   error?: string;
   disabled?: boolean;
   hint?: string;
+  locked?: boolean;
+  lockReason?: string;
 }) {
   return (
     <div>
@@ -119,6 +124,11 @@ function FormInput({
       >
         <Icon className="h-4 w-4" />
         {label}
+        {locked && (
+          <span className="ml-auto flex items-center gap-1 text-xs text-[#D4AF37]/80 font-sans bg-[#D4AF37]/10 border border-[#D4AF37]/25 px-2 py-0.5">
+            <Lock className="h-3 w-3" /> Đã xác nhận vĩnh viễn
+          </span>
+        )}
       </label>
       <input
         id={id}
@@ -126,10 +136,19 @@ function FormInput({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
-        disabled={disabled}
-        className={`w-full border border-[#D4AF37]/20 bg-[#0d0b09] px-4 py-3.5 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none focus:border-[#D4AF37]/60 transition-colors font-serif text-base ${disabled ? "opacity-60 cursor-not-allowed bg-[#1a1814]" : ""}`}
+        disabled={disabled || locked}
+        className={`w-full border px-4 py-3.5 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none transition-colors font-serif text-base ${
+          locked
+            ? "border-[#D4AF37]/30 bg-[#1a180f] opacity-80 cursor-not-allowed"
+            : disabled
+              ? "border-[#D4AF37]/20 bg-[#1a1814] opacity-60 cursor-not-allowed"
+              : "border-[#D4AF37]/20 bg-[#0d0b09] focus:border-[#D4AF37]/60"
+        }`}
       />
-      {hint && <p className="mt-1.5 text-xs text-[#D4AF37]/70">{hint}</p>}
+      {locked && lockReason && (
+        <p className="mt-1.5 text-xs text-[#D4AF37]/60">{lockReason}</p>
+      )}
+      {hint && !locked && <p className="mt-1.5 text-xs text-[#D4AF37]/70">{hint}</p>}
       {error && <p className="mt-1.5 text-xs text-[#A52525]">{error}</p>}
     </div>
   );
@@ -309,7 +328,7 @@ export function CheckoutContent() {
         setLookupLoading(true);
         try {
           const res = await fetch(
-            `/api/orders/lookup?phone=${encodeURIComponent(phone)}`,
+            `/api/orders/lookup?phone=${encodeURIComponent(phone)}&flow=${encodeURIComponent(flow)}`,
           );
           const data = await res.json();
           setLastLookedUpPhone(phone);
@@ -653,12 +672,8 @@ export function CheckoutContent() {
               value={formData.senderName}
               onChange={updateField("senderName")}
               error={errors.senderName}
-              disabled={flow === "ritual" && senderLocked}
-              hint={
-                flow === "ritual" && senderLocked
-                  ? "Tên người gửi được khóa theo nghi lễ trước đó"
-                  : undefined
-              }
+              locked={flow === "ritual" && senderLocked}
+              lockReason="Tên người gửi đã được gắn với nghi lễ trước đó"
             />
             <FormInput
               id="phone"
@@ -679,12 +694,8 @@ export function CheckoutContent() {
               value={formData.receiverName}
               onChange={updateField("receiverName")}
               error={errors.receiverName}
-              disabled={flow === "ritual" && receiverLocked}
-              hint={
-                flow === "ritual" && receiverLocked
-                  ? "Tên người nhận được khóa theo nghi lễ trước đó"
-                  : undefined
-              }
+              locked={flow === "ritual" && receiverLocked}
+              lockReason="Một đời chỉ một người — tên này đã được khắc vào nghi lễ vĩnh cửu"
             />
 
             <FormInput

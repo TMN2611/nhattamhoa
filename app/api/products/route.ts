@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { name, description, price, image_url, category, is_permanent_available, product_type } = body;
+    const { name, description, price, image_url, category, is_permanent_available, product_type, extra_images, description_images } = body;
 
     if (!name || !price) {
       return NextResponse.json({ error: "Name and price are required" }, { status: 400 });
@@ -41,6 +41,8 @@ export async function POST(req: Request) {
         category: category ?? null,
         is_permanent_available: typeof is_permanent_available === "boolean" ? is_permanent_available : true,
         product_type: product_type ?? "gift",
+        extra_images: Array.isArray(extra_images) ? extra_images : [],
+        description_images: Array.isArray(description_images) ? description_images : [],
       })
       .select("*")
       .single();

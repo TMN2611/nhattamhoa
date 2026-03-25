@@ -31,7 +31,7 @@ All data is stored in **Supabase** (PostgreSQL). The Supabase client is initiali
 
 ### Tables
 
-**products**: id (uuid), name, description, price, image_url, category, is_permanent_available (boolean), product_type, created_at
+**products**: id (uuid), name, description, price, image_url, category, is_permanent_available (boolean), product_type, extra_images (jsonb array of URLs), description_images (jsonb array of URLs), created_at
 
 **orders**: id (uuid), product_id, customer_id, sender_name, receiver_name, phone, message, ritual_type, offering, certificate_id, blockchain_hash, public_vow, permanence_type, status, created_at, receiver_phone, receiver_address, quantity
 
