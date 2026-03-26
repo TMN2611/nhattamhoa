@@ -45,18 +45,18 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
       return NextResponse.json({ error: 'Certificate not found' }, { status: 404 })
     }
 
-    const PDFDocument = (await import('pdfkit')).default
-    const QRCode = await import('qrcode')
-
     const fontPath = path.join(process.cwd(), 'fonts', 'DejaVuSans.ttf')
     if (!fs.existsSync(fontPath)) {
-      return NextResponse.json({ error: 'Font file not found' }, { status: 500 })
+      return NextResponse.json({ error: 'Font file not found at ' + fontPath }, { status: 500 })
     }
+
+    const fontBytes = fs.readFileSync(fontPath)
 
     const host = req.headers.get('host') || 'nhattamhoa.replit.app'
     const protocol = req.headers.get('x-forwarded-proto') || 'https'
-    const verifyUrl = `${protocol}://${host}/verify/${code}`
+    const verifyUrl = `${protocol}://${host}/certificate/${code}`
 
+    const QRCode = await import('qrcode')
     const qrDataUrl = await QRCode.toDataURL(verifyUrl, {
       width: 200,
       margin: 1,
@@ -64,17 +64,25 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
     })
     const qrBuffer = Buffer.from(qrDataUrl.split(',')[1], 'base64')
 
-    const doc = new PDFDocument({ size: 'A4', margin: 50 })
-    const chunks: Buffer[] = []
+    const PDFDocument = (await import('pdfkit')).default
 
+    const doc = new PDFDocument({
+      size: 'A4',
+      margin: 50,
+      autoFirstPage: false,
+    })
+
+    doc.registerFont('Vietnamese', fontBytes)
+
+    doc.addPage({ size: 'A4', margin: 50 })
+    doc.font('Vietnamese')
+
+    const chunks: Buffer[] = []
     doc.on('data', (chunk: Buffer) => chunks.push(chunk))
 
     const pdfReady = new Promise<Buffer>((resolve) => {
       doc.on('end', () => resolve(Buffer.concat(chunks)))
     })
-
-    doc.registerFont('Vietnamese', fontPath)
-    doc.font('Vietnamese')
 
     doc.rect(0, 0, 595, 842).fill('#0a0a08')
 
@@ -83,11 +91,13 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
     doc.strokeColor('#D4AF37').lineWidth(0.5)
     doc.rect(25, 25, 545, 792).stroke()
 
+    doc.font('Vietnamese')
+
     doc.fillColor('#D4AF37').fontSize(10)
     doc.text('FLOWER INTENTION CERTIFICATE', 0, 55, { align: 'center', width: 595 })
 
     doc.fillColor('#F5E6C8').fontSize(32)
-    doc.text('NHẤT TÂM HOA', 0, 80, { align: 'center', width: 595 })
+    doc.text('NHAT TAM HOA', 0, 80, { align: 'center', width: 595 })
 
     doc.fillColor('#D4AF37').fontSize(9)
     doc.text('ETERNAL ROSES', 0, 120, { align: 'center', width: 595 })
@@ -101,19 +111,20 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
     let y = 185
 
     const fields = [
-      { label: 'NGƯỜI GỬI', value: orderData.sender_name },
-      { label: 'NGƯỜI NHẬN', value: orderData.receiver_name },
-      { label: 'LỜI NHẮN', value: orderData.message },
-      { label: 'NGHI THỨC', value: orderData.ritual_type || 'Lời Thề Vĩnh Cửu' },
-      { label: 'NGÀY TẠO', value: new Date(orderData.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' }) },
+      { label: 'NGUOI GUI', value: orderData.sender_name },
+      { label: 'NGUOI NHAN', value: orderData.receiver_name },
+      { label: 'LOI NHAN', value: orderData.message },
+      { label: 'NGHI THUC', value: orderData.ritual_type || 'Loi The Vinh Cuu' },
+      { label: 'NGAY TAO', value: new Date(orderData.created_at).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' }) },
     ]
 
     for (const field of fields) {
+      doc.font('Vietnamese')
       doc.fillColor('#D4AF37').fontSize(8)
       doc.text(field.label, 60, y)
 
       doc.fillColor('#F5E6C8').fontSize(12)
-      if (field.label === 'LỜI NHẮN') {
+      if (field.label === 'LOI NHAN') {
         const textHeight = doc.heightOfString(field.value || '', { width: 400 })
         doc.text(field.value || '', 60, y + 14, { width: 400 })
         y += 14 + textHeight + 16
@@ -128,22 +139,25 @@ export async function GET(req: Request, { params }: { params: Promise<{ code: st
 
     y += 20
 
+    doc.font('Vietnamese')
     doc.fillColor('#D4AF37').fontSize(8)
-    doc.text('XÁC THỰC BLOCKCHAIN', 60, y)
+    doc.text('XAC THUC BLOCKCHAIN', 60, y)
     doc.fillColor('#8A7D65').fontSize(7)
     doc.text(orderData.blockchain_hash || '', 60, y + 14, { width: 350 })
 
     doc.image(qrBuffer, 430, y - 10, { width: 100 })
 
+    doc.font('Vietnamese')
     doc.fillColor('#8A7D65').fontSize(6)
-    doc.text('Quét mã QR để xác thực', 430, y + 95, { width: 100, align: 'center' })
+    doc.text('Quet ma QR de xac thuc', 430, y + 95, { width: 100, align: 'center' })
 
     const bottomY = 770
     doc.strokeColor('#D4AF37').lineWidth(0.5)
     doc.moveTo(200, bottomY).lineTo(395, bottomY).stroke()
 
+    doc.font('Vietnamese')
     doc.fillColor('#C5A55A').fontSize(11)
-    doc.text('Một đời, một đóa, một người.', 0, bottomY + 10, { align: 'center', width: 595 })
+    doc.text('Mot doi, mot doa, mot nguoi.', 0, bottomY + 10, { align: 'center', width: 595 })
 
     doc.end()
 

@@ -183,7 +183,7 @@ function ConfirmModal({
 }) {
   if (!open) return null;
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/80 backdrop-blur-sm">
       <div className="bg-card border border-gold/30 p-6 max-w-md w-full mx-4 shadow-2xl">
         <h3 className="text-lg font-display text-foreground mb-2">{title}</h3>
         <p className="text-sm text-muted-foreground mb-4 leading-relaxed">{message}</p>
@@ -202,7 +202,7 @@ function ConfirmModal({
             className={`px-5 py-2 text-sm uppercase font-bold flex items-center gap-2 transition-colors disabled:opacity-60 ${
               confirmVariant === "danger"
                 ? "bg-red-700 text-white hover:bg-red-600"
-                : "bg-gold text-black hover:bg-[var(--gold-dim)]"
+                : "bg-gold text-primary-foreground hover:bg-[var(--gold-dim)]"
             }`}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}
@@ -374,7 +374,7 @@ function DualImageUploader({
       <label className="text-[10px] text-muted-foreground uppercase">{label}</label>
       <div className="flex gap-3 items-start">
         <div
-          className="w-16 h-16 border border-gold/20 bg-black/50 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-gold/40 transition-colors"
+          className="w-16 h-16 border border-gold/20 bg-card/50 flex items-center justify-center overflow-hidden flex-shrink-0 cursor-pointer hover:border-gold/40 transition-colors"
           onClick={() => fileRef.current?.click()}
           title="Nhấp để tải ảnh lên"
         >
@@ -393,7 +393,7 @@ function DualImageUploader({
               onBlur={handleUrlCommit}
               onKeyDown={(e) => e.key === "Enter" && handleUrlCommit()}
               placeholder="Dán URL ảnh..."
-              className="flex-1 border border-gold/20 bg-black/60 px-2.5 py-1.5 text-foreground text-xs outline-none focus:border-gold/50 placeholder-[var(--muted-foreground)]"
+              className="flex-1 border border-gold/20 bg-card/60 px-2.5 py-1.5 text-foreground text-xs outline-none focus:border-gold/50 placeholder-[var(--muted-foreground)]"
             />
             <button
               type="button"
@@ -501,9 +501,9 @@ function MultiImageList({
       {images.length > 0 && (
         <div className="grid grid-cols-3 gap-2 mb-1">
           {images.map((url, idx) => (
-            <div key={idx} className="relative group aspect-video bg-black/50 border border-gold/10 overflow-hidden">
+            <div key={idx} className="relative group aspect-video bg-card/50 border border-gold/10 overflow-hidden">
               <img src={url} alt="" className="w-full h-full object-cover" />
-              <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
+              <div className="absolute inset-0 bg-background/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-1">
                 <div className="flex gap-1">
                   <button type="button" onClick={() => moveUp(idx)} title="Lên" className="text-gold text-xs p-1 hover:bg-white/10">↑</button>
                   <button type="button" onClick={() => moveDown(idx)} title="Xuống" className="text-gold text-xs p-1 hover:bg-white/10">↓</button>
@@ -520,7 +520,7 @@ function MultiImageList({
           onChange={(e) => setUrlInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && addUrl()}
           placeholder="Dán URL ảnh..."
-          className="flex-1 border border-gold/20 bg-black px-3 py-2 text-foreground text-sm outline-none"
+          className="flex-1 border border-gold/20 bg-card px-3 py-2 text-foreground text-sm outline-none"
         />
         <button type="button" onClick={addUrl} className="px-3 py-2 border border-gold/30 text-gold text-xs uppercase hover:bg-gold/10">Thêm</button>
         <button
@@ -964,14 +964,14 @@ export default function AdminDashboardPage() {
 
   if (isLoading) {
     return (
-      <main className="min-h-screen bg-black p-6 flex items-center justify-center">
+      <main className="min-h-screen bg-background p-6 flex items-center justify-center">
         <Loader2 className="h-8 w-8 text-gold animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-black p-4 md:p-6">
+    <main className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-2xl md:text-3xl font-light font-display text-foreground">
@@ -1026,7 +1026,7 @@ export default function AdminDashboardPage() {
                     description_images: [],
                   });
                 }}
-                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#B8860B] via-[var(--gold)] to-[#B8860B] text-black text-sm uppercase font-medium"
+                className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-[#B8860B] via-[var(--gold)] to-[#B8860B] text-primary-foreground text-sm uppercase font-medium"
               >
                 <Plus className="h-4 w-4" /> Thêm sản phẩm
               </button>
@@ -1050,7 +1050,7 @@ export default function AdminDashboardPage() {
                       className="border-b border-gold/10 hover:bg-[var(--secondary)] transition-colors"
                     >
                       <td className="px-4 py-3">
-                        <div className="w-12 h-12 bg-black/50 border border-gold/10 overflow-hidden">
+                        <div className="w-12 h-12 bg-card/50 border border-gold/10 overflow-hidden">
                           {product.image_url ? (
                             <img
                               src={product.image_url}
@@ -1121,7 +1121,7 @@ export default function AdminDashboardPage() {
                     value={bannerForm.title}
                     onChange={(e) => setBannerForm((f) => ({ ...f, title: e.target.value }))}
                     placeholder="Tên banner"
-                    className="border border-gold/20 bg-black px-3 py-2 text-foreground text-sm outline-none"
+                    className="border border-gold/20 bg-card px-3 py-2 text-foreground text-sm outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -1130,7 +1130,7 @@ export default function AdminDashboardPage() {
                     value={bannerForm.link_url}
                     onChange={(e) => setBannerForm((f) => ({ ...f, link_url: e.target.value }))}
                     placeholder="https://..."
-                    className="border border-gold/20 bg-black px-3 py-2 text-foreground text-sm outline-none"
+                    className="border border-gold/20 bg-card px-3 py-2 text-foreground text-sm outline-none"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -1144,7 +1144,7 @@ export default function AdminDashboardPage() {
               <button
                 onClick={handleAddBanner}
                 disabled={actionLoading === "banner-add"}
-                className="mt-4 flex items-center gap-2 px-6 py-2.5 bg-gold text-black text-sm uppercase font-bold disabled:opacity-50"
+                className="mt-4 flex items-center gap-2 px-6 py-2.5 bg-gold text-primary-foreground text-sm uppercase font-bold disabled:opacity-50"
               >
                 {actionLoading === "banner-add" && <Loader2 className="h-4 w-4 animate-spin" />}
                 <Plus className="h-4 w-4" />
@@ -1166,7 +1166,7 @@ export default function AdminDashboardPage() {
                 <div className="divide-y divide-[var(--gold)]/10">
                   {banners.map((banner) => (
                     <div key={banner.id} className="flex items-center gap-4 px-4 py-3">
-                      <div className="w-24 h-14 bg-black/50 border border-gold/10 overflow-hidden flex-shrink-0">
+                      <div className="w-24 h-14 bg-card/50 border border-gold/10 overflow-hidden flex-shrink-0">
                         <img
                           src={banner.image_url}
                           alt={banner.title || "Banner"}
@@ -1329,7 +1329,7 @@ export default function AdminDashboardPage() {
                       value={editForm.sender_name}
                       onChange={(e) => setEditForm((f) => ({ ...f, sender_name: e.target.value }))}
                       disabled={isFieldLocked(editingOrder, "sender_name")}
-                      className="border border-gold/20 bg-black px-4 py-2 text-foreground text-sm outline-none disabled:opacity-40"
+                      className="border border-gold/20 bg-card px-4 py-2 text-foreground text-sm outline-none disabled:opacity-40"
                     />
                   </div>
                   <div className="flex flex-col gap-1">
@@ -1338,7 +1338,7 @@ export default function AdminDashboardPage() {
                       value={editForm.receiver_name}
                       onChange={(e) => setEditForm((f) => ({ ...f, receiver_name: e.target.value }))}
                       disabled={isFieldLocked(editingOrder, "receiver_name")}
-                      className="border border-gold/20 bg-black px-4 py-2 text-foreground text-sm outline-none disabled:opacity-40"
+                      className="border border-gold/20 bg-card px-4 py-2 text-foreground text-sm outline-none disabled:opacity-40"
                     />
                   </div>
                   <div className="flex flex-col gap-1 md:col-span-2">
@@ -1347,14 +1347,14 @@ export default function AdminDashboardPage() {
                       value={editForm.message}
                       onChange={(e) => setEditForm((f) => ({ ...f, message: e.target.value }))}
                       rows={3}
-                      className="border border-gold/20 bg-black px-4 py-2 text-foreground text-sm outline-none resize-none"
+                      className="border border-gold/20 bg-card px-4 py-2 text-foreground text-sm outline-none resize-none"
                     />
                   </div>
                 </div>
                 <button
                   onClick={saveEditOrder}
                   disabled={actionLoading === editingOrder.id}
-                  className="mt-4 px-8 py-2.5 bg-gold text-black text-sm uppercase font-bold flex items-center gap-2"
+                  className="mt-4 px-8 py-2.5 bg-gold text-primary-foreground text-sm uppercase font-bold flex items-center gap-2"
                 >
                   {actionLoading === editingOrder.id && (
                     <Loader2 className="h-4 w-4 animate-spin" />
@@ -1559,7 +1559,7 @@ export default function AdminDashboardPage() {
       {/* =========== FLOATING PRODUCT MODAL =========== */}
       {showProductForm && (
         <div
-          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-background/80 backdrop-blur-sm p-4"
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowProductForm(false);
@@ -1591,7 +1591,7 @@ export default function AdminDashboardPage() {
                     value={productForm.name}
                     onChange={(e) => setProductForm((p) => ({ ...p, name: e.target.value }))}
                     placeholder="Nhập tên sản phẩm"
-                    className="border border-gold/20 bg-black px-4 py-2 text-foreground focus:border-gold/60 text-sm outline-none"
+                    className="border border-gold/20 bg-card px-4 py-2 text-foreground focus:border-gold/60 text-sm outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -1604,7 +1604,7 @@ export default function AdminDashboardPage() {
                         product_type: e.target.value as "gift" | "ritual",
                       }))
                     }
-                    className="border border-gold/20 bg-black px-4 py-2 text-foreground focus:border-gold/60 text-sm outline-none cursor-pointer"
+                    className="border border-gold/20 bg-card px-4 py-2 text-foreground focus:border-gold/60 text-sm outline-none cursor-pointer"
                   >
                     <option value="gift">🎁 Gift Collection</option>
                     <option value="ritual">🕯️ Ritual Collection</option>
@@ -1617,7 +1617,7 @@ export default function AdminDashboardPage() {
                     onChange={(e) => setProductForm((p) => ({ ...p, price: e.target.value }))}
                     placeholder="Ví dụ: 2500000"
                     type="number"
-                    className="border border-gold/20 bg-black px-4 py-2 text-foreground text-sm outline-none"
+                    className="border border-gold/20 bg-card px-4 py-2 text-foreground text-sm outline-none"
                   />
                 </div>
                 <div className="flex flex-col gap-1">
@@ -1626,7 +1626,7 @@ export default function AdminDashboardPage() {
                     value={productForm.category}
                     onChange={(e) => setProductForm((p) => ({ ...p, category: e.target.value }))}
                     placeholder="Ví dụ: Luxury, Premium"
-                    className="border border-gold/20 bg-black px-4 py-2 text-foreground text-sm outline-none"
+                    className="border border-gold/20 bg-card px-4 py-2 text-foreground text-sm outline-none"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -1643,7 +1643,7 @@ export default function AdminDashboardPage() {
                     onChange={(e) => setProductForm((p) => ({ ...p, description: e.target.value }))}
                     placeholder="Nhập mô tả chi tiết sản phẩm..."
                     rows={4}
-                    className="border border-gold/20 bg-black px-4 py-2 text-foreground text-sm outline-none resize-none"
+                    className="border border-gold/20 bg-card px-4 py-2 text-foreground text-sm outline-none resize-none"
                   />
                 </div>
                 <div className="md:col-span-2">
@@ -1664,7 +1664,7 @@ export default function AdminDashboardPage() {
                   <label className="flex items-center gap-3 cursor-pointer">
                     <div
                       className={`w-10 h-5 flex items-center rounded-full transition-colors ${
-                        productForm.is_permanent_available ? "bg-gold" : "bg-[#333]"
+                        productForm.is_permanent_available ? "bg-gold" : "bg-secondary"
                       }`}
                       onClick={() =>
                         setProductForm((p) => ({
@@ -1697,7 +1697,7 @@ export default function AdminDashboardPage() {
                 <button
                   disabled={actionLoading === "product-save"}
                   onClick={handleSaveProduct}
-                  className="flex-1 py-2.5 bg-gold text-black text-sm uppercase font-bold flex items-center justify-center gap-2 hover:bg-[var(--gold-dim)] transition-colors disabled:opacity-60"
+                  className="flex-1 py-2.5 bg-gold text-primary-foreground text-sm uppercase font-bold flex items-center justify-center gap-2 hover:bg-[var(--gold-dim)] transition-colors disabled:opacity-60"
                 >
                   {actionLoading === "product-save" && (
                     <Loader2 className="h-4 w-4 animate-spin" />

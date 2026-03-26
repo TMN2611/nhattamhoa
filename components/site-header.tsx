@@ -112,66 +112,49 @@ export function SiteHeader() {
         </div>
       </nav>
 
-      <div
-        className={`lg:hidden fixed inset-0 top-[65px] z-40 transition-all duration-500 ${
-          mobileMenuOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-      >
+      {mobileMenuOpen && (
         <div
-          className="absolute inset-0 bg-background/95 backdrop-blur-lg"
-          onClick={() => setMobileMenuOpen(false)}
-        />
-
-        <div className="relative z-10 flex flex-col items-center justify-center gap-1 pt-12 px-6">
-          {navLinks.map((link, i) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              onClick={() => setMobileMenuOpen(false)}
-              className={`py-4 text-lg tracking-[0.2em] uppercase font-display transition-all duration-500 ${
-                pathname === link.href
-                  ? "text-[var(--gold)]"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-              style={{
-                transitionDelay: mobileMenuOpen ? `${i * 60}ms` : "0ms",
-                opacity: mobileMenuOpen ? 1 : 0,
-                transform: mobileMenuOpen
-                  ? "translateY(0)"
-                  : "translateY(12px)",
-              }}
-            >
-              {link.label}
-            </Link>
-          ))}
-
+          className="lg:hidden fixed inset-0 top-[65px] z-[998] bg-background backdrop-blur-lg"
+        >
           <div
-            className="mt-6 h-px w-20"
-            style={{
-              background:
-                "linear-gradient(90deg, transparent, var(--gold), transparent)",
-              opacity: mobileMenuOpen ? 1 : 0,
-              transition: "opacity 600ms",
-              transitionDelay: mobileMenuOpen ? "400ms" : "0ms",
-            }}
+            className="absolute inset-0"
+            onClick={() => setMobileMenuOpen(false)}
           />
 
-          <Link
-            href="/checkout"
-            onClick={() => setMobileMenuOpen(false)}
-            className="mt-6 text-sm tracking-[0.2em] uppercase text-muted-foreground hover:text-foreground transition-colors"
-            style={{
-              opacity: mobileMenuOpen ? 1 : 0,
-              transition: "opacity 500ms",
-              transitionDelay: mobileMenuOpen ? "450ms" : "0ms",
-            }}
-          >
-            {"Giỏ hàng"}
-          </Link>
+          <div className="relative z-10 flex flex-col items-center justify-center gap-1 pt-12 px-6">
+            {navLinks.map((link, i) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                onClick={() => setMobileMenuOpen(false)}
+                className={`py-4 text-lg tracking-[0.2em] uppercase font-display ${
+                  pathname === link.href
+                    ? "text-[var(--gold)]"
+                    : "text-foreground"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
+
+            <div
+              className="mt-6 h-px w-20"
+              style={{
+                background:
+                  "linear-gradient(90deg, transparent, var(--gold), transparent)",
+              }}
+            />
+
+            <Link
+              href="/checkout"
+              onClick={() => setMobileMenuOpen(false)}
+              className="mt-6 text-sm tracking-[0.2em] uppercase text-foreground hover:text-[var(--gold)] transition-colors"
+            >
+              {"Giỏ hàng"}
+            </Link>
+          </div>
         </div>
-      </div>
+      )}
     </header>
   );
 }

@@ -19,7 +19,7 @@ interface Order {
 
 export default function LookupPage() {
   const router = useRouter()
-  const [tab, setTab] = useState<'code' | 'phone'>('code')
+  const [tab, setTab] = useState<'code' | 'phone'>('phone')
   const [code, setCode] = useState('')
   const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
@@ -107,17 +107,6 @@ export default function LookupPage() {
 
         <div className="flex border border-border mb-8">
           <button
-            onClick={() => { setTab('code'); setError(''); setOrders([]); setSearched(false) }}
-            className={`flex-1 py-3 text-xs tracking-[0.2em] uppercase font-medium transition-all ${
-              tab === 'code'
-                ? 'bg-gold text-primary-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            <FileText className="h-3.5 w-3.5 inline mr-2" />
-            Mã chứng thư
-          </button>
-          <button
             onClick={() => { setTab('phone'); setError(''); setOrders([]); setSearched(false) }}
             className={`flex-1 py-3 text-xs tracking-[0.2em] uppercase font-medium transition-all ${
               tab === 'phone'
@@ -127,6 +116,17 @@ export default function LookupPage() {
           >
             <Phone className="h-3.5 w-3.5 inline mr-2" />
             Số điện thoại
+          </button>
+          <button
+            onClick={() => { setTab('code'); setError(''); setOrders([]); setSearched(false) }}
+            className={`flex-1 py-3 text-xs tracking-[0.2em] uppercase font-medium transition-all ${
+              tab === 'code'
+                ? 'bg-gold text-primary-foreground'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            <FileText className="h-3.5 w-3.5 inline mr-2" />
+            Mã chứng thư
           </button>
         </div>
 
@@ -221,12 +221,6 @@ export default function LookupPage() {
                           {status.label}
                         </span>
                       </div>
-
-                      {order.message && (
-                        <p className="text-sm text-muted-foreground italic font-display leading-relaxed border-l-2 border-gold/20 pl-3">
-                          &ldquo;{order.message}&rdquo;
-                        </p>
-                      )}
 
                       <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                         <Clock className="h-3 w-3" />

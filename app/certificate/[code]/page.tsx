@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Download, Shield } from 'lucide-react'
+import { QRCodeSVG } from 'qrcode.react'
 
 interface CertificateData {
   code: string
@@ -48,6 +49,10 @@ export default function CertificatePage() {
     window.open(`/api/certificate/${cert.code}/pdf`, '_blank')
   }
 
+  const verifyUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/certificate/${code}`
+    : `/certificate/${code}`
+
   if (loading) {
     return (
       <main className="min-h-screen bg-background flex items-center justify-center">
@@ -72,9 +77,9 @@ export default function CertificatePage() {
   return (
     <main className="min-h-screen bg-background py-20 px-6">
       <div className="max-w-2xl mx-auto">
-        <div className="p-[3px] bg-gradient-to-br from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">
+        <div className="p-[3px] bg-gradient-to-br from-[var(--gold)] via-[#B8860B] to-[var(--gold)]">
           <div className="p-[6px] bg-background">
-            <div className="p-[2px] bg-gradient-to-br from-[#D4AF37]/60 via-[#B8860B]/40 to-[#D4AF37]/60">
+            <div className="p-[2px] bg-gradient-to-br from-[var(--gold)]/60 via-[#B8860B]/40 to-[var(--gold)]/60">
               <div className="bg-card px-8 py-12 md:px-16 md:py-16">
                 <div className="text-center mb-10">
                   <p className="text-xs tracking-[0.35em] uppercase text-gold mb-4">
@@ -88,7 +93,7 @@ export default function CertificatePage() {
                   </p>
                 </div>
 
-                <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mb-10" />
+                <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent mb-10" />
 
                 <div className="space-y-6">
                   <div>
@@ -117,21 +122,38 @@ export default function CertificatePage() {
                   </div>
                 </div>
 
-                <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent my-10" />
+                <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[var(--gold)] to-transparent my-10" />
 
-                <div className="p-4 border border-gold/20 bg-black/40">
-                  <div className="flex items-center gap-2 mb-2">
-                    <Shield className="h-4 w-4 text-gold" />
-                    <p className="text-[10px] tracking-[0.2em] uppercase text-gold">
-                      Blockchain Verification
+                <div className="flex flex-col md:flex-row items-center gap-6">
+                  <div className="flex-1 p-4 border border-gold/20 bg-secondary/40 w-full">
+                    <div className="flex items-center gap-2 mb-2">
+                      <Shield className="h-4 w-4 text-gold" />
+                      <p className="text-[10px] tracking-[0.2em] uppercase text-gold">
+                        Blockchain Verification
+                      </p>
+                    </div>
+                    <p className="text-[10px] text-muted-foreground font-mono break-all">
+                      {cert.blockchain_hash}
                     </p>
+                    <div className="flex items-center gap-1.5 mt-2">
+                      <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
+                      <span className="text-[9px] text-green-500 uppercase tracking-widest">Verified</span>
+                    </div>
                   </div>
-                  <p className="text-[10px] text-muted-foreground font-mono break-all">
-                    {cert.blockchain_hash}
-                  </p>
-                  <div className="flex items-center gap-1.5 mt-2">
-                    <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-                    <span className="text-[9px] text-green-500 uppercase tracking-widest">Verified</span>
+
+                  <div className="flex flex-col items-center gap-2">
+                    <div className="p-3 bg-white rounded">
+                      <QRCodeSVG
+                        value={verifyUrl}
+                        size={120}
+                        level="H"
+                        fgColor="#0a0a08"
+                        bgColor="#ffffff"
+                      />
+                    </div>
+                    <p className="text-[9px] text-muted-foreground tracking-wider uppercase">
+                      Quét để xác thực
+                    </p>
                   </div>
                 </div>
 
@@ -146,7 +168,7 @@ export default function CertificatePage() {
         <div className="flex items-center justify-center gap-6 mt-8">
           <button
             onClick={handleDownloadPDF}
-            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] font-medium tracking-wider uppercase text-xs transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
+            className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#B8860B] via-[var(--gold)] to-[#B8860B] text-primary-foreground font-medium tracking-wider uppercase text-xs transition-all hover:shadow-[0_0_20px_rgba(212,175,55,0.3)]"
           >
             <Download className="h-4 w-4" />
             Download Certificate PDF
