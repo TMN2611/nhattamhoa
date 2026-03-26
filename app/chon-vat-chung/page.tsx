@@ -79,11 +79,11 @@ export default function SelectTokenPage() {
         <div className="mx-auto max-w-6xl">
           {loading ? (
             <div className="flex items-center justify-center py-20">
-              <Loader2 className="h-8 w-8 animate-spin text-[#D4AF37]" />
+              <Loader2 className="h-8 w-8 animate-spin text-gold" />
             </div>
           ) : products.length === 0 ? (
-            <div className="text-center py-20 border border-[#D4AF37]/10">
-              <p className="text-[#8A7D65]">Hiện chưa có vật chứng nào.</p>
+            <div className="text-center py-20 border border-gold/10">
+              <p className="text-muted-foreground">Hiện chưa có vật chứng nào.</p>
             </div>
           ) : (
             <div className={`grid grid-cols-1 ${products.length === 2 ? 'md:grid-cols-2 max-w-4xl mx-auto' : 'md:grid-cols-3'} gap-6 lg:gap-8`}>
@@ -131,50 +131,47 @@ export default function SelectTokenPage() {
                         />
                         {isSelected && (
                           <div className="absolute top-4 right-4 flex h-8 w-8 items-center justify-center bg-[#D4AF37]">
-                            <Check className="h-5 w-5" style={{ color: '#0a0a08' }} />
+                            <Check className="h-5 w-5" />
                           </div>
                         )}
                         {isPreselected && !isSelected && (
-                          <div className="absolute top-4 left-4 px-2 py-1 bg-[#D4AF37]/20 border border-[#D4AF37]/30">
-                            <span className="text-[9px] tracking-[0.15em] uppercase text-[#D4AF37]">Đã chọn trước</span>
+                          <div className="absolute top-4 left-4 px-2 py-1 bg-[#D4AF37]/20 border border-gold/30">
+                            <span className="text-[9px] tracking-[0.15em] uppercase text-gold">Đã chọn trước</span>
                           </div>
                         )}
                       </div>
 
                       <div className="flex flex-col flex-1 p-6 lg:p-8">
                         {product.category && (
-                          <p
-                            className="text-xs tracking-[0.3em] uppercase mb-3"
-                            style={{ color: '#C5A55A' }}
-                          >
+                          <p className="text-xs tracking-[0.3em] uppercase mb-3 text-gold-dim">
                             {product.category}
                           </p>
                         )}
 
                         <h3
-                          className="text-xl lg:text-2xl font-display font-light mb-4 transition-colors duration-500"
-                          style={{ color: isSelected ? '#F5E6C8' : '#C5A55A' }}
+                          className={`text-xl lg:text-2xl font-display font-light mb-4 transition-colors duration-500 ${
+                            isSelected ? 'text-foreground' : 'text-gold'
+                          }`}
                         >
                           {product.name}
                         </h3>
 
-                        <p
-                          className="text-sm leading-relaxed mb-6 flex-1"
-                          style={{ color: '#8A7D65' }}
-                        >
+                        <p className="text-sm leading-relaxed mb-6 flex-1 text-muted-foreground">
                           {product.description}
                         </p>
 
-                        <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: 'rgba(212,175,55,0.1)' }}>
+                        <div className="flex items-center justify-between pt-4 border-t border-gold/10">
                           <span
-                            className="text-lg font-display tracking-wide"
-                            style={{ color: isSelected ? '#D4AF37' : '#6B5F4A' }}
+                            className={`text-lg font-display tracking-wide ${
+                              isSelected ? 'text-gold' : 'text-muted-foreground'
+                            }`}
                           >
                             {formatPrice(product.price)}
                           </span>
                           <span
-                            className="text-xs tracking-[0.2em] uppercase transition-colors duration-500"
-                            style={{ color: isSelected ? '#D4AF37' : '#555040' }}
+                            className={`text-xs tracking-[0.2em] uppercase transition-colors duration-500 ${
+                              isSelected ? 'text-gold' : 'text-muted-foreground/50'
+                            }`}
                           >
                             {isSelected ? 'Đã chọn' : 'Chọn vật chứng này'}
                           </span>
@@ -194,10 +191,7 @@ export default function SelectTokenPage() {
           <div className="mx-auto max-w-xl text-center">
             <GoldDivider className="mb-12" />
 
-            <p
-              className="text-lg md:text-xl font-display italic leading-relaxed mb-10"
-              style={{ color: '#8A7D65' }}
-            >
+            <p className="text-lg md:text-xl font-display italic leading-relaxed mb-10 text-muted-foreground">
               {'Lựa chọn này sẽ đi cùng lời thề của bạn.'}
             </p>
 
@@ -207,7 +201,7 @@ export default function SelectTokenPage() {
               className={`w-full max-w-md mx-auto py-5 flex items-center justify-center gap-3 text-sm tracking-[0.25em] uppercase font-medium transition-all duration-700 cursor-pointer ${
                 selectedId
                   ? 'bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] shadow-[0_0_40px_rgba(212,175,55,0.15)] hover:shadow-[0_0_60px_rgba(212,175,55,0.25)]'
-                  : 'bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]'
+                  : 'bg-secondary text-muted-foreground/50 cursor-not-allowed border border-border'
               }`}
             >
               {selectedProduct ? `Tiếp tục với ${selectedProduct.name}` : 'Tiếp tục hoàn tất lời thề'}
@@ -215,7 +209,7 @@ export default function SelectTokenPage() {
             </button>
 
             {!selectedId && (
-              <p className="mt-4 text-sm" style={{ color: '#6B5F4A' }}>
+              <p className="mt-4 text-sm">
                 {'Hãy chọn một vật chứng để tiếp tục'}
               </p>
             )}

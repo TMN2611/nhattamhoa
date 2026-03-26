@@ -30,17 +30,17 @@ export default function AdminLoginPage() {
     <main className="min-h-screen bg-black flex items-center justify-center px-6">
       <div className="w-full max-w-md">
         <div className="text-center mb-10">
-          <h1 className="text-4xl font-light font-display text-[#F5E6C8] mb-2">
+          <h1 className="text-4xl font-light font-display text-foreground mb-2">
             Nhất Tâm Hoa
           </h1>
-          <p className="text-[#D4AF37] tracking-[0.2em] text-xs uppercase">
+          <p className="text-gold tracking-[0.2em] text-xs uppercase">
             Admin Portal
           </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-[#C5A55A] text-sm mb-2 tracking-wide">
+            <label className="block text-gold text-sm mb-2 tracking-wide">
               Tên người dùng
             </label>
             <input
@@ -48,13 +48,13 @@ export default function AdminLoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder="Nhập tên người dùng"
-              className="w-full border border-[#D4AF37]/20 bg-[#0d0b09] px-4 py-3 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none focus:border-[#D4AF37]/60 transition-colors"
+              className="w-full border border-gold/20 bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-gold/60 transition-colors"
               disabled={isLoading}
             />
           </div>
 
           <div>
-            <label className="block text-[#C5A55A] text-sm mb-2 tracking-wide">
+            <label className="block text-gold text-sm mb-2 tracking-wide">
               Mật khẩu
             </label>
             <input
@@ -62,7 +62,7 @@ export default function AdminLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Nhập mật khẩu"
-              className="w-full border border-[#D4AF37]/20 bg-[#0d0b09] px-4 py-3 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none focus:border-[#D4AF37]/60 transition-colors"
+              className="w-full border border-gold/20 bg-card px-4 py-3 text-foreground placeholder:text-muted-foreground/50 focus:outline-none focus:border-gold/60 transition-colors"
               disabled={isLoading}
             />
           </div>
@@ -82,9 +82,9 @@ export default function AdminLoginPage() {
           </button>
         </form>
 
-        <div className="mt-8 p-4 bg-[#0d0b09] border border-[#D4AF37]/10 rounded text-center">
-          <p className="text-[#8A7D65] text-xs">Demo Credentials:</p>
-          <p className="text-[#D4AF37] text-sm font-mono mt-1">adm1 / 123</p>
+        <div className="mt-8 p-4 bg-card border border-gold/10 rounded text-center">
+          <p className="text-muted-foreground text-xs">Demo Credentials:</p>
+          <p className="text-gold text-sm font-mono mt-1">adm1 / 123</p>
         </div>
       </div>
     </main>

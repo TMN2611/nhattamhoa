@@ -99,17 +99,10 @@ export function ProductPageClient({ productId }: { productId: string }) {
     }
   }
 
-  function handleBeginRitual() {
-    if (!product) return;
-    setProductContext();
-    localStorage.setItem("ntt_flow", "ritual");
-    router.push(`/nghi-thuc?product_id=${product.id}`);
-  }
-
   if (loading)
     return (
-      <main className="min-h-screen bg-[#0a0a08] pt-24 flex items-center justify-center">
-        <div className="w-6 h-6 border border-[#D4AF37] border-t-transparent rounded-full animate-spin" />
+      <main className="min-h-screen bg-background pt-24 flex items-center justify-center">
+        <div className="w-6 h-6 border border-gold border-t-transparent rounded-full animate-spin" />
       </main>
     );
 
@@ -124,20 +117,19 @@ export function ProductPageClient({ productId }: { productId: string }) {
   const displayImage = selectedImage || imageUrl;
 
   return (
-    <main className="min-h-screen bg-[#0a0a08] pt-24 px-6 pb-24">
+    <main className="min-h-screen bg-background pt-24 px-6 pb-32">
       <div className="max-w-6xl mx-auto">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-[10px] text-[#8A7D65] hover:text-[#D4AF37] transition-all mb-12 tracking-[0.3em] uppercase group"
+          className="inline-flex items-center gap-2 text-[10px] text-muted-foreground hover:text-gold transition-all mb-12 tracking-[0.3em] uppercase group"
         >
           <ArrowLeft className="h-3 w-3 transition-transform group-hover:-translate-x-1" />
           Nhất Tâm Hoa Collection
         </Link>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
-          {/* Cột Hình Ảnh - Cuộn cùng trang */}
           <div className="space-y-4">
-            <div className="relative aspect-[4/5] overflow-hidden bg-[#111]">
+            <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
               <Image
                 src={displayImage}
                 alt={product.name}
@@ -146,20 +138,19 @@ export function ProductPageClient({ productId }: { productId: string }) {
                 priority
               />
               {isRitualProduct && (
-                <div className="absolute top-0 left-0 w-full h-full border-[12px] border-[#D4AF37]/10 pointer-events-none" />
+                <div className="absolute top-0 left-0 w-full h-full border-[12px] border-gold/10 pointer-events-none" />
               )}
               <div className="absolute top-4 left-4">
                 <span className={`text-[9px] px-2.5 py-1 uppercase tracking-widest font-medium ${
                   isRitualProduct
-                    ? "bg-[#D4AF37] text-black"
-                    : "bg-white/10 backdrop-blur-sm text-white border border-white/20"
+                    ? "bg-gold text-primary-foreground"
+                    : "bg-black/10 dark:bg-white/10 backdrop-blur-sm text-foreground border border-border"
                 }`}>
-                  {isRitualProduct ? "🕯️ Ritual" : "🎁 Gift"}
+                  {isRitualProduct ? "Ritual" : "Gift"}
                 </span>
               </div>
             </div>
 
-            {/* Gallery thumbnails — only shown if there are extra images */}
             {allGalleryImages.length > 1 && (
               <div className="flex gap-2 flex-wrap">
                 {allGalleryImages.map((url, idx) => (
@@ -168,8 +159,8 @@ export function ProductPageClient({ productId }: { productId: string }) {
                     onClick={() => setSelectedImage(url)}
                     className={`relative w-16 h-16 overflow-hidden border-2 transition-all flex-shrink-0 ${
                       displayImage === url
-                        ? "border-[#D4AF37]"
-                        : "border-[#D4AF37]/15 hover:border-[#D4AF37]/40"
+                        ? "border-gold"
+                        : "border-border hover:border-gold/40"
                     }`}
                   >
                     <Image
@@ -184,19 +175,18 @@ export function ProductPageClient({ productId }: { productId: string }) {
             )}
 
             {product.description && (
-              <div className="border border-[#D4AF37]/10 bg-[#0d0b09] p-5">
-                <p className="text-[10px] text-[#D4AF37] uppercase tracking-widest mb-2">Mô tả sản phẩm</p>
-                <p className="text-[#8A7D65] font-light leading-relaxed text-sm">
+              <div className="border border-border bg-card p-5">
+                <p className="text-[10px] text-gold uppercase tracking-widest mb-2">Mô tả sản phẩm</p>
+                <p className="text-muted-foreground font-light leading-relaxed text-sm">
                   {product.description}
                 </p>
               </div>
             )}
 
-            {/* Description images — inline visual storytelling */}
             {product.description_images && product.description_images.length > 0 && (
               <div className="space-y-3">
                 {product.description_images.map((url, idx) => (
-                  <div key={idx} className="relative w-full overflow-hidden bg-[#111]">
+                  <div key={idx} className="relative w-full overflow-hidden bg-secondary">
                     <Image
                       src={url}
                       alt={`Chi tiết ${idx + 1}`}
@@ -210,53 +200,45 @@ export function ProductPageClient({ productId }: { productId: string }) {
             )}
 
             <div className="grid grid-cols-2 gap-3">
-              <div className="border border-[#D4AF37]/10 bg-[#0d0b09] p-4">
-                <p className="text-[9px] uppercase text-[#555] tracking-widest mb-1">Đóng gói</p>
-                <p className="text-[11px] text-[#8A7D65]">Hộp quà Luxury & Thiệp tay</p>
-              </div>
-              <div className="border border-[#D4AF37]/10 bg-[#0d0b09] p-4">
-                <p className="text-[9px] uppercase text-[#555] tracking-widest mb-1">Bảo quản</p>
-                <p className="text-[11px] text-[#8A7D65]">Lưu giữ từ 3 - 5 năm</p>
-              </div>
-              <div className="border border-[#D4AF37]/10 bg-[#0d0b09] p-4">
-                <p className="text-[9px] uppercase text-[#555] tracking-widest mb-1">Giao hàng</p>
-                <p className="text-[11px] text-[#8A7D65]">Hỏa tốc 2H nội thành</p>
-              </div>
-              <div className="border border-[#D4AF37]/10 bg-[#0d0b09] p-4">
-                <p className="text-[9px] uppercase text-[#555] tracking-widest mb-1">Chứng nhận</p>
-                <p className="text-[11px] text-[#8A7D65]">
-                  {isRitualProduct ? "Blockchain Polygon" : "Xác thực NTH"}
-                </p>
-              </div>
+              {[
+                { label: "Đóng gói", value: "Hộp quà Luxury & Thiệp tay" },
+                { label: "Bảo quản", value: "Lưu giữ từ 3 - 5 năm" },
+                { label: "Giao hàng", value: "Hỏa tốc 2H nội thành" },
+                { label: "Chứng nhận", value: isRitualProduct ? "Blockchain Polygon" : "Xác thực NTH" },
+              ].map((item, i) => (
+                <div key={i} className="border border-border bg-card p-4">
+                  <p className="text-[9px] uppercase text-muted-foreground tracking-widest mb-1">{item.label}</p>
+                  <p className="text-[11px] text-foreground/80">{item.value}</p>
+                </div>
+              ))}
             </div>
           </div>
 
-          {/* Cột Thông Tin - Sticky trên Desktop */}
-          <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pb-4">
+          <div className="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto pb-4 hidden lg:block">
             <div className="mb-8">
               <div className="flex items-center gap-3 mb-4">
-                <span className="h-[1px] w-8 bg-[#D4AF37]/50" />
-                <p className="text-[10px] tracking-[0.4em] uppercase text-[#D4AF37]">
+                <span className="h-[1px] w-8 bg-gold/50" />
+                <p className="text-[10px] tracking-[0.4em] uppercase text-gold">
                   {isRitualProduct ? "Ritual Signature" : "Gift Collection"}
                 </p>
               </div>
-              <h1 className="text-3xl md:text-4xl font-light text-[#F5E6C8] font-display mb-4 tracking-tight leading-tight">
+              <h1 className="text-3xl md:text-4xl font-light text-foreground font-display mb-4 tracking-tight leading-tight">
                 {product.name}
               </h1>
-              <p className="text-2xl text-[#C5A55A] font-light">
+              <p className="text-2xl text-gold font-light">
                 {formatPrice(product.price)}
               </p>
             </div>
 
             {isRitualProduct && (
-              <div className="p-4 border border-[#D4AF37]/20 bg-[#D4AF37]/5 mb-6">
+              <div className="p-4 border border-gold/20 bg-gold/5 mb-6">
                 <div className="flex gap-3 items-start">
-                  <Lock className="h-4 w-4 text-[#D4AF37] mt-0.5 flex-shrink-0" />
+                  <Lock className="h-4 w-4 text-gold mt-0.5 flex-shrink-0" />
                   <div>
-                    <p className="text-[#D4AF37] text-[11px] font-bold uppercase tracking-wider mb-1">
+                    <p className="text-gold text-[11px] font-bold uppercase tracking-wider mb-1">
                       Đặc quyền cam kết trọn đời
                     </p>
-                    <p className="text-[#8A7D65] text-[10px] leading-relaxed">
+                    <p className="text-muted-foreground text-[10px] leading-relaxed">
                       Sản phẩm này đi kèm Chứng thư Blockchain và chỉ được
                       phép gửi tặng cho duy nhất một người trong đời.
                     </p>
@@ -265,25 +247,17 @@ export function ProductPageClient({ productId }: { productId: string }) {
               </div>
             )}
 
-            {/* Purchase Buttons */}
             <div className="space-y-3">
               {isRitualProduct ? (
                 <>
                   <button
                     onClick={handleBuyNow}
-                    className="w-full py-4 flex items-center justify-center gap-3 bg-[#D4AF37] text-black font-bold tracking-[0.25em] uppercase text-xs transition-all hover:bg-[#B8860B]"
+                    className="w-full py-4 flex items-center justify-center gap-3 bg-gold text-primary-foreground font-bold tracking-[0.25em] uppercase text-xs transition-all hover:opacity-90"
                   >
                     <Shield className="h-4 w-4" />
                     Bắt đầu nghi lễ cam kết
                   </button>
-                  <button
-                    onClick={handleBeginRitual}
-                    className="w-full py-4 flex items-center justify-center gap-3 border border-[#D4AF37]/40 text-[#D4AF37] font-medium tracking-[0.2em] uppercase text-xs transition-all hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/60"
-                  >
-                    <Zap className="h-4 w-4" />
-                    Xem chi tiết nghi lễ
-                  </button>
-                  <p className="text-center text-[10px] text-[#555] tracking-widest uppercase pt-1">
+                  <p className="text-center text-[10px] text-muted-foreground tracking-widest uppercase pt-1">
                     Mỗi bông hoa — Một người — Trọn đời
                   </p>
                 </>
@@ -291,7 +265,7 @@ export function ProductPageClient({ productId }: { productId: string }) {
                 <>
                   <button
                     onClick={handleBuyNow}
-                    className="w-full py-4 flex items-center justify-center gap-3 bg-white text-black font-bold tracking-[0.25em] uppercase text-xs transition-all hover:bg-[#F5E6C8]"
+                    className="w-full py-4 flex items-center justify-center gap-3 bg-gold text-primary-foreground font-bold tracking-[0.25em] uppercase text-xs transition-all hover:opacity-90"
                   >
                     <Zap className="h-4 w-4" />
                     Mua ngay
@@ -300,8 +274,8 @@ export function ProductPageClient({ productId }: { productId: string }) {
                     onClick={handleAddToCart}
                     className={`w-full py-4 flex items-center justify-center gap-3 font-medium tracking-[0.2em] uppercase text-xs transition-all border ${
                       addedToCart
-                        ? "border-green-400/60 text-green-400 bg-green-400/10"
-                        : "border-[#D4AF37]/40 text-[#D4AF37] hover:bg-[#D4AF37]/10 hover:border-[#D4AF37]/60"
+                        ? "border-green-500/60 text-green-500 bg-green-500/10"
+                        : "border-gold/40 text-gold hover:bg-gold/10 hover:border-gold/60"
                     }`}
                   >
                     {addedToCart ? (
@@ -316,15 +290,14 @@ export function ProductPageClient({ productId }: { productId: string }) {
                       </>
                     )}
                   </button>
-                  <p className="text-center text-[10px] text-[#555] tracking-widest uppercase pt-1">
+                  <p className="text-center text-[10px] text-muted-foreground tracking-widest uppercase pt-1">
                     Giao hỏa tốc 2H nội thành
                   </p>
                 </>
               )}
             </div>
 
-            {/* Trust badges */}
-            <div className="mt-8 pt-6 border-t border-[#D4AF37]/10 space-y-2.5">
+            <div className="mt-8 pt-6 border-t border-border space-y-2.5">
               {[
                 isRitualProduct
                   ? "Chứng thư vĩnh cửu trên Blockchain Polygon"
@@ -333,12 +306,69 @@ export function ProductPageClient({ productId }: { productId: string }) {
                 "Hỗ trợ 24/7 qua hotline & Zalo",
               ].map((item, i) => (
                 <div key={i} className="flex items-center gap-2.5">
-                  <div className="h-1 w-1 rounded-full bg-[#D4AF37]/60 flex-shrink-0" />
-                  <span className="text-[10px] text-[#8A7D65] tracking-wide">{item}</span>
+                  <div className="h-1 w-1 rounded-full bg-gold/60 flex-shrink-0" />
+                  <span className="text-[10px] text-muted-foreground tracking-wide">{item}</span>
                 </div>
               ))}
             </div>
           </div>
+
+          <div className="lg:hidden">
+            <h1 className="text-2xl font-light text-foreground font-display mb-2 tracking-tight leading-tight">
+              {product.name}
+            </h1>
+            <p className="text-xl text-gold font-light mb-4">
+              {formatPrice(product.price)}
+            </p>
+            {isRitualProduct && (
+              <div className="p-3 border border-gold/20 bg-gold/5 mb-4">
+                <div className="flex gap-2 items-start">
+                  <Lock className="h-3.5 w-3.5 text-gold mt-0.5 flex-shrink-0" />
+                  <p className="text-muted-foreground text-[10px] leading-relaxed">
+                    Chứng thư Blockchain — chỉ tặng cho duy nhất một người trong đời.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-md border-t border-border px-4 py-3 lg:hidden">
+        <div className="max-w-lg mx-auto flex items-center gap-3">
+          {isRitualProduct ? (
+            <button
+              onClick={handleBuyNow}
+              className="flex-1 py-3.5 flex items-center justify-center gap-2 bg-gold text-primary-foreground font-bold tracking-[0.2em] uppercase text-xs transition-all hover:opacity-90"
+            >
+              <Shield className="h-4 w-4" />
+              Bắt đầu nghi lễ
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={handleAddToCart}
+                className={`py-3.5 px-5 flex items-center justify-center gap-2 border transition-all text-xs uppercase tracking-wider ${
+                  addedToCart
+                    ? "border-green-500/60 text-green-500"
+                    : "border-gold/40 text-gold"
+                }`}
+              >
+                {addedToCart ? (
+                  <CheckCircle className="h-4 w-4" />
+                ) : (
+                  <ShoppingBag className="h-4 w-4" />
+                )}
+              </button>
+              <button
+                onClick={handleBuyNow}
+                className="flex-1 py-3.5 flex items-center justify-center gap-2 bg-gold text-primary-foreground font-bold tracking-[0.2em] uppercase text-xs transition-all hover:opacity-90"
+              >
+                <Zap className="h-4 w-4" />
+                Mua ngay
+              </button>
+            </>
+          )}
         </div>
       </div>
     </main>

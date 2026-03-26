@@ -88,18 +88,18 @@ export function LiveVowFeed() {
   if (vows.length === 0) return null
 
   return (
-    <section ref={sectionRef} className="border-t border-border/30 bg-[#0a0a08]">
+    <section ref={sectionRef} className="border-t border-border/30 bg-secondary/30">
       <div className="mx-auto max-w-5xl px-6 py-20 md:py-28">
         <div className={`text-center mb-14 transition-all duration-[1200ms] ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}>
-          <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37] mb-4">
+          <p className="text-xs tracking-[0.4em] uppercase text-gold mb-4">
             {liveFeedText.label}
           </p>
-          <h2 className="text-2xl md:text-4xl font-light text-[#F5E6C8] font-display mb-4">
+          <h2 className="text-2xl md:text-4xl font-light text-foreground font-display mb-4">
             {liveFeedText.title}
           </h2>
-          <p className="text-[#8A7D65] text-sm">
+          <p className="text-muted-foreground text-sm">
             {liveFeedText.subtitle}
           </p>
         </div>
@@ -110,20 +110,20 @@ export function LiveVowFeed() {
             return (
               <div
                 key={i}
-                className={`p-8 border border-[#D4AF37]/15 bg-[#0d0b09] transition-all duration-700 hover:border-[#D4AF37]/40 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] ${
+                className={`p-8 border border-border bg-card transition-all duration-700 hover:border-gold/40 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)] ${
                   cardsVisible[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
                 }`}
               >
-                <p className="text-sm text-[#D4AF37] tracking-wider mb-4 font-medium">
+                <p className="text-sm text-gold tracking-wider mb-4 font-medium">
                   {isAnonymous
                     ? liveFeedText.anonymousLabel
                     : `${vow.sender_name} ❤ ${vow.receiver_name}`
                   }
                 </p>
-                <p className="text-[#C5A55A]/90 italic leading-relaxed text-sm font-display">
+                <p className="text-muted-foreground italic leading-relaxed text-sm font-display">
                   &ldquo;{vow.message}&rdquo;
                 </p>
-                <div className="h-px w-8 bg-gradient-to-r from-[#D4AF37]/30 to-transparent mt-6" />
+                <div className="h-px w-8 bg-gradient-to-r from-gold/30 to-transparent mt-6" />
               </div>
             )
           })}

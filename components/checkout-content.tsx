@@ -120,12 +120,12 @@ function FormInput({
     <div>
       <label
         htmlFor={id}
-        className="flex items-center gap-2 text-sm text-[#C5A55A] mb-2 tracking-wide"
+        className="flex items-center gap-2 text-sm text-gold mb-2 tracking-wide"
       >
         <Icon className="h-4 w-4" />
         {label}
         {locked && (
-          <span className="ml-auto flex items-center gap-1 text-xs text-[#D4AF37]/80 font-sans bg-[#D4AF37]/10 border border-[#D4AF37]/25 px-2 py-0.5">
+          <span className="ml-auto flex items-center gap-1 text-xs text-gold/80 font-sans bg-[#D4AF37]/10 border border-gold/25 px-2 py-0.5">
             <Lock className="h-3 w-3" /> Đã xác nhận vĩnh viễn
           </span>
         )}
@@ -137,19 +137,19 @@ function FormInput({
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
         disabled={disabled || locked}
-        className={`w-full border px-4 py-3.5 text-[#F5E6C8] placeholder:text-[#555040] focus:outline-none transition-colors font-serif text-base ${
+        className={`w-full border px-4 py-3.5 text-foreground placeholder:text-muted-foreground/50 focus:outline-none transition-colors font-serif text-base ${
           locked
-            ? "border-[#D4AF37]/30 bg-[#1a180f] opacity-80 cursor-not-allowed"
+            ? "border-gold/30 bg-secondary opacity-80 cursor-not-allowed"
             : disabled
-              ? "border-[#D4AF37]/20 bg-[#1a1814] opacity-60 cursor-not-allowed"
-              : "border-[#D4AF37]/20 bg-[#0d0b09] focus:border-[#D4AF37]/60"
+              ? "border-gold/20 bg-secondary opacity-60 cursor-not-allowed"
+              : "border-gold/20 bg-card focus:border-gold/60"
         }`}
       />
       {locked && lockReason && (
-        <p className="mt-1.5 text-xs text-[#D4AF37]/60">{lockReason}</p>
+        <p className="mt-1.5 text-xs text-gold/60">{lockReason}</p>
       )}
-      {hint && !locked && <p className="mt-1.5 text-xs text-[#D4AF37]/70">{hint}</p>}
-      {error && <p className="mt-1.5 text-xs text-[#A52525]">{error}</p>}
+      {hint && !locked && <p className="mt-1.5 text-xs text-gold/70">{hint}</p>}
+      {error && <p className="mt-1.5 text-xs text-destructive">{error}</p>}
     </div>
   );
 }
@@ -169,13 +169,13 @@ function OrderSummary({
   const totalPrice = unitPrice * quantity;
 
   return (
-    <div className="border border-[#D4AF37]/20 bg-[#0d0b09] p-5">
-      <p className="text-xs tracking-[0.3em] uppercase text-[#C5A55A] mb-4">
+    <div className="border border-gold/20 bg-card p-5">
+      <p className="text-xs tracking-[0.3em] uppercase text-gold mb-4">
         Đơn hàng của bạn
       </p>
 
       <div className="flex gap-4">
-        <div className="relative w-20 h-24 flex-shrink-0 overflow-hidden bg-[#1a1814]">
+        <div className="relative w-20 h-24 flex-shrink-0 overflow-hidden bg-secondary">
           <Image
             src={product.image_url || product.image || "/images/product-1.jpg"}
             alt={product.name}
@@ -184,34 +184,34 @@ function OrderSummary({
           />
         </div>
         <div className="flex-1 min-w-0">
-          <h4 className="text-sm font-medium text-[#F5E6C8] truncate">
+          <h4 className="text-sm font-medium text-foreground truncate">
             {product.name}
           </h4>
-          <p className="text-sm text-[#D4AF37] mt-1">
+          <p className="text-sm text-gold mt-1">
             {formatPrice(unitPrice)}
           </p>
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-[#D4AF37]/10">
+      <div className="mt-4 pt-4 border-t border-gold/10">
         <div className="flex items-center justify-between">
-          <span className="text-sm text-[#8A7D65]">Số lượng</span>
+          <span className="text-sm text-muted-foreground">Số lượng</span>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => onQuantityChange(Math.max(1, quantity - 1))}
-              className="h-8 w-8 flex items-center justify-center border border-[#D4AF37]/20 text-[#C5A55A] hover:border-[#D4AF37]/50 transition-colors"
+              className="h-8 w-8 flex items-center justify-center border border-gold/20 text-gold hover:border-gold/50 transition-colors"
               disabled={quantity <= 1}
             >
               <Minus className="h-3 w-3" />
             </button>
-            <span className="text-base text-[#F5E6C8] font-medium w-8 text-center">
+            <span className="text-base text-foreground font-medium w-8 text-center">
               {quantity}
             </span>
             <button
               type="button"
               onClick={() => onQuantityChange(quantity + 1)}
-              className="h-8 w-8 flex items-center justify-center border border-[#D4AF37]/20 text-[#C5A55A] hover:border-[#D4AF37]/50 transition-colors"
+              className="h-8 w-8 flex items-center justify-center border border-gold/20 text-gold hover:border-gold/50 transition-colors"
             >
               <Plus className="h-3 w-3" />
             </button>
@@ -219,9 +219,9 @@ function OrderSummary({
         </div>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-[#D4AF37]/10 flex items-center justify-between">
-        <span className="text-sm text-[#C5A55A] tracking-wider">Tổng cộng</span>
-        <span className="text-lg text-[#D4AF37] font-display">
+      <div className="mt-4 pt-4 border-t border-gold/10 flex items-center justify-between">
+        <span className="text-sm text-gold tracking-wider">Tổng cộng</span>
+        <span className="text-lg text-gold font-display">
           {formatPrice(totalPrice)}
         </span>
       </div>
@@ -501,18 +501,18 @@ export function CheckoutContent() {
     return (
       <div className="flex flex-col items-center gap-10 py-8 animate-in fade-in duration-700">
         <div className="text-center space-y-3">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-[#D4AF37]/30">
-            <ShieldCheck className="h-7 w-7 text-[#D4AF37]" />
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full border border-gold/30">
+            <ShieldCheck className="h-7 w-7 text-gold" />
           </div>
-          <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37]">
+          <p className="text-xs tracking-[0.4em] uppercase text-gold">
             {flow === "gift" ? "Đặt hàng thành công" : "Nghi lễ đã hoàn tất"}
           </p>
-          <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
+          <h2 className="text-2xl md:text-3xl font-light text-foreground font-display">
             {flow === "gift"
               ? "Đơn hàng đã được ghi nhận"
               : "Lời nguyện của bạn đã được ghi nhận"}
           </h2>
-          <p className="text-sm text-[#8A7D65] mt-3">
+          <p className="text-sm text-muted-foreground mt-3">
             Chứng thư sẽ được gửi đến email của bạn.
           </p>
         </div>
@@ -535,11 +535,11 @@ export function CheckoutContent() {
           <div className="space-y-4 w-full max-w-md">
             {orderResult.certificate_id ? (
               <>
-                <div className="p-4 bg-[#0d0b09] border border-[#D4AF37]/20 text-center">
-                  <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2">
+                <div className="p-4 bg-card border border-gold/20 text-center">
+                  <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-2">
                     Mã chứng thư
                   </p>
-                  <p className="text-lg text-[#F5E6C8] font-mono">
+                  <p className="text-lg text-foreground font-mono">
                     {orderResult.certificate_id}
                   </p>
                 </div>
@@ -552,14 +552,14 @@ export function CheckoutContent() {
                 </button>
               </>
             ) : (
-              <div className="p-4 bg-[#0d0b09] border border-[#D4AF37]/20 text-center">
-                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-2">
+              <div className="p-4 bg-card border border-gold/20 text-center">
+                <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-2">
                   Mã đơn hàng
                 </p>
-                <p className="text-sm text-[#F5E6C8] font-mono mb-3">
+                <p className="text-sm text-foreground font-mono mb-3">
                   {orderResult.orderId}
                 </p>
-                <p className="text-xs text-[#8A7D65]">
+                <p className="text-xs text-muted-foreground">
                   Chứng thư sẽ được tạo sau khi đơn hàng được xác nhận thanh
                   toán.
                 </p>
@@ -570,7 +570,7 @@ export function CheckoutContent() {
 
         <Link
           href="/"
-          className="flex items-center gap-2 text-sm text-[#C5A55A] hover:text-[#D4AF37] transition-colors tracking-wider uppercase"
+          className="flex items-center gap-2 text-sm text-gold hover:text-gold transition-colors tracking-wider uppercase"
         >
           <ArrowLeft className="h-4 w-4" />
           Quay về trang chủ
@@ -588,7 +588,7 @@ export function CheckoutContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
         <div className="order-2 lg:order-1 space-y-8">
           <div>
-            <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A] mb-6 text-center lg:text-left">
+            <p className="text-xs tracking-[0.35em] uppercase text-gold mb-6 text-center lg:text-left">
               Xem trước chứng thư
             </p>
             <CommitmentCertificate
@@ -608,26 +608,26 @@ export function CheckoutContent() {
         <div className="order-1 lg:order-2">
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-3">
-              <p className="text-xs tracking-[0.35em] uppercase text-[#C5A55A]">
+              <p className="text-xs tracking-[0.35em] uppercase text-gold">
                 {flow === "gift" ? "Đặt hàng quà tặng" : "Thông tin nghi lễ"}
               </p>
               <span
                 className={`px-2.5 py-0.5 text-[10px] tracking-wider uppercase border ${
                   flow === "gift"
-                    ? "border-[#C5A55A]/30 text-[#C5A55A] bg-[#C5A55A]/5"
-                    : "border-[#D4AF37]/30 text-[#D4AF37] bg-[#D4AF37]/5"
+                    ? "border-[#C5A55A]/30 text-gold bg-[#C5A55A]/5"
+                    : "border-gold/30 text-gold bg-[#D4AF37]/5"
                 }`}
               >
                 {flow === "gift" ? "Quà tặng" : "Nghi lễ"}
               </span>
             </div>
-            <h2 className="text-2xl md:text-3xl font-light text-[#F5E6C8] font-display">
+            <h2 className="text-2xl md:text-3xl font-light text-foreground font-display">
               {flow === "gift" ? "Thông tin giao hàng" : "Hoàn tất nghi lễ hoa"}
             </h2>
 
             {isReturningCustomer && (
-              <div className="mt-3 px-3 py-2 border border-[#D4AF37]/20 bg-[#D4AF37]/5">
-                <p className="text-xs text-[#D4AF37]">
+              <div className="mt-3 px-3 py-2 border border-gold/20 bg-[#D4AF37]/5">
+                <p className="text-xs text-gold">
                   Chào mừng bạn quay lại! Thông tin đã được điền tự động.
                   {flow === "ritual" &&
                     " Tên người gửi và người nhận đã được khóa theo nghi lễ."}
@@ -639,20 +639,20 @@ export function CheckoutContent() {
               (ritualType || offering || permanenceType) && (
                 <div className="mt-3 flex flex-wrap gap-2">
                   {ritualType && (
-                    <span className="px-3 py-1 text-xs bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#D4AF37] tracking-wider">
+                    <span className="px-3 py-1 text-xs bg-[#D4AF37]/10 border border-gold/20 text-gold tracking-wider">
                       {ritualType}
                     </span>
                   )}
                   {offering && (
-                    <span className="px-3 py-1 text-xs bg-[#D4AF37]/10 border border-[#D4AF37]/20 text-[#C5A55A] tracking-wider">
+                    <span className="px-3 py-1 text-xs bg-[#D4AF37]/10 border border-gold/20 text-gold tracking-wider">
                       {offering}
                     </span>
                   )}
                   <span
                     className={`px-3 py-1 text-xs border tracking-wider ${
                       permanenceType === "permanent"
-                        ? "bg-[#D4AF37]/20 border-[#D4AF37]/40 text-[#D4AF37]"
-                        : "bg-[#D4AF37]/10 border-[#D4AF37]/20 text-[#8A7D65]"
+                        ? "bg-[#D4AF37]/20 border-gold/40 text-gold"
+                        : "bg-[#D4AF37]/10 border-gold/20 text-muted-foreground"
                     }`}
                   >
                     {permanenceType === "permanent"
@@ -722,7 +722,7 @@ export function CheckoutContent() {
               <div className="flex items-center justify-between mb-2">
                 <label
                   htmlFor="message"
-                  className="flex items-center gap-2 text-sm text-[#C5A55A] tracking-wide"
+                  className="flex items-center gap-2 text-sm text-gold tracking-wide"
                 >
                   <PenLine className="h-4 w-4" />
                   Lời nhắn
@@ -730,13 +730,13 @@ export function CheckoutContent() {
                 <button
                   onClick={handleAISuggest}
                   disabled={generatingMessage}
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-[#D4AF37]/30 text-[#D4AF37] hover:bg-[#D4AF37]/10 transition-colors disabled:opacity-50"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs border border-gold/30 text-gold hover:bg-[#D4AF37]/10 transition-colors disabled:opacity-50"
                 >
                   <Sparkles className="h-3 w-3" />
                   {generatingMessage ? "Đang viết..." : "AI Suggest Message"}
                 </button>
               </div>
-              <div className="border border-[#D4AF37]/20 bg-[#0d0b09] p-1">
+              <div className="border border-gold/20 bg-card p-1">
                 <div className="letter-paper">
                   <textarea
                     id="message"
@@ -744,7 +744,7 @@ export function CheckoutContent() {
                     onChange={(e) => updateField("message")(e.target.value)}
                     placeholder="Gửi người tôi yêu thương nhất..."
                     rows={5}
-                    className="w-full bg-transparent px-3 py-2 text-[#F5E6C8] placeholder:text-[#555040] resize-none focus:outline-none italic leading-8 font-serif text-base"
+                    className="w-full bg-transparent px-3 py-2 text-foreground placeholder:text-muted-foreground/50 resize-none focus:outline-none italic leading-8 font-serif text-base"
                   />
                 </div>
               </div>
@@ -755,8 +755,8 @@ export function CheckoutContent() {
             <div
               className={`h-5 w-5 flex-shrink-0 border transition-all duration-300 flex items-center justify-center ${
                 publicVow
-                  ? "border-[#D4AF37] bg-[#D4AF37]"
-                  : "border-[#D4AF37]/40 group-hover:border-[#D4AF37]/60"
+                  ? "border-gold bg-[#D4AF37]"
+                  : "border-gold/40 group-hover:border-gold/60"
               }`}
             >
               {publicVow && (
@@ -781,7 +781,7 @@ export function CheckoutContent() {
               onChange={(e) => setPublicVow(e.target.checked)}
               className="sr-only"
             />
-            <span className="text-sm text-[#C5A55A]/80">
+            <span className="text-sm text-gold/80">
               Cho phép hiển thị lời thề trên trang &ldquo;Những Lời Thề&rdquo;
             </span>
           </label>
@@ -792,7 +792,7 @@ export function CheckoutContent() {
             className={`mt-6 w-full py-4 text-sm tracking-[0.25em] uppercase font-medium transition-all duration-500 cursor-pointer ${
               canSubmit
                 ? "bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] hover:shadow-[0_0_30px_rgba(212,175,55,0.2)]"
-                : "bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]"
+                : "bg-secondary text-muted-foreground/50 cursor-not-allowed border border-border"
             }`}
           >
             {flow === "gift" ? "Xác nhận đặt hàng" : "Xác nhận & Thanh toán"}

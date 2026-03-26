@@ -61,7 +61,7 @@ export function ProductGrid({ flow = "gift" }: ProductGridProps) {
       <div className="mx-auto max-w-7xl px-6 pb-24 md:pb-32">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="aspect-[4/5] bg-[#1a1814] animate-pulse" />
+            <div key={i} className="aspect-[4/5] bg-secondary animate-pulse" />
           ))}
         </div>
       </div>

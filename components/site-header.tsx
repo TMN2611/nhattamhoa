@@ -24,14 +24,12 @@ export function SiteHeader() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <header
-      className="fixed top-0 left-0 right-0 z-[999] bg-background lg:bg-background/80 backdrop-blur-md border-b border-border/50"
-    >
+    <header className="fixed top-0 left-0 right-0 z-[999] bg-background/95 backdrop-blur-md border-b border-border/50">
       <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <div className="w-24">
+        <div className="flex items-center gap-6 flex-1 min-w-0">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden text-muted-foreground hover:text-foreground transition-colors"
+            className="lg:hidden text-foreground/70 hover:text-foreground transition-colors"
             aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
           >
             {mobileMenuOpen ? (
@@ -45,9 +43,9 @@ export function SiteHeader() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 ${
+                className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 whitespace-nowrap ${
                   pathname === link.href
-                    ? "text-[#D4AF37]"
+                    ? "text-[var(--gold)]"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -59,7 +57,7 @@ export function SiteHeader() {
 
         <Link
           href="/"
-          className="flex flex-col items-center"
+          className="flex flex-col items-center shrink-0 mx-4"
           onClick={() => setMobileMenuOpen(false)}
         >
           <span className="text-2xl md:text-3xl font-semibold tracking-wider text-foreground">
@@ -70,15 +68,15 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <div className="flex items-center gap-5 justify-end">
-          <div className="hidden lg:flex items-center gap-6 mr-4">
+        <div className="flex items-center gap-4 justify-end flex-1 min-w-0">
+          <div className="hidden lg:flex items-center gap-6 mr-2">
             {navLinks.slice(2).map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 ${
+                className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 whitespace-nowrap ${
                   pathname === link.href
-                    ? "text-[#D4AF37]"
+                    ? "text-[var(--gold)]"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
@@ -89,7 +87,7 @@ export function SiteHeader() {
           {mounted && (
             <button
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="text-muted-foreground hover:text-foreground transition-colors"
+              className="text-foreground/70 hover:text-foreground transition-colors"
               aria-label={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
             >
               {theme === "dark" ? (
@@ -101,12 +99,12 @@ export function SiteHeader() {
           )}
           <Link
             href="/checkout"
-            className="relative text-muted-foreground hover:text-foreground transition-colors"
+            className="relative text-foreground/70 hover:text-foreground transition-colors"
             aria-label="Giỏ hàng"
           >
             <ShoppingBag className="h-5 w-5" />
             {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground text-[10px] font-medium">
+              <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--gold)] text-primary-foreground text-[10px] font-medium">
                 {itemCount}
               </span>
             )}
@@ -134,8 +132,8 @@ export function SiteHeader() {
               onClick={() => setMobileMenuOpen(false)}
               className={`py-4 text-lg tracking-[0.2em] uppercase font-display transition-all duration-500 ${
                 pathname === link.href
-                  ? "text-[#D4AF37]"
-                  : "text-[#C5A55A] hover:text-[#F5E6C8]"
+                  ? "text-[var(--gold)]"
+                  : "text-muted-foreground hover:text-foreground"
               }`}
               style={{
                 transitionDelay: mobileMenuOpen ? `${i * 60}ms` : "0ms",
@@ -153,7 +151,7 @@ export function SiteHeader() {
             className="mt-6 h-px w-20"
             style={{
               background:
-                "linear-gradient(90deg, transparent, #D4AF37, transparent)",
+                "linear-gradient(90deg, transparent, var(--gold), transparent)",
               opacity: mobileMenuOpen ? 1 : 0,
               transition: "opacity 600ms",
               transitionDelay: mobileMenuOpen ? "400ms" : "0ms",

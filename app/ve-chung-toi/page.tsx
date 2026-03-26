@@ -14,13 +14,10 @@ function PhilosophySection({
   return (
     <FadeInSection delay={delay}>
       <div className="text-center">
-        <h2
-          className="text-2xl md:text-3xl lg:text-4xl font-light font-display leading-snug text-balance"
-          style={{ color: '#F5E6C8' }}
-        >
+        <h2 className="text-2xl md:text-3xl lg:text-4xl font-light font-display leading-snug text-balance text-foreground">
           {heading}
         </h2>
-        <div className="mx-auto mt-6 max-w-2xl text-base md:text-lg leading-relaxed" style={{ color: '#8A7D65' }}>
+        <div className="mx-auto mt-6 max-w-2xl text-base md:text-lg leading-relaxed text-muted-foreground">
           {children}
         </div>
       </div>
@@ -31,9 +28,7 @@ function PhilosophySection({
 export default function BrandStoryPage() {
   return (
     <>
-      {/* Hero */}
       <section className="relative pt-32 pb-20 md:pt-44 md:pb-28 text-center px-6 overflow-hidden">
-        {/* Subtle radial glow */}
         <div
           className="absolute inset-0 pointer-events-none"
           style={{
@@ -41,26 +36,19 @@ export default function BrandStoryPage() {
           }}
         />
         <FadeInSection>
-          <p className="text-xs tracking-[0.4em] uppercase mb-6" style={{ color: '#C5A55A' }}>
+          <p className="text-xs tracking-[0.4em] uppercase mb-6 text-gold-dim">
             {'Nhất Tâm Hoa'}
           </p>
-          <h1
-            className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight font-display"
-            style={{ color: '#F5E6C8' }}
-          >
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight font-display text-foreground">
             {'Một đời. Một đóa. Một người.'}
           </h1>
-          <p
-            className="mx-auto mt-8 max-w-lg text-lg md:text-xl leading-relaxed italic"
-            style={{ color: '#C5A55A' }}
-          >
+          <p className="mx-auto mt-8 max-w-lg text-lg md:text-xl leading-relaxed italic text-gold-dim">
             {'Nhất Tâm Hoa không bán hoa. Chúng tôi tạo ra một lời hứa.'}
           </p>
           <GoldDivider className="mt-12" />
         </FadeInSection>
       </section>
 
-      {/* Section 1: Modern love critique */}
       <section className="px-6 pb-20 md:pb-28">
         <PhilosophySection heading="Tình yêu trong thời đại có thể thay thế">
           <p>
@@ -74,10 +62,11 @@ export default function BrandStoryPage() {
         </PhilosophySection>
       </section>
 
-      {/* Gold horizontal line */}
-      <div className="mx-auto max-w-xs h-px" style={{ background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)' }} />
+      <div
+        className="mx-auto max-w-xs h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, var(--gold), transparent)' }}
+      />
 
-      {/* Section 2: Belief */}
       <section className="px-6 py-20 md:py-28">
         <PhilosophySection heading="Niềm tin" delay={100}>
           <p>
@@ -88,32 +77,24 @@ export default function BrandStoryPage() {
             {'Mà vì họ hiểu rằng, giá trị thật sự của tình yêu nằm ở sự lựa chọn có ý thức '}
             {'- chọn một người, và không bao giờ quay đầu.'}
           </p>
-          <p
-            className="mt-8 text-xl md:text-2xl italic font-display"
-            style={{ color: '#D4AF37' }}
-          >
+          <p className="mt-8 text-xl md:text-2xl italic font-display text-gold">
             {'"Vì tình yêu đích thực không cần lựa chọn thứ hai."'}
           </p>
         </PhilosophySection>
       </section>
 
-      {/* Gold horizontal line */}
-      <div className="mx-auto max-w-xs h-px" style={{ background: 'linear-gradient(90deg, transparent, #D4AF37, transparent)' }} />
+      <div
+        className="mx-auto max-w-xs h-px"
+        style={{ background: 'linear-gradient(90deg, transparent, var(--gold), transparent)' }}
+      />
 
-      {/* Section 3: Meaning of a flower */}
       <section className="px-6 py-20 md:py-28">
         <FadeInSection delay={100}>
           <div className="text-center">
-            <h2
-              className="text-2xl md:text-3xl lg:text-4xl font-light font-display leading-snug text-balance"
-              style={{ color: '#F5E6C8' }}
-            >
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-light font-display leading-snug text-balance text-foreground">
               {'Ý nghĩa của một đóa hoa'}
             </h2>
-            <p
-              className="mx-auto mt-6 max-w-2xl text-base md:text-lg leading-relaxed"
-              style={{ color: '#8A7D65' }}
-            >
+            <p className="mx-auto mt-6 max-w-2xl text-base md:text-lg leading-relaxed text-muted-foreground">
               {'Mỗi đóa hồng Nhất Tâm không chỉ là một bông hoa đẹp. Nó là hiện thân của ba điều thiêng liêng:'}
             </p>
           </div>
@@ -139,20 +120,14 @@ export default function BrandStoryPage() {
           ].map((item, i) => (
             <FadeInSection key={item.number} delay={i * 150}>
               <div className="flex gap-6 md:gap-10 items-start">
-                <span
-                  className="text-3xl md:text-4xl font-display flex-shrink-0 w-12 text-center"
-                  style={{ color: '#D4AF37' }}
-                >
+                <span className="text-3xl md:text-4xl font-display flex-shrink-0 w-12 text-center text-gold">
                   {item.number}
                 </span>
                 <div>
-                  <h3
-                    className="text-lg md:text-xl font-display"
-                    style={{ color: '#F5E6C8' }}
-                  >
+                  <h3 className="text-lg md:text-xl font-display text-foreground">
                     {item.title}
                   </h3>
-                  <p className="mt-2 leading-relaxed" style={{ color: '#8A7D65' }}>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">
                     {item.text}
                   </p>
                 </div>
@@ -162,14 +137,10 @@ export default function BrandStoryPage() {
         </div>
       </section>
 
-      {/* Closing quote */}
       <section className="px-6 py-20 md:py-28 text-center">
         <FadeInSection>
           <GoldDivider className="mb-12" />
-          <p
-            className="text-xl md:text-2xl lg:text-3xl font-light italic font-display leading-relaxed max-w-2xl mx-auto"
-            style={{ color: '#D4AF37' }}
-          >
+          <p className="text-xl md:text-2xl lg:text-3xl font-light italic font-display leading-relaxed max-w-2xl mx-auto text-gold">
             {'"Khi cả thế giới nói rằng tình yêu là tạm thời, hãy để Nhất Tâm Hoa nhắc bạn rằng — '}
             {'có những thứ đáng để giữ mãi."'}
           </p>

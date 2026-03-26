@@ -71,23 +71,23 @@ export default function OfferingPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a08] flex items-center justify-center px-6 py-20">
+    <main className="min-h-screen bg-background flex items-center justify-center px-6 py-20">
       <div className={`max-w-3xl w-full text-center transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37] mb-6">
+        <p className="text-xs tracking-[0.4em] uppercase text-gold mb-6">
           {offeringPageText.label}
         </p>
 
-        <h1 className="text-3xl md:text-4xl font-light text-[#F5E6C8] font-display leading-tight mb-4">
+        <h1 className="text-3xl md:text-4xl font-light text-foreground font-display leading-tight mb-4">
           {offeringPageText.title}
         </h1>
 
-        <p className="text-[#8A7D65] leading-relaxed mb-12 text-base">
+        <p className="text-muted-foreground leading-relaxed mb-12 text-base">
           {offeringPageText.subtitle}
         </p>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 border-2 border-[#D4AF37]/30 border-t-[#D4AF37] rounded-full animate-spin" />
+            <div className="h-8 w-8 border-2 border-gold/30 border-t-[#D4AF37] rounded-full animate-spin" />
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
@@ -104,8 +104,8 @@ export default function OfferingPage() {
                   }}
                   className={`group relative p-8 border text-left transition-all duration-500 hover:translate-y-[-4px] ${
                     isSelected
-                      ? 'border-[#D4AF37] bg-[#D4AF37]/10 shadow-[0_0_40px_rgba(212,175,55,0.15)]'
-                      : 'border-[#D4AF37]/20 bg-[#0d0b09] hover:border-[#D4AF37]/50 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)]'
+                      ? 'border-gold bg-[#D4AF37]/10 shadow-[0_0_40px_rgba(212,175,55,0.15)]'
+                      : 'border-gold/20 bg-card hover:border-gold/50 hover:shadow-[0_0_20px_rgba(212,175,55,0.08)]'
                   }`}
                 >
                   <div className={`absolute top-0 left-0 right-0 h-[2px] transition-all duration-500 ${
@@ -113,19 +113,19 @@ export default function OfferingPage() {
                   }`} />
 
                   <h3 className={`text-base tracking-wider font-medium mb-4 transition-colors ${
-                    isSelected ? 'text-[#D4AF37]' : 'text-[#C5A55A] group-hover:text-[#D4AF37]'
+                    isSelected ? 'text-gold' : 'text-gold group-hover:text-gold'
                   }`}>
                     {product.name}
                   </h3>
 
-                  <p className="text-xs text-[#8A7D65] leading-relaxed whitespace-pre-line mb-6">
+                  <p className="text-xs text-muted-foreground leading-relaxed whitespace-pre-line mb-6">
                     {product.description}
                   </p>
 
                   <div className="h-px w-12 bg-gradient-to-r from-[#D4AF37]/40 to-transparent mb-4" />
 
                   <p className={`text-lg font-display transition-colors ${
-                    isSelected ? 'text-[#F5E6C8]' : 'text-[#C5A55A]'
+                    isSelected ? 'text-foreground' : 'text-gold'
                   }`}>
                     {formatPrice(product.price)}
                   </p>
@@ -137,32 +137,32 @@ export default function OfferingPage() {
 
         {selected && (
           <div className="mb-10 max-w-md mx-auto">
-            <p className="text-xs tracking-[0.3em] uppercase text-[#C5A55A] mb-4">Loại cam kết</p>
+            <p className="text-xs tracking-[0.3em] uppercase text-gold mb-4">Loại cam kết</p>
             <div className="grid grid-cols-2 gap-4">
               <button
                 onClick={() => setPermanenceType('temporary')}
                 className={`p-4 border text-center transition-all duration-300 ${
                   permanenceType === 'temporary'
-                    ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#F5E6C8]'
-                    : 'border-[#D4AF37]/20 bg-[#0d0b09] text-[#8A7D65] hover:border-[#D4AF37]/40'
+                    ? 'border-gold bg-[#D4AF37]/10 text-foreground'
+                    : 'border-gold/20 bg-card text-muted-foreground hover:border-gold/40'
                 }`}
               >
                 <p className="text-sm font-medium mb-1">Duyên Khởi</p>
-                <p className="text-[10px] text-[#8A7D65]">Có thể chỉnh sửa sau</p>
+                <p className="text-[10px] text-muted-foreground">Có thể chỉnh sửa sau</p>
               </button>
               <button
                 onClick={() => canSelectPermanent && setPermanenceType('permanent')}
                 disabled={!canSelectPermanent}
                 className={`p-4 border text-center transition-all duration-300 ${
                   !canSelectPermanent
-                    ? 'border-[#2a2520] bg-[#0d0b09] text-[#555040] cursor-not-allowed'
+                    ? 'border-border bg-card text-muted-foreground/50 cursor-not-allowed'
                     : permanenceType === 'permanent'
-                      ? 'border-[#D4AF37] bg-[#D4AF37]/10 text-[#F5E6C8]'
-                      : 'border-[#D4AF37]/20 bg-[#0d0b09] text-[#8A7D65] hover:border-[#D4AF37]/40'
+                      ? 'border-gold bg-[#D4AF37]/10 text-foreground'
+                      : 'border-gold/20 bg-card text-muted-foreground hover:border-gold/40'
                 }`}
               >
                 <p className="text-sm font-medium mb-1">Thiên Niên</p>
-                <p className="text-[10px] text-[#8A7D65]">
+                <p className="text-[10px] text-muted-foreground">
                   {canSelectPermanent ? 'Không thể thay đổi' : 'Không khả dụng'}
                 </p>
               </button>
@@ -176,7 +176,7 @@ export default function OfferingPage() {
           className={`px-12 py-4 font-medium tracking-[0.2em] uppercase text-sm transition-all duration-500 ${
             selected
               ? 'bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]'
-              : 'bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]'
+              : 'bg-secondary text-muted-foreground/50 cursor-not-allowed border border-border'
           }`}
         >
           {offeringPageText.button}

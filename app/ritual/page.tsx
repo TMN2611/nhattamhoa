@@ -51,28 +51,28 @@ export default function RitualPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#0a0a08] flex items-center justify-center px-6 py-20">
+    <main className="min-h-screen bg-background flex items-center justify-center px-6 py-20">
       <div className={`max-w-2xl w-full text-center transition-all duration-1000 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}>
-        <p className="text-xs tracking-[0.4em] uppercase text-[#D4AF37] mb-6">
+        <p className="text-xs tracking-[0.4em] uppercase text-gold mb-6">
           {ritualPageText.label}
         </p>
 
-        <h1 className="text-3xl md:text-4xl font-light text-[#F5E6C8] font-display leading-tight mb-4">
+        <h1 className="text-3xl md:text-4xl font-light text-foreground font-display leading-tight mb-4">
           {ritualPageText.title}
         </h1>
 
-        <div className="text-[#8A7D65] leading-relaxed mb-10 whitespace-pre-line text-base">
+        <div className="text-muted-foreground leading-relaxed mb-10 whitespace-pre-line text-base">
           {ritualPageText.subtitle}
         </div>
 
         <div className="text-left max-w-lg mx-auto mb-8">
-          <div className="text-[#C5A55A]/80 leading-loose whitespace-pre-line text-sm md:text-base italic">
+          <div className="text-gold/80 leading-loose whitespace-pre-line text-sm md:text-base italic">
             {ritualPageText.body}
           </div>
         </div>
 
-        <div className="mb-10 p-6 border border-[#D4AF37]/30 bg-[#D4AF37]/5">
-          <p className="text-lg md:text-xl text-[#D4AF37] italic font-display">
+        <div className="mb-10 p-6 border border-gold/30 bg-[#D4AF37]/5">
+          <p className="text-lg md:text-xl text-gold italic font-display">
             &ldquo;{ritualPageText.highlight}&rdquo;
           </p>
         </div>
@@ -85,12 +85,12 @@ export default function RitualPage() {
                 itemsVisible[i] ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'
               } ${
                 commitments[i]
-                  ? 'border-[#D4AF37] bg-[#D4AF37]/10'
-                  : 'border-[#D4AF37]/20 bg-[#0d0b09] hover:border-[#D4AF37]/40'
+                  ? 'border-gold bg-[#D4AF37]/10'
+                  : 'border-gold/20 bg-card hover:border-gold/40'
               }`}
             >
               <div className={`mt-0.5 h-5 w-5 flex-shrink-0 border transition-all duration-300 flex items-center justify-center ${
-                commitments[i] ? 'border-[#D4AF37] bg-[#D4AF37]' : 'border-[#D4AF37]/40'
+                commitments[i] ? 'border-gold bg-[#D4AF37]' : 'border-gold/40'
               }`}>
                 {commitments[i] && (
                   <svg className="h-3 w-3 text-[#0a0a08]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -105,7 +105,7 @@ export default function RitualPage() {
                 className="sr-only"
               />
               <span className={`text-sm leading-relaxed transition-colors ${
-                commitments[i] ? 'text-[#F5E6C8]' : 'text-[#C5A55A]/80'
+                commitments[i] ? 'text-foreground' : 'text-gold/80'
               }`}>
                 {text}
               </span>
@@ -119,7 +119,7 @@ export default function RitualPage() {
           className={`px-12 py-4 font-medium tracking-[0.2em] uppercase text-sm transition-all duration-500 ${
             allChecked
               ? 'bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] hover:shadow-[0_0_30px_rgba(212,175,55,0.3)]'
-              : 'bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]'
+              : 'bg-secondary text-muted-foreground/50 cursor-not-allowed border border-border'
           }`}
         >
           {ritualPageText.button}

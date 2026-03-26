@@ -56,26 +56,23 @@ export default function FAQPage() {
         <div className="mx-auto max-w-2xl flex flex-col gap-0">
           {faqs.map((faq, i) => (
             <FadeInSection key={i} delay={i * 100}>
-              <div
-                className="border-b"
-                style={{ borderColor: 'rgba(212,175,55,0.12)' }}
-              >
+              <div className="border-b border-gold/12">
                 <button
                   onClick={() => toggleFAQ(i)}
                   className="w-full flex items-center justify-between py-7 text-left cursor-pointer group"
                   aria-expanded={openIndex === i}
                 >
                   <span
-                    className="text-base md:text-lg font-display pr-4 transition-colors duration-300"
-                    style={{ color: openIndex === i ? '#F5E6C8' : '#C5A55A' }}
+                    className={`text-base md:text-lg font-display pr-4 transition-colors duration-300 ${
+                      openIndex === i ? 'text-foreground' : 'text-gold'
+                    }`}
                   >
                     {faq.question}
                   </span>
                   <ChevronDown
-                    className={`h-5 w-5 flex-shrink-0 transition-transform duration-500 ${
+                    className={`h-5 w-5 flex-shrink-0 transition-transform duration-500 text-gold ${
                       openIndex === i ? 'rotate-180' : ''
                     }`}
-                    style={{ color: '#D4AF37' }}
                   />
                 </button>
 
@@ -84,10 +81,7 @@ export default function FAQPage() {
                     openIndex === i ? 'max-h-96 opacity-100 pb-7' : 'max-h-0 opacity-0'
                   }`}
                 >
-                  <p
-                    className="text-sm md:text-base leading-relaxed"
-                    style={{ color: '#8A7D65' }}
-                  >
+                  <p className="text-sm md:text-base leading-relaxed text-muted-foreground">
                     {faq.answer}
                   </p>
                 </div>
@@ -96,22 +90,17 @@ export default function FAQPage() {
           ))}
         </div>
 
-        {/* Closing */}
         <FadeInSection delay={700}>
           <div className="mx-auto max-w-xl mt-16 text-center">
             <GoldDivider className="mb-10" />
-            <p
-              className="text-lg md:text-xl italic font-display leading-relaxed"
-              style={{ color: '#D4AF37' }}
-            >
+            <p className="text-lg md:text-xl italic font-display leading-relaxed text-gold">
               {'"Nếu bạn còn phân vân, có lẽ bạn chưa sẵn sàng. Và điều đó hoàn toàn ổn."'}
             </p>
-            <p className="mt-6 text-sm" style={{ color: '#6B5F4A' }}>
+            <p className="mt-6 text-sm text-muted-foreground">
               {'Cần hỗ trợ thêm? Liên hệ với chúng tôi qua trang '}
               <a
                 href="mailto:hello@nhattamhoa.com"
-                className="underline underline-offset-4 transition-colors hover:text-[#D4AF37]"
-                style={{ color: '#C5A55A' }}
+                className="underline underline-offset-4 transition-colors text-gold-dim hover:text-gold"
               >
                 {'email'}
               </a>

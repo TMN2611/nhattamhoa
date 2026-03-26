@@ -26,7 +26,6 @@ export default function ReadinessPage() {
 
   return (
     <>
-      {/* Hero */}
       <section className="relative min-h-[70vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
         <div
           className="absolute inset-0 pointer-events-none"
@@ -36,36 +35,23 @@ export default function ReadinessPage() {
           }}
         />
         <FadeInSection>
-          <p
-            className="text-xs tracking-[0.4em] uppercase mb-8"
-            style={{ color: "#C5A55A" }}
-          >
+          <p className="text-xs tracking-[0.4em] uppercase mb-8 text-gold-dim">
             {"Một khoảnh khắc để suy ngẫm"}
           </p>
-          <h1
-            className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight font-display text-balance"
-            style={{ color: "#F5E6C8" }}
-          >
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight font-display text-balance text-foreground">
             {"Không phải ai cũng nên trao lời thề"}
           </h1>
-          <p
-            className="mx-auto mt-8 max-w-lg text-lg md:text-xl leading-relaxed"
-            style={{ color: "#8A7D65" }}
-          >
+          <p className="mx-auto mt-8 max-w-lg text-lg md:text-xl leading-relaxed text-muted-foreground">
             {"Một lời hứa vĩnh viễn không dành cho những cảm xúc tạm thời."}
           </p>
           <GoldDivider className="mt-12" />
         </FadeInSection>
       </section>
 
-      {/* Section 1: Reflection questions */}
       <section className="px-6 py-20 md:py-28">
         <FadeInSection>
           <div className="mx-auto max-w-2xl text-center mb-14">
-            <h2
-              className="text-2xl md:text-3xl font-light font-display text-balance"
-              style={{ color: "#F5E6C8" }}
-            >
+            <h2 className="text-2xl md:text-3xl font-light font-display text-balance text-foreground">
               {"Hãy tự hỏi mình"}
             </h2>
           </div>
@@ -82,10 +68,7 @@ export default function ReadinessPage() {
                   i < visibleQuestions ? "translateY(0)" : "translateY(24px)",
               }}
             >
-              <p
-                className="text-xl md:text-2xl font-display font-light italic leading-relaxed"
-                style={{ color: "#C5A55A" }}
-              >
+              <p className="text-xl md:text-2xl font-display font-light italic leading-relaxed text-gold">
                 {question}
               </p>
               {i < reflectionQuestions.length - 1 && (
@@ -102,63 +85,40 @@ export default function ReadinessPage() {
         </div>
       </section>
 
-      {/* Section 2: Emotional Divider Quote */}
       <section className="px-6 py-16 md:py-24 text-center">
         <FadeInSection>
           <GoldDivider className="mb-12" />
-          <p
-            className="text-xl md:text-2xl lg:text-3xl font-light italic font-display leading-relaxed max-w-2xl mx-auto"
-            style={{ color: "#D4AF37" }}
-          >
+          <p className="text-xl md:text-2xl lg:text-3xl font-light italic font-display leading-relaxed max-w-2xl mx-auto text-gold">
             {"Không phải ai cũng sẵn sàng. Và điều đó hoàn toàn ổn."}
           </p>
           <GoldDivider className="mt-12" />
         </FadeInSection>
       </section>
 
-      {/* Section 3: Decision */}
       <section className="px-6 py-20 md:py-28">
         <FadeInSection>
           <div className="mx-auto max-w-xl">
             <div className="flex flex-col gap-6">
-              {/* Button 1: Not ready */}
               <Link
                 href="/"
-                className="group block w-full p-8 border text-center transition-all duration-500 hover:border-[#555040]"
-                style={{
-                  borderColor: "rgba(212,175,55,0.1)",
-                  background: "rgba(10,10,8,0.6)",
-                }}
+                className="group block w-full p-8 border border-gold/10 bg-background/60 text-center transition-all duration-500 hover:border-muted-foreground/30"
               >
-                <p
-                  className="text-xl md:text-2xl font-display font-light"
-                  style={{ color: "#8A7D65" }}
-                >
+                <p className="text-xl md:text-2xl font-display font-light text-muted-foreground">
                   {"Chưa phải lúc này"}
                 </p>
-                <p
-                  className="mt-3 text-base leading-relaxed"
-                  style={{ color: "#6B5F4A" }}
-                >
+                <p className="mt-3 text-base leading-relaxed text-muted-foreground/70">
                   {"Hãy quay lại khi bạn chắc chắn."}
                 </p>
               </Link>
 
-              {/* Button 2: Ready */}
               <button
                 onClick={() => router.push("/nghi-thuc")}
                 className="group w-full p-8 text-center transition-all duration-700 cursor-pointer bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] shadow-[0_0_40px_rgba(212,175,55,0.1)] hover:shadow-[0_0_60px_rgba(212,175,55,0.2)]"
               >
-                <p
-                  className="text-xl md:text-2xl font-display font-light"
-                  style={{ color: "#0a0a08" }}
-                >
+                <p className="text-xl md:text-2xl font-display font-light text-[#0a0a08]">
                   {"Tôi đã sẵn sàng"}
                 </p>
-                <p
-                  className="mt-3 text-base leading-relaxed"
-                  style={{ color: "rgba(10,10,8,0.7)" }}
-                >
+                <p className="mt-3 text-base leading-relaxed text-[#0a0a08]/70">
                   {"Tiến vào Nghi Thức"}
                 </p>
               </button>

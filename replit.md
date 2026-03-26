@@ -165,6 +165,7 @@ Product Detail → /ready → /checkout (quick ritual)
 
 ### Public
 - `GET /api/orders/lookup?phone=X` - Phone lookup returning sender_name, receiver_name, receiver_phone, receiver_address, total_orders
+- `GET /api/orders/lookup-by-phone?phone=X` - Full order history by phone (for /lookup page phone tab)
 - `GET /api/vows?limit=N` - Public vows feed (used by home page + moments page)
 - `GET /api/certificate/[code]` - Certificate lookup (JSON)
 - `GET /api/certificate/[code]/pdf` - Certificate PDF download
@@ -192,6 +193,18 @@ Product Detail → /ready → /checkout (quick ritual)
 - **Light theme**: `.light` class in `globals.css` — cream/ivory variant
 - **Toggle**: Sun/Moon icon in site header (`components/site-header.tsx`)
 - **Persistence**: `next-themes` auto-persists via localStorage
+
+### CSS Variable Color Tokens (use instead of hardcoded hex)
+- `text-foreground` / `var(--foreground)` — primary text (replaces `#F5E6C8`)
+- `text-muted-foreground` / `var(--muted-foreground)` — secondary text (replaces `#8A7D65`)
+- `text-gold` / `var(--gold)` — gold accent text (replaces `#D4AF37`, `#C5A55A`)
+- `text-gold-dim` / `var(--gold-dim)` — dim gold (replaces `#C5A55A`)
+- `bg-background` / `var(--background)` — page background (replaces `#0a0a08`)
+- `bg-card` / `var(--card)` — card background (replaces `#0d0b09`)
+- `bg-secondary` / `var(--secondary)` — secondary background (replaces `#1a1814`)
+- `border-border` / `var(--border)` — border color (replaces `#2a2520`)
+- `border-gold` — gold border (replaces `border-[#D4AF37]`)
+- For gradients: use `var(--gold)` instead of `#D4AF37`
 
 ## Environment Variables
 

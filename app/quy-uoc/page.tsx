@@ -40,39 +40,22 @@ export default function VowRulesPage() {
             return (
               <FadeInSection key={rule.number} delay={i * 200}>
                 <div className="relative flex flex-col items-center text-center py-14 md:py-18">
-                  {/* Rule number */}
-                  <span
-                    className="text-5xl md:text-6xl font-display font-light"
-                    style={{ color: '#D4AF37' }}
-                  >
+                  <span className="text-5xl md:text-6xl font-display font-light text-gold">
                     {rule.number}
                   </span>
 
-                  {/* Icon */}
-                  <div
-                    className="mt-6 flex h-14 w-14 items-center justify-center border"
-                    style={{ borderColor: '#D4AF37', color: '#D4AF37' }}
-                  >
+                  <div className="mt-6 flex h-14 w-14 items-center justify-center border border-gold text-gold">
                     <Icon className="h-6 w-6" strokeWidth={1.5} />
                   </div>
 
-                  {/* Title */}
-                  <h2
-                    className="mt-6 text-xl md:text-2xl font-display leading-snug text-balance"
-                    style={{ color: '#F5E6C8' }}
-                  >
+                  <h2 className="mt-6 text-xl md:text-2xl font-display leading-snug text-balance text-foreground">
                     {rule.title}
                   </h2>
 
-                  {/* Description */}
-                  <p
-                    className="mt-4 max-w-lg text-base leading-relaxed"
-                    style={{ color: '#8A7D65' }}
-                  >
+                  <p className="mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
                     {rule.text}
                   </p>
 
-                  {/* Divider (not after last) */}
                   {i < rules.length - 1 && (
                     <div className="mt-14">
                       <GoldDivider />
@@ -84,14 +67,10 @@ export default function VowRulesPage() {
           })}
         </div>
 
-        {/* Closing */}
         <FadeInSection delay={700}>
           <div className="mx-auto max-w-xl mt-6 text-center">
             <GoldDivider className="mb-10" />
-            <p
-              className="text-lg md:text-xl italic font-display leading-relaxed"
-              style={{ color: '#D4AF37' }}
-            >
+            <p className="text-lg md:text-xl italic font-display leading-relaxed text-gold">
               {'"Những quy tắc này không phải để hạn chế bạn. Chúng tồn tại để bảo vệ giá trị của lời thề."'}
             </p>
           </div>

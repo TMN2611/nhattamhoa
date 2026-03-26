@@ -38,7 +38,7 @@ export default function ChosenMomentsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen bg-black text-[#F5E6C8] selection:bg-[#D4AF37]/30">
+    <main className="min-h-screen bg-black text-foreground selection:bg-[#D4AF37]/30">
       {/* Hero Section */}
       <section className="relative pt-32 pb-20 md:pt-44 md:pb-28 text-center px-6 overflow-hidden">
         <div
@@ -49,13 +49,13 @@ export default function ChosenMomentsPage() {
           }}
         />
         <FadeInSection>
-          <p className="text-xs tracking-[0.4em] uppercase mb-6 text-[#C5A55A]">
+          <p className="text-xs tracking-[0.4em] uppercase mb-6 text-gold">
             Khoảnh khắc đã chọn
           </p>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight font-display text-balance text-[#F5E6C8]">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-light leading-tight font-display text-balance text-foreground">
             Những Lời Thề Đã Được Trao
           </h1>
-          <p className="mx-auto mt-8 max-w-2xl text-lg md:text-xl leading-relaxed text-[#8A7D65]">
+          <p className="mx-auto mt-8 max-w-2xl text-lg md:text-xl leading-relaxed text-muted-foreground">
             Không phải ai cũng chọn. Nhưng những người đã chọn — họ không bao
             giờ quay lại.
           </p>
@@ -68,7 +68,7 @@ export default function ChosenMomentsPage() {
         <div className="mx-auto max-w-6xl">
           {loading ? (
             // Hiệu ứng Loading đơn giản
-            <div className="text-center py-20 text-[#555040] tracking-widest uppercase text-xs animate-pulse">
+            <div className="text-center py-20 text-muted-foreground/50 tracking-widest uppercase text-xs animate-pulse">
               Đang kết nối với dòng thời gian...
             </div>
           ) : (
@@ -76,7 +76,7 @@ export default function ChosenMomentsPage() {
               {vows.map((item, i) => (
                 <FadeInSection key={i} delay={i * 100}>
                   <div
-                    className="group relative p-8 border border-[#D4AF37]/10 bg-[#0A0A08] transition-all duration-700 hover:border-[#D4AF37]/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] h-full flex flex-col justify-between"
+                    className="group relative p-8 border border-gold/10 bg-[#0A0A08] transition-all duration-700 hover:border-gold/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] h-full flex flex-col justify-between"
                     style={{
                       boxShadow: "inset 0 0 20px rgba(212,175,55,0.02)",
                     }}
@@ -85,7 +85,7 @@ export default function ChosenMomentsPage() {
                       {/* Top: names and date */}
                       <div className="relative flex items-center justify-between mb-6">
                         <div className="flex items-center gap-2.5">
-                          <span className="text-lg font-display font-medium text-[#F5E6C8]">
+                          <span className="text-lg font-display font-medium text-foreground">
                             {item.sender_name}
                           </span>
                           <Heart
@@ -96,11 +96,11 @@ export default function ChosenMomentsPage() {
                               opacity: 0.5,
                             }}
                           />
-                          <span className="text-lg font-display font-medium text-[#F5E6C8]">
+                          <span className="text-lg font-display font-medium text-foreground">
                             {item.receiver_name}
                           </span>
                         </div>
-                        <span className="text-[10px] tracking-wider text-[#555040]">
+                        <span className="text-[10px] tracking-wider text-muted-foreground/50">
                           {new Date(item.created_at).toLocaleDateString(
                             "vi-VN",
                           )}
@@ -108,14 +108,14 @@ export default function ChosenMomentsPage() {
                       </div>
 
                       {/* Vow Text */}
-                      <p className="text-base leading-relaxed italic font-display text-[#8A7D65] group-hover:text-[#C5A55A] transition-colors duration-500">
+                      <p className="text-base leading-relaxed italic font-display text-muted-foreground group-hover:text-gold transition-colors duration-500">
                         &ldquo;{item.message}&rdquo;
                       </p>
                     </div>
 
                     {/* Corner accents */}
-                    <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-[#D4AF37]/20 group-hover:border-[#D4AF37]/40 transition-colors duration-500" />
-                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-[#D4AF37]/20 group-hover:border-[#D4AF37]/40 transition-colors duration-500" />
+                    <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold/20 group-hover:border-gold/40 transition-colors duration-500" />
+                    <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold/20 group-hover:border-gold/40 transition-colors duration-500" />
                   </div>
                 </FadeInSection>
               ))}
@@ -123,7 +123,7 @@ export default function ChosenMomentsPage() {
           )}
 
           {!loading && vows.length === 0 && (
-            <div className="text-center py-20 text-[#8A7D65] italic">
+            <div className="text-center py-20 text-muted-foreground italic">
               Chưa có lời thề nào được công khai. Hãy là người đầu tiên.
             </div>
           )}
@@ -134,7 +134,7 @@ export default function ChosenMomentsPage() {
       <section className="pb-32 px-6 text-center">
         <FadeInSection>
           <GoldDivider className="mb-16 opacity-30" />
-          <p className="text-xl md:text-2xl font-display italic text-[#C5A55A] mb-12">
+          <p className="text-xl md:text-2xl font-display italic text-gold mb-12">
             "Mỗi lời thề là một quyết định không thể thay đổi."
           </p>
         </FadeInSection>

@@ -51,20 +51,12 @@ function RitualPageContent() {
       <section className="px-6 pb-12">
         <FadeInSection>
           <div className="mx-auto max-w-2xl text-center">
-            <p
-              className="text-base md:text-lg leading-relaxed"
-              style={{ color: "#8A7D65" }}
-            >
+            <p className="text-base md:text-lg leading-relaxed text-muted-foreground">
               {"Trong một thế giới mà lời hứa trở nên nhẹ bẫng, "}
               {"Nhất Tâm Hoa yêu cầu bạn dừng lại một nhịp. "}
-              {
-                "Hãy tự hỏi mình: người này có xứng đáng với lời thề trọn đời không?"
-              }
+              {"Hãy tự hỏi mình: người này có xứng đáng với lời thề trọn đời không?"}
             </p>
-            <p
-              className="mt-6 text-lg md:text-xl italic font-display"
-              style={{ color: "#D4AF37" }}
-            >
+            <p className="mt-6 text-lg md:text-xl italic font-display text-gold">
               {'"Nếu câu trả lời là có — hãy tiếp tục."'}
             </p>
           </div>
@@ -79,35 +71,31 @@ function RitualPageContent() {
                 onClick={() => toggleCommitment(item.id)}
                 className={`w-full text-left p-6 border transition-all duration-500 cursor-pointer group ${
                   checked[item.id]
-                    ? "border-[#D4AF37]/40 bg-[#D4AF37]/[0.04]"
-                    : "border-[#2a2520] bg-[#0d0b09]/60 hover:border-[#D4AF37]/20"
+                    ? "border-gold/40 bg-gold/[0.04]"
+                    : "border-border bg-card/60 hover:border-gold/20"
                 }`}
               >
                 <div className="flex items-start gap-4">
                   <div
                     className={`mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center border transition-all duration-300 ${
                       checked[item.id]
-                        ? "bg-[#D4AF37] border-[#D4AF37]"
-                        : "border-[#555040] group-hover:border-[#C5A55A]"
+                        ? "bg-gold border-gold"
+                        : "border-muted-foreground/50 group-hover:border-gold-dim"
                     }`}
                   >
                     {checked[item.id] && (
-                      <Check className="h-4 w-4" style={{ color: "#0a0a08" }} />
+                      <Check className="h-4 w-4 text-[#0a0a08]" />
                     )}
                   </div>
                   <div>
                     <p
-                      className="text-base md:text-lg font-display transition-colors duration-300"
-                      style={{
-                        color: checked[item.id] ? "#F5E6C8" : "#C5A55A",
-                      }}
+                      className={`text-base md:text-lg font-display transition-colors duration-300 ${
+                        checked[item.id] ? "text-foreground" : "text-gold"
+                      }`}
                     >
                       {item.label}
                     </p>
-                    <p
-                      className="mt-1.5 text-sm leading-relaxed"
-                      style={{ color: "#6B5F4A" }}
-                    >
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">
                       {item.description}
                     </p>
                   </div>
@@ -127,7 +115,7 @@ function RitualPageContent() {
               className={`w-full py-5 flex items-center justify-center gap-3 text-sm tracking-[0.25em] uppercase font-medium transition-all duration-700 cursor-pointer ${
                 allChecked
                   ? "bg-gradient-to-r from-[#B8860B] via-[#D4AF37] to-[#B8860B] text-[#0a0a08] shadow-[0_0_40px_rgba(212,175,55,0.15)]"
-                  : "bg-[#1a1814] text-[#555040] cursor-not-allowed border border-[#2a2520]"
+                  : "bg-secondary text-muted-foreground/50 cursor-not-allowed border border-border"
               }`}
             >
               <Shield className="h-4 w-4" />
@@ -135,10 +123,7 @@ function RitualPageContent() {
             </button>
 
             {!allChecked && (
-              <p
-                className="mt-4 text-center text-sm"
-                style={{ color: "#6B5F4A" }}
-              >
+              <p className="mt-4 text-center text-sm text-muted-foreground">
                 {"Vui lòng xác nhận tất cả cam kết để tiếp tục"}
               </p>
             )}
