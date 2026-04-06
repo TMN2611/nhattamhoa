@@ -102,10 +102,13 @@ export function ReviewsSection() {
               {review.video_url && (
                 <button
                   onClick={() => setVideoModal(review.video_url!)}
-                  className="relative w-full aspect-video mb-4 bg-secondary/80 flex items-center justify-center hover:bg-secondary/60 transition-colors"
+                  className="relative w-full aspect-video mb-4 overflow-hidden group"
                 >
-                  <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center">
-                    <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
+                  <video src={review.video_url} muted preload="metadata" playsInline className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition-colors flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center">
+                      <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
+                    </div>
                   </div>
                   <span className="absolute bottom-2 left-2 text-[10px] text-gold/80 uppercase tracking-wider">Video</span>
                 </button>
