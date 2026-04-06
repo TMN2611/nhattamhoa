@@ -6,7 +6,8 @@ import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
 export async function POST(req: Request) {
-  if (!validateAdminRequest(req)) {
+  const auth = validateAdminRequest(req);
+  if (!auth.valid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
@@ -23,17 +24,23 @@ export async function POST(req: Request) {
       'image/png': 'png',
       'image/webp': 'webp',
       'image/gif': 'gif',
+      'video/mp4': 'mp4',
+      'video/webm': 'webm',
+      'video/quicktime': 'mov',
     }
     const ext = mimeToExt[file.type]
     if (!ext) {
-      return NextResponse.json({ error: 'Invalid file type. Allowed: JPG, PNG, WebP, GIF' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid file type. Allowed: JPG, PNG, WebP, GIF, MP4, WebM, MOV' }, { status: 400 })
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: 'File too large. Max 5MB' }, { status: 400 })
+    const isVideo = file.type.startsWith('video/')
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 5 * 1024 * 1024
+    if (file.size > maxSize) {
+      return NextResponse.json({ error: `File too large. Max ${isVideo ? '50MB' : '5MB'}` }, { status: 400 })
     }
 
-    const safeName = `product-${Date.now()}.${ext}`
+    const prefix = isVideo ? 'video' : 'product'
+    const safeName = `${prefix}-${Date.now()}.${ext}`
     const buffer = Buffer.from(await file.arrayBuffer())
 
     const uploadDir = path.join(process.cwd(), 'public', 'uploads')

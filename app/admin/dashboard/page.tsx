@@ -440,6 +440,163 @@ function DualImageUploader({
   );
 }
 
+function ReviewMediaUploader({
+  label,
+  accept,
+  currentUrl,
+  onUploaded,
+  onClear,
+  type,
+}: {
+  label: string;
+  accept: string;
+  currentUrl: string;
+  onUploaded: (url: string) => void;
+  onClear: () => void;
+  type: "image" | "video";
+}) {
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState("");
+  const [urlMode, setUrlMode] = useState(false);
+  const [urlInput, setUrlInput] = useState("");
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const maxSize = type === "video" ? 50 * 1024 * 1024 : 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      alert(`File quá lớn. Tối đa ${type === "video" ? "50MB" : "5MB"}`);
+      return;
+    }
+
+    setUploading(true);
+    setProgress("Đang tải lên...");
+    try {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${getAdminToken()}` },
+        body: form,
+      });
+      const data = await res.json();
+      if (data.success && data.url) {
+        onUploaded(data.url);
+        setProgress("");
+      } else {
+        alert("Lỗi upload: " + (data.error || "Không rõ"));
+        setProgress("");
+      }
+    } catch {
+      alert("Lỗi upload file");
+      setProgress("");
+    } finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  function handleUrlSubmit() {
+    if (urlInput.trim()) {
+      onUploaded(urlInput.trim());
+      setUrlInput("");
+      setUrlMode(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-[10px] text-muted-foreground uppercase tracking-wider">{label}</label>
+
+      {currentUrl ? (
+        <div className="border border-gold/20 bg-background p-3 space-y-2">
+          <div className="flex items-start gap-3">
+            {type === "image" ? (
+              <div className="w-16 h-16 border border-gold/10 overflow-hidden flex-shrink-0">
+                <img src={currentUrl} alt="" className="w-full h-full object-cover" />
+              </div>
+            ) : (
+              <div className="w-24 h-16 border border-gold/10 overflow-hidden flex-shrink-0 bg-secondary flex items-center justify-center">
+                <video src={currentUrl} className="w-full h-full object-cover" />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-[10px] text-muted-foreground truncate">{currentUrl}</p>
+              <button onClick={onClear} className="mt-1 text-[10px] text-red-400 hover:text-red-300 flex items-center gap-1">
+                <X className="h-3 w-3" /> Xoá
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="border border-dashed border-gold/20 bg-background p-4 space-y-3">
+          <div
+            className="flex flex-col items-center justify-center cursor-pointer hover:bg-gold/5 transition-colors py-3 rounded"
+            onClick={() => !uploading && fileRef.current?.click()}
+          >
+            {uploading ? (
+              <>
+                <Loader2 className="h-8 w-8 text-gold animate-spin mb-2" />
+                <p className="text-xs text-gold">{progress}</p>
+              </>
+            ) : (
+              <>
+                <Upload className="h-8 w-8 text-gold/40 mb-2" />
+                <p className="text-xs text-muted-foreground">
+                  Nhấp để tải {type === "image" ? "ảnh" : "video"} từ máy
+                </p>
+                <p className="text-[10px] text-muted-foreground/60 mt-0.5">
+                  {type === "image" ? "JPG, PNG, WebP, GIF — tối đa 5MB" : "MP4, WebM, MOV — tối đa 50MB"}
+                </p>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2">
+            <div className="flex-1 h-px bg-gold/10" />
+            <span className="text-[10px] text-muted-foreground/60 uppercase">hoặc</span>
+            <div className="flex-1 h-px bg-gold/10" />
+          </div>
+
+          {urlMode ? (
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={urlInput}
+                onChange={(e) => setUrlInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleUrlSubmit()}
+                placeholder={`Dán URL ${type === "image" ? "ảnh" : "video"}...`}
+                className="flex-1 px-3 py-2 border border-gold/20 bg-card text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60"
+                autoFocus
+              />
+              <button onClick={handleUrlSubmit} className="px-3 py-2 bg-gold/20 text-gold text-xs uppercase hover:bg-gold/30 transition-colors">
+                OK
+              </button>
+              <button onClick={() => { setUrlMode(false); setUrlInput(""); }} className="px-2 py-2 text-muted-foreground hover:text-foreground transition-colors">
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+          ) : (
+            <button onClick={() => setUrlMode(true)} className="w-full text-center text-xs text-gold/60 hover:text-gold transition-colors py-1">
+              Dán URL thay vì tải file
+            </button>
+          )}
+        </div>
+      )}
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept={accept}
+        onChange={handleFile}
+        className="hidden"
+      />
+    </div>
+  );
+}
+
 function MultiImageList({
   label,
   images,
@@ -1937,9 +2094,23 @@ export default function AdminDashboardPage() {
               </div>
             </div>
             <textarea value={reviewForm.content} onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })} placeholder="Nội dung đánh giá *" rows={3} className="w-full px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60 resize-none" />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input value={reviewForm.image_url} onChange={(e) => setReviewForm({ ...reviewForm, image_url: e.target.value })} placeholder="URL hình ảnh (tuỳ chọn)" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
-              <input value={reviewForm.video_url} onChange={(e) => setReviewForm({ ...reviewForm, video_url: e.target.value })} placeholder="URL video (tuỳ chọn)" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <ReviewMediaUploader
+                label="Hình ảnh"
+                accept="image/*"
+                currentUrl={reviewForm.image_url}
+                onUploaded={(url) => setReviewForm({ ...reviewForm, image_url: url })}
+                onClear={() => setReviewForm({ ...reviewForm, image_url: "" })}
+                type="image"
+              />
+              <ReviewMediaUploader
+                label="Video"
+                accept="video/*"
+                currentUrl={reviewForm.video_url}
+                onUploaded={(url) => setReviewForm({ ...reviewForm, video_url: url })}
+                onClear={() => setReviewForm({ ...reviewForm, video_url: "" })}
+                type="video"
+              />
             </div>
             <button onClick={handleAddReview} className="px-5 py-2.5 bg-gradient-to-r from-[#B8860B] via-[var(--gold)] to-[#B8860B] text-primary-foreground text-sm uppercase font-medium flex items-center gap-2">
               <Plus className="h-4 w-4" /> Thêm đánh giá
