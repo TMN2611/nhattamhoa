@@ -3,6 +3,7 @@ import { ProductGrid } from '@/components/product-grid'
 import { LiveVowFeed } from '@/components/live-vow-feed'
 import { CommitmentSection } from '@/components/commitment-section'
 import { BannerCarousel } from '@/components/banner-carousel'
+import { ReviewsSection } from '@/components/reviews-section'
 
 export default function HomePage() {
   return (
@@ -41,6 +42,10 @@ export default function HomePage() {
           <div className="mt-6 h-px w-24 mx-auto bg-gradient-to-r from-transparent via-gold to-transparent" />
         </div>
         <ProductGrid flow="ritual" />
+      </section>
+
+      <section className="border-t border-border/30">
+        <ReviewsSection />
       </section>
 
       <section className="border-t border-border/30">

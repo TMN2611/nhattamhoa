@@ -101,7 +101,9 @@ Product (from Ritual Collection) → `/product/[id]?flow=ritual` → "Bắt đ�
 ## Pages
 
 ### Public Pages
-- `/` - Home page with hero + 3 sections: "Gift Collection" (product grid) + "Ritual Collection" (product grid with ritual badges) + Live vows + Commitment
+- `/` - Home page with hero + 5 sections: "Gift Collection" (horizontal scroll mobile/grid desktop) + "Ritual Collection" + Customer Reviews + Live vows + Commitment
+- `/reviews` - All customer reviews page (social-media style with images/video)
+- `/collection` - Full product collection page with Gift/Ritual tabs (`?flow=gift|ritual`)
 - `/product/[id]` - Product detail with two CTAs based on `?flow=gift|ritual`
 - `/ready` - Ritual readiness with reflective questions + dual buttons
 - `/moment` - Describe moment/intention
@@ -118,8 +120,8 @@ Product (from Ritual Collection) → `/product/[id]?flow=ritual` → "Bắt đ�
 - `/hoi-dap` - FAQ
 
 ### Admin Pages
-- `/admin/login` - Admin authentication (credentials: adm1/123)
-- `/admin/dashboard` - Orders + Products management with full lifecycle controls
+- `/admin/login` - Admin authentication (DB-backed, default: owner/owner2026)
+- `/admin/dashboard` - Orders + Products + Banners + Revenue (owner) + Reviews (owner) + Users (owner) management
 
 ## Ritual Flow
 
@@ -173,6 +175,18 @@ Product Detail → /ready → /checkout (quick ritual)
 - `POST /api/create-certificate` - Blockchain certificate creation
 - `POST /api/upload` - Image upload (admin auth), saves to /public/uploads/
 
+### Admin Management
+- `POST /api/admin/login` - DB-backed login (validates against admin_users table)
+- `GET /api/admin/users` - List admin users (owner auth)
+- `POST /api/admin/users` - Create admin user (owner auth)
+- `PATCH /api/admin/users` - Toggle user active status (owner auth)
+- `GET /api/admin/revenue` - Revenue stats by day/week/month/quarter/year (owner auth)
+
+### Reviews
+- `GET /api/reviews` - List active reviews (public)
+- `POST /api/reviews` - Create review (owner auth)
+- `DELETE /api/reviews?id=X` - Soft-delete review (owner auth)
+
 ## Certificate System
 
 - **Code**: Generated as NTH-XXXXXXXX (alphanumeric)
@@ -182,9 +196,15 @@ Product Detail → /ready → /checkout (quick ritual)
 
 ## Admin Authentication
 
-- Server-side: Bearer token validation (Base64 of username:password)
-- Client-side: localStorage session + token
-- Credentials: adm1 / 123
+- **Database-backed**: `admin_users` table with hashed passwords (SHA256)
+- **Roles**: `owner` (full access: revenue, reviews, users) and `cashier` (orders/products/banners only)
+- **Token**: Bearer token = base64 JSON `{id, username, role}`, validated in `lib/admin-utils.ts`
+- **Default account**: username `owner`, password `owner2026`
+- **Owner-only features**: Revenue dashboard, review management, user account management
+
+### Database Tables (Admin)
+**admin_users**: id (uuid), username, password_hash, display_name, role (owner/cashier), is_active, created_at
+**reviews**: id (uuid), customer_name, content, rating, image_url, video_url, is_featured, is_active, created_by, created_at
 
 ## Theme System
 

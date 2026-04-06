@@ -31,11 +31,21 @@ import {
   GalleryHorizontal,
   AlertTriangle,
   CheckCircle2,
+  Star,
+  Download,
+  Users,
+  BarChart3,
+  MessageSquare,
+  UserPlus,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import {
   isAdminLoggedIn,
   setAdminSession,
   getAdminToken,
+  getAdminRole,
+  getAdminDisplayName,
 } from "@/lib/admin-utils";
 
 interface Order {
@@ -540,7 +550,15 @@ function MultiImageList({
 
 export default function AdminDashboardPage() {
   const router = useRouter();
-  const [tab, setTab] = useState<"orders" | "products" | "banners">("orders");
+  const [tab, setTab] = useState<"orders" | "products" | "banners" | "revenue" | "reviews" | "users">("orders");
+  const [adminRole, setAdminRole] = useState<string>("");
+  const [adminName, setAdminName] = useState<string>("");
+  const [revenueData, setRevenueData] = useState<any>(null);
+  const [revenueLoading, setRevenueLoading] = useState(false);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewForm, setReviewForm] = useState({ customer_name: "", content: "", rating: 5, image_url: "", video_url: "" });
+  const [adminUsers, setAdminUsers] = useState<any[]>([]);
+  const [newUserForm, setNewUserForm] = useState({ username: "", password: "", display_name: "", role: "cashier" });
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -618,6 +636,8 @@ export default function AdminDashboardPage() {
       router.push("/admin/login");
       return;
     }
+    setAdminRole(getAdminRole());
+    setAdminName(getAdminDisplayName());
     fetchData();
   }, [router]);
 
@@ -927,6 +947,101 @@ export default function AdminDashboardPage() {
     router.push("/admin/login");
   }
 
+  async function fetchRevenue() {
+    setRevenueLoading(true);
+    try {
+      const res = await fetch("/api/admin/revenue", { headers: { Authorization: `Bearer ${getAdminToken()}` } });
+      const data = await res.json();
+      if (data.success) setRevenueData(data);
+    } catch (e) { console.error(e); }
+    finally { setRevenueLoading(false); }
+  }
+
+  async function fetchReviews() {
+    try {
+      const res = await fetch("/api/reviews");
+      const data = await res.json();
+      if (data.success) setReviews(data.reviews || []);
+    } catch (e) { console.error(e); }
+  }
+
+  async function handleAddReview() {
+    if (!reviewForm.customer_name || !reviewForm.content) { showToast("Thiếu tên hoặc nội dung", "error"); return; }
+    try {
+      const res = await fetch("/api/reviews", { method: "POST", headers: headers(), body: JSON.stringify(reviewForm) });
+      const data = await res.json();
+      if (data.success) {
+        setReviewForm({ customer_name: "", content: "", rating: 5, image_url: "", video_url: "" });
+        fetchReviews();
+        showToast("Đánh giá đã được tạo.", "success");
+      } else { showToast(data.error, "error"); }
+    } catch { showToast("Lỗi tạo đánh giá", "error"); }
+  }
+
+  async function deleteReview(id: string) {
+    await fetch(`/api/reviews?id=${id}`, { method: "DELETE", headers: headers() });
+    fetchReviews();
+  }
+
+  async function fetchAdminUsers() {
+    try {
+      const res = await fetch("/api/admin/users", { headers: { Authorization: `Bearer ${getAdminToken()}` } });
+      const data = await res.json();
+      if (data.success) setAdminUsers(data.users || []);
+    } catch (e) { console.error(e); }
+  }
+
+  async function handleCreateUser() {
+    if (!newUserForm.username || !newUserForm.password) { showToast("Thiếu tên đăng nhập hoặc mật khẩu", "error"); return; }
+    try {
+      const res = await fetch("/api/admin/users", { method: "POST", headers: headers(), body: JSON.stringify(newUserForm) });
+      const data = await res.json();
+      if (data.success) {
+        setNewUserForm({ username: "", password: "", display_name: "", role: "cashier" });
+        fetchAdminUsers();
+        showToast("Tài khoản đã được tạo.", "success");
+      } else { showToast(data.error, "error"); }
+    } catch { showToast("Lỗi tạo tài khoản", "error"); }
+  }
+
+  async function toggleUserActive(userId: string, isActive: boolean) {
+    await fetch("/api/admin/users", { method: "PATCH", headers: headers(), body: JSON.stringify({ id: userId, is_active: !isActive }) });
+    fetchAdminUsers();
+  }
+
+  useEffect(() => {
+    if (tab === "revenue" && adminRole === "owner") fetchRevenue();
+    if (tab === "reviews") fetchReviews();
+    if (tab === "users" && adminRole === "owner") fetchAdminUsers();
+  }, [tab]);
+
+  function handleStatClick(status: string) {
+    if (status === "total") { setFilterStatus("all"); }
+    else { setFilterStatus(status); }
+    setTab("orders");
+    setSearchPhone("");
+    setFilterDate("");
+  }
+
+  function formatMoney(n: number) {
+    return new Intl.NumberFormat("vi-VN").format(n) + "₫";
+  }
+
+  function exportRevenueCSV() {
+    if (!revenueData?.allOrders) return;
+    const rows = [["Ngày", "Sản phẩm", "Doanh thu"].join(",")];
+    revenueData.allOrders.forEach((o: any) => {
+      rows.push([o.date, `"${o.product_name}"`, o.revenue].join(","));
+    });
+    const blob = new Blob(["\uFEFF" + rows.join("\n")], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `doanh-thu-${new Date().toISOString().split("T")[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   const filteredOrders = useMemo(() => {
     let result = orders;
 
@@ -974,9 +1089,14 @@ export default function AdminDashboardPage() {
     <main className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-8">
-          <h1 className="text-2xl md:text-3xl font-light font-display text-foreground">
-            Admin Dashboard
-          </h1>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-light font-display text-foreground">
+              Admin Dashboard
+            </h1>
+            <p className="text-xs text-muted-foreground mt-1">
+              {adminName || "Admin"} — <span className="text-gold">{adminRole === "owner" ? "Chủ cửa hàng" : "Thu ngân"}</span>
+            </p>
+          </div>
           <button
             onClick={handleLogout}
             className="px-4 md:px-6 py-2 border border-gold/40 text-gold text-sm uppercase hover:bg-gold/10 transition-colors"
@@ -986,24 +1106,24 @@ export default function AdminDashboardPage() {
         </div>
 
         <div className="flex gap-2 md:gap-4 mb-6 flex-wrap">
-          <button
-            onClick={() => setTab("orders")}
-            className={`flex items-center gap-2 px-4 md:px-5 py-2.5 text-sm uppercase transition-all ${tab === "orders" ? "bg-gold/20 text-gold border border-gold/40" : "text-muted-foreground border border-gold/10"}`}
-          >
-            <ShoppingBag className="h-4 w-4" /> Đơn hàng
-          </button>
-          <button
-            onClick={() => setTab("products")}
-            className={`flex items-center gap-2 px-4 md:px-5 py-2.5 text-sm uppercase transition-all ${tab === "products" ? "bg-gold/20 text-gold border border-gold/40" : "text-muted-foreground border border-gold/10"}`}
-          >
-            <Package className="h-4 w-4" /> Sản phẩm
-          </button>
-          <button
-            onClick={() => setTab("banners")}
-            className={`flex items-center gap-2 px-4 md:px-5 py-2.5 text-sm uppercase transition-all ${tab === "banners" ? "bg-gold/20 text-gold border border-gold/40" : "text-muted-foreground border border-gold/10"}`}
-          >
-            <GalleryHorizontal className="h-4 w-4" /> Banners
-          </button>
+          {([
+            { key: "orders", icon: ShoppingBag, label: "Đơn hàng" },
+            { key: "products", icon: Package, label: "Sản phẩm" },
+            { key: "banners", icon: GalleryHorizontal, label: "Banners" },
+            ...(adminRole === "owner" ? [
+              { key: "revenue", icon: CreditCard, label: "Doanh thu" },
+              { key: "reviews", icon: Eye, label: "Đánh giá" },
+              { key: "users", icon: Shield, label: "Tài khoản" },
+            ] : []),
+          ] as { key: string; icon: any; label: string }[]).map((t) => (
+            <button
+              key={t.key}
+              onClick={() => setTab(t.key as any)}
+              className={`flex items-center gap-2 px-4 md:px-5 py-2.5 text-sm uppercase transition-all ${tab === t.key ? "bg-gold/20 text-gold border border-gold/40" : "text-muted-foreground border border-gold/10"}`}
+            >
+              <t.icon className="h-4 w-4" /> {t.label}
+            </button>
+          ))}
         </div>
 
         {/* =========== PRODUCTS TAB =========== */}
@@ -1214,31 +1334,31 @@ export default function AdminDashboardPage() {
           <>
             {stats && (
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-                <div className="border border-gold/20 bg-card p-4">
+                <button onClick={() => handleStatClick("total")} className={`border bg-card p-4 text-left transition-all hover:border-gold/40 ${filterStatus === "all" ? "border-gold/40 ring-1 ring-gold/20" : "border-gold/20"}`}>
                   <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Tổng đơn hàng</div>
                   <div className="text-2xl font-light text-foreground">{stats.total}</div>
-                </div>
-                <div className="border border-yellow-500/20 bg-yellow-900/5 p-4">
+                </button>
+                <button onClick={() => handleStatClick("pending")} className={`border bg-yellow-900/5 p-4 text-left transition-all hover:border-yellow-500/40 ${filterStatus === "pending" ? "border-yellow-500/40 ring-1 ring-yellow-500/20" : "border-yellow-500/20"}`}>
                   <div className="flex items-center gap-1.5 mb-1">
                     <Clock className="h-3 w-3 text-yellow-400" />
                     <span className="text-[10px] text-yellow-400 uppercase tracking-wider">Đang xử lý</span>
                   </div>
                   <div className="text-2xl font-light text-yellow-400">{stats.pending}</div>
-                </div>
-                <div className="border border-blue-500/20 bg-blue-900/5 p-4">
+                </button>
+                <button onClick={() => handleStatClick("paid")} className={`border bg-blue-900/5 p-4 text-left transition-all hover:border-blue-500/40 ${filterStatus === "paid" ? "border-blue-500/40 ring-1 ring-blue-500/20" : "border-blue-500/20"}`}>
                   <div className="flex items-center gap-1.5 mb-1">
                     <CreditCard className="h-3 w-3 text-blue-400" />
                     <span className="text-[10px] text-blue-400 uppercase tracking-wider">Đã thanh toán</span>
                   </div>
                   <div className="text-2xl font-light text-blue-400">{stats.paid}</div>
-                </div>
-                <div className="border border-emerald-500/20 bg-emerald-900/5 p-4">
+                </button>
+                <button onClick={() => handleStatClick("completed")} className={`border bg-emerald-900/5 p-4 text-left transition-all hover:border-emerald-500/40 ${filterStatus === "completed" ? "border-emerald-500/40 ring-1 ring-emerald-500/20" : "border-emerald-500/20"}`}>
                   <div className="flex items-center gap-1.5 mb-1">
                     <CheckCircle className="h-3 w-3 text-emerald-400" />
                     <span className="text-[10px] text-emerald-400 uppercase tracking-wider">Hoàn tất</span>
                   </div>
                   <div className="text-2xl font-light text-emerald-400">{stats.completed}</div>
-                </div>
+                </button>
               </div>
             )}
 
@@ -1296,7 +1416,9 @@ export default function AdminDashboardPage() {
               <span className="text-muted-foreground">
                 {searchPhone.trim()
                   ? `Tìm thấy ${filteredOrders.length} đơn hàng`
-                  : `${filteredOrders.length} đơn hàng ngày ${filterDate === getTodayISO() ? "hôm nay" : formatDisplayDate(filterDate)}`}
+                  : filterDate
+                    ? `${filteredOrders.length} đơn hàng ngày ${filterDate === getTodayISO() ? "hôm nay" : formatDisplayDate(filterDate)}`
+                    : `${filteredOrders.length} đơn hàng (tất cả)`}
               </span>
               {(searchPhone || filterType !== "all" || filterStatus !== "all") && (
                 <button
@@ -1383,7 +1505,9 @@ export default function AdminDashboardPage() {
                       <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
                         {searchPhone.trim()
                           ? "Không tìm thấy đơn hàng nào với SĐT này"
-                          : `Không có đơn hàng nào ngày ${filterDate === getTodayISO() ? "hôm nay" : formatDisplayDate(filterDate)}`}
+                          : filterDate
+                            ? `Không có đơn hàng nào ngày ${filterDate === getTodayISO() ? "hôm nay" : formatDisplayDate(filterDate)}`
+                            : "Không có đơn hàng nào"}
                       </td>
                     </tr>
                   )}
@@ -1707,6 +1831,217 @@ export default function AdminDashboardPage() {
               </div>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* =========== REVENUE TAB (OWNER ONLY) =========== */}
+      {tab === "revenue" && adminRole === "owner" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-display text-gold flex items-center gap-2">
+              <BarChart3 className="h-5 w-5" /> Thống kê doanh thu
+            </h2>
+            <button onClick={exportRevenueCSV} disabled={!revenueData} className="flex items-center gap-2 px-4 py-2 border border-gold/30 text-gold text-xs uppercase hover:bg-gold/10 transition-colors disabled:opacity-40">
+              <Download className="h-3.5 w-3.5" /> Xuất CSV
+            </button>
+          </div>
+
+          {revenueLoading ? (
+            <div className="flex items-center justify-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-gold" />
+            </div>
+          ) : revenueData ? (
+            <>
+              <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+                {[
+                  { label: "Hôm nay", value: revenueData.summary?.today?.revenue, color: "text-gold" },
+                  { label: "Tuần này", value: revenueData.summary?.week?.revenue, color: "text-blue-400" },
+                  { label: "Tháng này", value: revenueData.summary?.month?.revenue, color: "text-emerald-400" },
+                  { label: "Quý này", value: revenueData.summary?.quarter?.revenue, color: "text-purple-400" },
+                  { label: "Năm nay", value: revenueData.summary?.year?.revenue, color: "text-orange-400" },
+                ].map((item) => (
+                  <div key={item.label} className="border border-gold/20 bg-card p-4">
+                    <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-2">{item.label}</div>
+                    <div className={`text-xl font-light ${item.color}`}>{formatMoney(item.value || 0)}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border border-gold/20 bg-card p-4">
+                  <h3 className="text-sm text-gold uppercase tracking-wider mb-3">Tổng đơn hàng</h3>
+                  <div className="text-3xl font-light text-foreground">{revenueData.summary?.total?.orders || 0}</div>
+                  <p className="text-xs text-muted-foreground mt-1">đã thanh toán hoặc hoàn tất</p>
+                </div>
+                <div className="border border-gold/20 bg-card p-4">
+                  <h3 className="text-sm text-gold uppercase tracking-wider mb-3">Doanh thu trung bình / đơn</h3>
+                  <div className="text-3xl font-light text-foreground">{formatMoney(revenueData.summary?.total?.orders ? Math.round(revenueData.summary.total.revenue / revenueData.summary.total.orders) : 0)}</div>
+                </div>
+              </div>
+
+              {(() => {
+                const productRevMap = new Map<string, { name: string; revenue: number; count: number }>();
+                (revenueData.allOrders || []).forEach((o: any) => {
+                  const existing = productRevMap.get(o.product_name) || { name: o.product_name, revenue: 0, count: 0 };
+                  existing.revenue += o.revenue;
+                  existing.count += 1;
+                  productRevMap.set(o.product_name, existing);
+                });
+                const topProducts = Array.from(productRevMap.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 10);
+                if (topProducts.length === 0) return null;
+                return (
+                  <div className="border border-gold/20 bg-card p-4">
+                    <h3 className="text-sm text-gold uppercase tracking-wider mb-4">Sản phẩm bán chạy</h3>
+                    <div className="space-y-3">
+                      {topProducts.map((p, i) => (
+                        <div key={i} className="flex items-center justify-between py-2 border-b border-gold/10 last:border-0">
+                          <div>
+                            <span className="text-xs text-gold mr-2">#{i + 1}</span>
+                            <span className="text-sm text-foreground">{p.name}</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-sm text-foreground">{formatMoney(p.revenue)}</div>
+                            <div className="text-[10px] text-muted-foreground">{p.count} đơn</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })()}
+            </>
+          ) : (
+            <div className="text-center py-16 text-muted-foreground">Không có dữ liệu</div>
+          )}
+        </div>
+      )}
+
+      {/* =========== REVIEWS TAB (OWNER ONLY) =========== */}
+      {tab === "reviews" && adminRole === "owner" && (
+        <div className="space-y-6">
+          <h2 className="text-lg font-display text-gold flex items-center gap-2">
+            <MessageSquare className="h-5 w-5" /> Quản lý đánh giá
+          </h2>
+
+          <div className="border border-gold/20 bg-card p-4 space-y-4">
+            <h3 className="text-sm text-gold uppercase tracking-wider">Thêm đánh giá mới</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input value={reviewForm.customer_name} onChange={(e) => setReviewForm({ ...reviewForm, customer_name: e.target.value })} placeholder="Tên khách hàng *" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Đánh giá:</span>
+                {[1, 2, 3, 4, 5].map((s) => (
+                  <button key={s} onClick={() => setReviewForm({ ...reviewForm, rating: s })} className="p-0.5">
+                    <Star className={`h-5 w-5 ${s <= reviewForm.rating ? "text-gold fill-gold" : "text-gold/30"}`} />
+                  </button>
+                ))}
+              </div>
+            </div>
+            <textarea value={reviewForm.content} onChange={(e) => setReviewForm({ ...reviewForm, content: e.target.value })} placeholder="Nội dung đánh giá *" rows={3} className="w-full px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60 resize-none" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input value={reviewForm.image_url} onChange={(e) => setReviewForm({ ...reviewForm, image_url: e.target.value })} placeholder="URL hình ảnh (tuỳ chọn)" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
+              <input value={reviewForm.video_url} onChange={(e) => setReviewForm({ ...reviewForm, video_url: e.target.value })} placeholder="URL video (tuỳ chọn)" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
+            </div>
+            <button onClick={handleAddReview} className="px-5 py-2.5 bg-gradient-to-r from-[#B8860B] via-[var(--gold)] to-[#B8860B] text-primary-foreground text-sm uppercase font-medium flex items-center gap-2">
+              <Plus className="h-4 w-4" /> Thêm đánh giá
+            </button>
+          </div>
+
+          {reviews.length > 0 ? (
+            <div className="space-y-3">
+              {reviews.map((r) => (
+                <div key={r.id} className="border border-gold/20 bg-card p-4 flex flex-col md:flex-row gap-4">
+                  {r.image_url && (
+                    <div className="w-20 h-20 flex-shrink-0 border border-gold/10 overflow-hidden">
+                      <img src={r.image_url} alt="" className="w-full h-full object-cover" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="text-sm font-medium text-foreground">{r.customer_name}</span>
+                      <div className="flex gap-0.5">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star key={i} className={`h-3 w-3 ${i < r.rating ? "text-gold fill-gold" : "text-gold/20"}`} />
+                        ))}
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{r.content}</p>
+                    {r.video_url && <p className="text-[10px] text-blue-400 mt-1">🎥 Video đính kèm</p>}
+                  </div>
+                  <button onClick={() => deleteReview(r.id)} className="self-start p-2 text-red-400 hover:bg-red-500/10 transition-colors">
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">Chưa có đánh giá nào</div>
+          )}
+        </div>
+      )}
+
+      {/* =========== USERS TAB (OWNER ONLY) =========== */}
+      {tab === "users" && adminRole === "owner" && (
+        <div className="space-y-6">
+          <h2 className="text-lg font-display text-gold flex items-center gap-2">
+            <Users className="h-5 w-5" /> Quản lý tài khoản
+          </h2>
+
+          <div className="border border-gold/20 bg-card p-4 space-y-4">
+            <h3 className="text-sm text-gold uppercase tracking-wider flex items-center gap-2"><UserPlus className="h-4 w-4" /> Tạo tài khoản mới</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <input value={newUserForm.username} onChange={(e) => setNewUserForm({ ...newUserForm, username: e.target.value })} placeholder="Tên đăng nhập *" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
+              <input type="password" value={newUserForm.password} onChange={(e) => setNewUserForm({ ...newUserForm, password: e.target.value })} placeholder="Mật khẩu *" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
+              <input value={newUserForm.display_name} onChange={(e) => setNewUserForm({ ...newUserForm, display_name: e.target.value })} placeholder="Tên hiển thị" className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 placeholder-[#8A7D65]/60" />
+              <select value={newUserForm.role} onChange={(e) => setNewUserForm({ ...newUserForm, role: e.target.value })} className="px-3 py-2.5 border border-gold/20 bg-background text-foreground text-sm outline-none focus:border-gold/50 cursor-pointer">
+                <option value="cashier">Thu ngân</option>
+                <option value="owner">Chủ cửa hàng</option>
+              </select>
+            </div>
+            <button onClick={handleCreateUser} className="px-5 py-2.5 bg-gradient-to-r from-[#B8860B] via-[var(--gold)] to-[#B8860B] text-primary-foreground text-sm uppercase font-medium flex items-center gap-2">
+              <UserPlus className="h-4 w-4" /> Tạo tài khoản
+            </button>
+          </div>
+
+          {adminUsers.length > 0 ? (
+            <div className="border border-gold/20 bg-card overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gold/10 text-gold text-[10px] uppercase tracking-wider">
+                    <th className="px-4 py-4 text-left">Tên đăng nhập</th>
+                    <th className="px-4 py-4 text-left">Tên hiển thị</th>
+                    <th className="px-4 py-4 text-left">Vai trò</th>
+                    <th className="px-4 py-4 text-left">Trạng thái</th>
+                    <th className="px-4 py-4 text-left">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {adminUsers.map((u) => (
+                    <tr key={u.id} className="border-b border-gold/10 hover:bg-[var(--secondary)] transition-colors">
+                      <td className="px-4 py-3 text-sm text-foreground font-medium">{u.username}</td>
+                      <td className="px-4 py-3 text-sm text-muted-foreground">{u.display_name || "—"}</td>
+                      <td className="px-4 py-3">
+                        <span className={`text-[9px] px-2 py-0.5 border uppercase ${u.role === "owner" ? "border-gold text-gold" : "border-blue-400 text-blue-400"}`}>
+                          {u.role === "owner" ? "Chủ cửa hàng" : "Thu ngân"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <span className={`text-[9px] px-2 py-0.5 border uppercase ${u.is_active ? "border-emerald-400 text-emerald-400" : "border-red-400 text-red-400"}`}>
+                          {u.is_active ? "Hoạt động" : "Đã khoá"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3">
+                        <button onClick={() => toggleUserActive(u.id, u.is_active)} className={`text-xs flex items-center gap-1 px-2 py-1 border transition-colors ${u.is_active ? "border-red-400/30 text-red-400 hover:bg-red-500/10" : "border-emerald-400/30 text-emerald-400 hover:bg-emerald-500/10"}`}>
+                          {u.is_active ? <><Ban className="h-3 w-3" /> Khoá</> : <><CheckCircle className="h-3 w-3" /> Mở khoá</>}
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ) : (
+            <div className="text-center py-12 text-muted-foreground">Không có tài khoản nào</div>
+          )}
         </div>
       )}
 
