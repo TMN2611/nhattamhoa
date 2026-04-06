@@ -47,6 +47,12 @@ export default function ReviewsPage() {
             Những chia sẻ chân thành từ khách hàng đã tin tưởng Nhất Tâm Hoa
           </p>
           <div className="mt-6 h-px w-24 mx-auto bg-gradient-to-r from-transparent via-gold to-transparent" />
+          <Link
+            href="/reviews/submit"
+            className="inline-block mt-6 px-6 py-3 bg-gradient-to-r from-[#B8860B] via-[var(--gold)] to-[#B8860B] text-primary-foreground text-sm uppercase tracking-wider font-medium hover:brightness-110 transition-all"
+          >
+            Gửi đánh giá của bạn
+          </Link>
         </div>
 
         {loading ? (

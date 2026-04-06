@@ -102,7 +102,8 @@ Product (from Ritual Collection) → `/product/[id]?flow=ritual` → "Bắt đ�
 
 ### Public Pages
 - `/` - Home page with hero + 5 sections: "Gift Collection" (horizontal scroll mobile/grid desktop) + "Ritual Collection" + Customer Reviews + Live vows + Commitment
-- `/reviews` - All customer reviews page (social-media style with images/video)
+- `/reviews` - All customer reviews page (social-media style with images/video) + "Gửi đánh giá" button
+- `/reviews/submit` - Customer review submission form (phone-verified: checks orders table). Supports file upload (image/video) or URL paste. Rate-limited.
 - `/collection` - Full product collection page with Gift/Ritual tabs (`?flow=gift|ritual`)
 - `/product/[id]` - Product detail with two CTAs based on `?flow=gift|ritual`
 - `/ready` - Ritual readiness with reflective questions + dual buttons
