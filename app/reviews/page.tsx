@@ -71,31 +71,23 @@ export default function ReviewsPage() {
               <div key={review.id} className="border border-gold/15 bg-card overflow-hidden">
                 <div className="flex flex-col md:flex-row">
                   {(review.image_url || review.video_url) && (
-                    <div className="md:w-72 flex-shrink-0">
-                      {review.image_url ? (
-                        <div className="relative aspect-square md:aspect-auto md:h-full overflow-hidden">
+                    <div className="md:w-72 flex-shrink-0 flex flex-col">
+                      {review.image_url && (
+                        <div className="aspect-[4/3] md:aspect-auto md:flex-1 overflow-hidden">
                           <img src={review.image_url} alt="" className="w-full h-full object-cover" />
-                          {review.video_url && (
-                            <button
-                              onClick={() => setVideoModal(review.video_url!)}
-                              className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/50 transition-colors"
-                            >
-                              <div className="w-14 h-14 rounded-full bg-gold/90 flex items-center justify-center">
-                                <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
-                              </div>
-                            </button>
-                          )}
                         </div>
-                      ) : review.video_url ? (
+                      )}
+                      {review.video_url && (
                         <button
                           onClick={() => setVideoModal(review.video_url!)}
-                          className="w-full aspect-video md:aspect-auto md:h-full bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                          className={`w-full aspect-video bg-secondary/80 flex items-center justify-center hover:bg-secondary/60 transition-colors relative ${review.image_url ? "border-t border-gold/10" : "md:aspect-auto md:flex-1"}`}
                         >
                           <div className="w-14 h-14 rounded-full bg-gold/90 flex items-center justify-center">
                             <Play className="h-6 w-6 text-primary-foreground ml-0.5" />
                           </div>
+                          <span className="absolute bottom-2 left-3 text-[10px] text-gold/80 uppercase tracking-wider">Video</span>
                         </button>
-                      ) : null}
+                      )}
                     </div>
                   )}
 
@@ -128,12 +120,16 @@ export default function ReviewsPage() {
             <button onClick={() => setVideoModal(null)} className="absolute -top-10 right-0 text-white hover:text-gold transition-colors">
               <X className="h-6 w-6" />
             </button>
-            <iframe
-              src={videoModal}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {videoModal.startsWith("/uploads/") || videoModal.match(/\.(mp4|webm|mov)(\?|$)/i) ? (
+              <video src={videoModal} controls autoPlay className="w-full h-full bg-black" />
+            ) : (
+              <iframe
+                src={videoModal}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            )}
           </div>
         </div>
       )}

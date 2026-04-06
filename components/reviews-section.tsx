@@ -94,30 +94,20 @@ export function ReviewsSection() {
               className="flex-shrink-0 w-72 md:w-80 border border-gold/15 bg-card p-5 snap-start flex flex-col"
             >
               {review.image_url && (
-                <div className="relative w-full aspect-square mb-4 overflow-hidden bg-secondary">
+                <div className="w-full aspect-square mb-2 overflow-hidden bg-secondary">
                   <img src={review.image_url} alt="" className="w-full h-full object-cover" />
-                  {review.video_url && (
-                    <button
-                      onClick={() => setVideoModal(review.video_url!)}
-                      className="absolute inset-0 flex items-center justify-center bg-black/30 hover:bg-black/50 transition-colors"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center">
-                        <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
-                      </div>
-                    </button>
-                  )}
                 </div>
               )}
 
-              {!review.image_url && review.video_url && (
+              {review.video_url && (
                 <button
                   onClick={() => setVideoModal(review.video_url!)}
-                  className="relative w-full aspect-video mb-4 bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                  className="relative w-full aspect-video mb-4 bg-secondary/80 flex items-center justify-center hover:bg-secondary/60 transition-colors"
                 >
                   <div className="w-12 h-12 rounded-full bg-gold/90 flex items-center justify-center">
                     <Play className="h-5 w-5 text-primary-foreground ml-0.5" />
                   </div>
-                  <span className="absolute bottom-2 left-2 text-[10px] text-gold uppercase tracking-wider">Video</span>
+                  <span className="absolute bottom-2 left-2 text-[10px] text-gold/80 uppercase tracking-wider">Video</span>
                 </button>
               )}
 
@@ -148,12 +138,16 @@ export function ReviewsSection() {
             <button onClick={() => setVideoModal(null)} className="absolute -top-10 right-0 text-white hover:text-gold transition-colors">
               <X className="h-6 w-6" />
             </button>
-            <iframe
-              src={videoModal}
-              className="w-full h-full"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
+            {videoModal.startsWith("/uploads/") || videoModal.match(/\.(mp4|webm|mov)(\?|$)/i) ? (
+              <video src={videoModal} controls autoPlay className="w-full h-full bg-black" />
+            ) : (
+              <iframe
+                src={videoModal}
+                className="w-full h-full"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+              />
+            )}
           </div>
         </div>
       )}
