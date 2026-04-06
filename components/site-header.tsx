@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShoppingBag, Menu, X, Sun, Moon } from "lucide-react";
@@ -23,138 +24,155 @@ export function SiteHeader() {
 
   useEffect(() => setMounted(true), []);
 
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [mobileMenuOpen]);
+
   return (
-    <header className="fixed top-0 left-0 right-0 z-[999] bg-background/95 backdrop-blur-md border-b border-border/50">
-      <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
-        <div className="flex items-center gap-6 flex-1 min-w-0">
-          <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden text-foreground/70 hover:text-foreground transition-colors"
-            aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
-          >
-            {mobileMenuOpen ? (
-              <X className="h-5 w-5" />
-            ) : (
-              <Menu className="h-5 w-5" />
-            )}
-          </button>
-          <div className="hidden lg:flex items-center gap-6">
-            {navLinks.slice(0, 2).map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 whitespace-nowrap ${
-                  pathname === link.href
-                    ? "text-[var(--gold)]"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <Link
-          href="/"
-          className="flex flex-col items-center shrink-0 mx-4"
-          onClick={() => setMobileMenuOpen(false)}
-        >
-          <span className="text-2xl md:text-3xl font-semibold tracking-wider text-foreground">
-            Nhất Tâm Hoa
-          </span>
-          <span className="text-[10px] tracking-[0.3em] text-muted-foreground uppercase mt-0.5">
-            Eternal Roses
-          </span>
-        </Link>
-
-        <div className="flex items-center gap-4 justify-end flex-1 min-w-0">
-          <div className="hidden lg:flex items-center gap-6 mr-2">
-            {navLinks.slice(2).map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 whitespace-nowrap ${
-                  pathname === link.href
-                    ? "text-[var(--gold)]"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          {mounted && (
+    <>
+      <header className="fixed top-0 left-0 right-0 z-[999] bg-background/95 backdrop-blur-md border-b border-border/50">
+        <nav className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="flex items-center gap-6 flex-1 min-w-0">
             <button
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="text-foreground/70 hover:text-foreground transition-colors"
-              aria-label={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden text-foreground/70 hover:text-foreground transition-colors"
+              aria-label={mobileMenuOpen ? "Đóng menu" : "Mở menu"}
             >
-              {theme === "dark" ? (
-                <Sun className="h-4 w-4" />
+              {mobileMenuOpen ? (
+                <X className="h-5 w-5" />
               ) : (
-                <Moon className="h-4 w-4" />
+                <Menu className="h-5 w-5" />
               )}
             </button>
-          )}
+            <div className="hidden lg:flex items-center gap-6">
+              {navLinks.slice(0, 2).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 whitespace-nowrap ${
+                    pathname === link.href
+                      ? "text-[var(--gold)]"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           <Link
-            href="/checkout"
-            className="relative text-foreground/70 hover:text-foreground transition-colors"
-            aria-label="Giỏ hàng"
-          >
-            <ShoppingBag className="h-5 w-5" />
-            {itemCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--gold)] text-primary-foreground text-[10px] font-medium">
-                {itemCount}
-              </span>
-            )}
-          </Link>
-        </div>
-      </nav>
-
-      {mobileMenuOpen && (
-        <div
-          className="lg:hidden fixed inset-0 top-[65px] z-[998] bg-background backdrop-blur-lg"
-        >
-          <div
-            className="absolute inset-0"
+            href="/"
+            className="flex flex-col items-center shrink-0 mx-4"
             onClick={() => setMobileMenuOpen(false)}
-          />
+          >
+            <span className="text-2xl md:text-3xl font-semibold tracking-wider text-foreground">
+              Nhất Tâm Hoa
+            </span>
+            <span className="text-[10px] tracking-[0.3em] text-muted-foreground uppercase mt-0.5">
+              Eternal Roses
+            </span>
+          </Link>
 
-          <div className="relative z-10 flex flex-col items-center justify-center gap-1 pt-12 px-6">
-            {navLinks.map((link, i) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className={`py-4 text-lg tracking-[0.2em] uppercase font-display ${
-                  pathname === link.href
-                    ? "text-[var(--gold)]"
-                    : "text-foreground"
-                }`}
+          <div className="flex items-center gap-4 justify-end flex-1 min-w-0">
+            <div className="hidden lg:flex items-center gap-6 mr-2">
+              {navLinks.slice(2).map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className={`text-xs tracking-[0.15em] uppercase transition-colors duration-300 whitespace-nowrap ${
+                    pathname === link.href
+                      ? "text-[var(--gold)]"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+            {mounted && (
+              <button
+                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+                className="text-foreground/70 hover:text-foreground transition-colors"
+                aria-label={theme === "dark" ? "Chuyển sang sáng" : "Chuyển sang tối"}
               >
-                {link.label}
-              </Link>
-            ))}
-
-            <div
-              className="mt-6 h-px w-20"
-              style={{
-                background:
-                  "linear-gradient(90deg, transparent, var(--gold), transparent)",
-              }}
-            />
-
+                {theme === "dark" ? (
+                  <Sun className="h-4 w-4" />
+                ) : (
+                  <Moon className="h-4 w-4" />
+                )}
+              </button>
+            )}
             <Link
               href="/checkout"
-              onClick={() => setMobileMenuOpen(false)}
-              className="mt-6 text-sm tracking-[0.2em] uppercase text-foreground hover:text-[var(--gold)] transition-colors"
+              className="relative text-foreground/70 hover:text-foreground transition-colors"
+              aria-label="Giỏ hàng"
             >
-              {"Giỏ hàng"}
+              <ShoppingBag className="h-5 w-5" />
+              {itemCount > 0 && (
+                <span className="absolute -top-2 -right-2 flex h-4 w-4 items-center justify-center rounded-full bg-[var(--gold)] text-primary-foreground text-[10px] font-medium">
+                  {itemCount}
+                </span>
+              )}
             </Link>
           </div>
-        </div>
-      )}
-    </header>
+        </nav>
+      </header>
+
+      {mounted &&
+        mobileMenuOpen &&
+        createPortal(
+          <div
+            className="lg:hidden fixed inset-0 z-[10000]"
+            style={{ top: 65 }}
+          >
+            <div
+              className="absolute inset-0 bg-background"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+
+            <div className="relative z-10 flex flex-col items-center justify-center gap-1 pt-12 px-6">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`py-4 text-lg tracking-[0.2em] uppercase font-display ${
+                    pathname === link.href
+                      ? "text-[var(--gold)]"
+                      : "text-foreground"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+
+              <div
+                className="mt-6 h-px w-20"
+                style={{
+                  background:
+                    "linear-gradient(90deg, transparent, var(--gold), transparent)",
+                }}
+              />
+
+              <Link
+                href="/checkout"
+                onClick={() => setMobileMenuOpen(false)}
+                className="mt-6 text-sm tracking-[0.2em] uppercase text-foreground hover:text-[var(--gold)] transition-colors"
+              >
+                Giỏ hàng
+              </Link>
+            </div>
+          </div>,
+          document.body
+        )}
+    </>
   );
 }
