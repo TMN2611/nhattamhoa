@@ -175,7 +175,7 @@ function QRCodePlaceholder() {
         <rect x="26" y="46" width="4" height="4" fill="#D4AF37" opacity="0.6" />
         <rect x="54" y="42" width="4" height="4" fill="#D4AF37" opacity="0.6" />
       </svg>
-      <span className="text-[8px] tracking-[0.15em] uppercase">
+      <span className="text-[8px] tracking-[0.15em] uppercase" style={{ color: '#D4AF37' }}>
         {'Quét để truy cập'}
       </span>
     </div>
@@ -246,7 +246,7 @@ export function CommitmentCertificate({
                 {/* Pre-title */}
                 <p
                   className="text-xs tracking-[0.35em] uppercase font-display"
-                 
+                  style={{ color: '#D4AF37' }}
                 >
                   {'Tấm Chứng Thư'}
                 </p>
@@ -254,7 +254,7 @@ export function CommitmentCertificate({
                 {/* Main title */}
                 <h2
                   className="mt-4 text-3xl md:text-4xl lg:text-5xl font-bold tracking-wider font-display"
-                 
+                  style={{ color: '#f5f0e8' }}
                 >
                   {'CHỨNG THƯ NHẤT TÂM'}
                 </h2>
@@ -262,7 +262,7 @@ export function CommitmentCertificate({
                 {/* Serial */}
                 <p
                   className="mt-3 text-xs tracking-[0.3em] font-display"
-                 
+                  style={{ color: '#D4AF37' }}
                 >
                   {`Serial ID: ${serialId}`}
                 </p>
@@ -277,25 +277,25 @@ export function CommitmentCertificate({
                 <div className="mt-8 text-center space-y-3">
                   <p
                     className="text-sm tracking-[0.2em] uppercase font-display"
-                   
+                    style={{ color: '#D4AF37' }}
                   >
                     {'Xác nhận rằng'}
                   </p>
                   <p
                     className="text-2xl md:text-3xl italic font-display"
-                   
+                    style={{ color: '#f5f0e8' }}
                   >
                     {buyerName}
                   </p>
                   <p
                     className="text-sm md:text-base leading-relaxed max-w-md font-display"
-                   
+                    style={{ color: '#D4AF37' }}
                   >
                     {'Đã dành trọn sự chân thành và đóa hoa duy nhất cho'}
                   </p>
                   <p
                     className="text-2xl md:text-3xl italic font-display"
-                   
+                    style={{ color: '#f5f0e8' }}
                   >
                     {recipientName}
                   </p>
@@ -305,7 +305,7 @@ export function CommitmentCertificate({
                 <div className="mt-8">
                   <p
                     className="text-lg md:text-xl font-bold tracking-[0.15em] font-display"
-                   
+                    style={{ color: '#f5f0e8' }}
                   >
                     {'MỘT ĐỜI, MỘT ĐÓA, MỘT NGƯỜI.'}
                   </p>
@@ -314,24 +314,24 @@ export function CommitmentCertificate({
                 {/* Date */}
                 <p
                   className="mt-4 text-xs tracking-[0.2em] uppercase font-display"
-                 
+                  style={{ color: '#D4AF37' }}
                 >
                   {`Ngày xác nhận: ${currentDate}`}
                 </p>
 
                 {blockchainData && (
-                  <div className="mt-6 p-4 border border-gold/20 bg-black/40 text-left w-full max-w-sm rounded-sm backdrop-blur-sm">
-                    <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-2 font-display">
+                  <div className="mt-6 p-4 border border-[#D4AF37]/20 bg-black/40 text-left w-full max-w-sm rounded-sm backdrop-blur-sm">
+                    <p className="text-[10px] tracking-[0.2em] uppercase mb-2 font-display" style={{ color: '#D4AF37' }}>
                       Chứng thực Blockchain (Polygon)
                     </p>
                     <div className="space-y-1.5">
                       <div className="flex justify-between items-center gap-4">
-                        <span className="text-[10px] text-muted-foreground">Certificate ID:</span>
-                        <span className="text-[10px] text-foreground font-mono truncate">{blockchainData.orderId}</span>
+                        <span className="text-[10px]" style={{ color: '#8A7D65' }}>Certificate ID:</span>
+                        <span className="text-[10px] font-mono truncate" style={{ color: '#f5f0e8' }}>{blockchainData.orderId}</span>
                       </div>
                       <div className="flex justify-between items-center gap-4">
-                        <span className="text-[10px] text-muted-foreground">TX Hash:</span>
-                        <span className="text-[10px] text-gold font-mono truncate hover:underline cursor-pointer">
+                        <span className="text-[10px]" style={{ color: '#8A7D65' }}>TX Hash:</span>
+                        <span className="text-[10px] font-mono truncate hover:underline cursor-pointer" style={{ color: '#D4AF37' }}>
                           {blockchainData.txHash.substring(0, 10)}...{blockchainData.txHash.substring(60)}
                         </span>
                       </div>
