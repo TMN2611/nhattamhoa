@@ -72,48 +72,45 @@ export default function ChosenMomentsPage() {
               Đang kết nối với dòng thời gian...
             </div>
           ) : (
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-8">
               {vows.map((item, i) => (
                 <FadeInSection key={i} delay={i * 100}>
                   <div
-                    className="group relative p-8 border border-gold/10 bg-[#0A0A08] transition-all duration-700 hover:border-gold/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] h-full flex flex-col justify-between"
+                    className="group relative p-6 md:p-8 border border-gold/10 bg-[#0A0A08] transition-all duration-700 hover:border-gold/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] h-full flex flex-col justify-between"
                     style={{
                       boxShadow: "inset 0 0 20px rgba(212,175,55,0.02)",
                     }}
                   >
                     <div>
-                      {/* Top: names and date */}
-                      <div className="relative flex items-center justify-between mb-6">
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-lg font-display font-medium text-foreground">
+                      <div className="relative mb-4 md:mb-6">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-base md:text-lg font-display font-medium text-foreground">
                             {item.sender_name}
                           </span>
                           <Heart
-                            className="h-3.5 w-3.5 flex-shrink-0"
+                            className="h-3 w-3 md:h-3.5 md:w-3.5 flex-shrink-0"
                             style={{
                               color: "#D4AF37",
                               fill: "#D4AF37",
                               opacity: 0.5,
                             }}
                           />
-                          <span className="text-lg font-display font-medium text-foreground">
+                          <span className="text-base md:text-lg font-display font-medium text-foreground">
                             {item.receiver_name}
                           </span>
                         </div>
-                        <span className="text-[10px] tracking-wider text-muted-foreground/50">
+                        <span className="text-[10px] tracking-wider text-muted-foreground/50 mt-1 block">
                           {new Date(item.created_at).toLocaleDateString(
                             "vi-VN",
                           )}
                         </span>
                       </div>
 
-                      {/* Vow Text */}
-                      <p className="text-base leading-relaxed italic font-display text-muted-foreground group-hover:text-gold transition-colors duration-500">
+                      <p className="text-sm md:text-base leading-relaxed italic font-display text-muted-foreground group-hover:text-gold transition-colors duration-500">
                         &ldquo;{item.message}&rdquo;
                       </p>
                     </div>
 
-                    {/* Corner accents */}
                     <div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-gold/20 group-hover:border-gold/40 transition-colors duration-500" />
                     <div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-gold/20 group-hover:border-gold/40 transition-colors duration-500" />
                   </div>

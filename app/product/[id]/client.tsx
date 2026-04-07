@@ -129,6 +129,15 @@ export function ProductPageClient({ productId }: { productId: string }) {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-start">
           <div className="space-y-4">
+            <div className="lg:hidden mb-2">
+              <h1 className="text-2xl font-light text-foreground font-display mb-2 tracking-tight leading-tight">
+                {product.name}
+              </h1>
+              <p className="text-xl text-gold font-light">
+                {formatPrice(product.price)}
+              </p>
+            </div>
+
             <div className="relative aspect-[4/5] overflow-hidden bg-secondary">
               <Image
                 src={displayImage}
@@ -313,24 +322,6 @@ export function ProductPageClient({ productId }: { productId: string }) {
             </div>
           </div>
 
-          <div className="lg:hidden">
-            <h1 className="text-2xl font-light text-foreground font-display mb-2 tracking-tight leading-tight">
-              {product.name}
-            </h1>
-            <p className="text-xl text-gold font-light mb-4">
-              {formatPrice(product.price)}
-            </p>
-            {isRitualProduct && (
-              <div className="p-3 border border-gold/20 bg-gold/5 mb-4">
-                <div className="flex gap-2 items-start">
-                  <Lock className="h-3.5 w-3.5 text-gold mt-0.5 flex-shrink-0" />
-                  <p className="text-muted-foreground text-[10px] leading-relaxed">
-                    Chứng thư Blockchain — chỉ tặng cho duy nhất một người trong đời.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
         </div>
       </div>
 
