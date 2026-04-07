@@ -79,19 +79,19 @@ export default function VerifyPage() {
   const isRevoked = data.status === 'revoked'
 
   return (
-    <main className="min-h-screen bg-background py-20 px-6">
+    <main className="min-h-screen bg-[#0a0a08] py-20 px-6">
       <div className="max-w-xl mx-auto">
         <div className="text-center mb-10">
-          <p className="text-xs tracking-[0.35em] uppercase text-gold mb-4">
+          <p className="text-xs tracking-[0.35em] uppercase text-[#D4AF37] mb-4">
             Certificate Verification
           </p>
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground font-display tracking-wider">
+          <h1 className="text-3xl md:text-4xl font-bold text-[#f5f0e8] font-display tracking-wider">
             NHẤT TÂM HOA
           </h1>
         </div>
 
         <div className="p-[2px] bg-gradient-to-br from-[#D4AF37] via-[#B8860B] to-[#D4AF37]">
-          <div className="bg-card px-8 py-10">
+          <div className="bg-[#0d0b09] px-8 py-10">
             <div className="flex items-center justify-center gap-3 mb-8">
               {isRevoked ? (
                 <>
@@ -115,30 +115,30 @@ export default function VerifyPage() {
 
             <div className="space-y-5">
               <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-1">Mã chứng thư</p>
-                <p className="text-sm text-foreground font-mono">{data.code}</p>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Mã chứng thư</p>
+                <p className="text-sm text-[#f5f0e8] font-mono">{data.code}</p>
               </div>
               <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-1">Người gửi</p>
-                <p className="text-lg text-foreground italic font-display">{data.sender}</p>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Người gửi</p>
+                <p className="text-lg text-[#f5f0e8] italic font-display">{data.sender}</p>
               </div>
               <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-1">Người nhận</p>
-                <p className="text-lg text-foreground italic font-display">{data.receiver}</p>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Người nhận</p>
+                <p className="text-lg text-[#f5f0e8] italic font-display">{data.receiver}</p>
               </div>
               <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-1">Lời nhắn</p>
-                <p className="text-sm text-gold leading-relaxed italic">{data.message}</p>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Lời nhắn</p>
+                <p className="text-sm text-[#D4AF37]/90 leading-relaxed italic">{data.message}</p>
               </div>
               <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-1">Ngày tạo</p>
-                <p className="text-sm text-gold">
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Ngày tạo</p>
+                <p className="text-sm text-[#D4AF37]/90">
                   {new Date(data.date).toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' })}
                 </p>
               </div>
               <div>
-                <p className="text-[10px] tracking-[0.2em] uppercase text-gold mb-1">Trạng thái</p>
-                <p className={`text-sm font-medium ${isRevoked ? 'text-destructive' : isValid ? 'text-green-500' : 'text-gold'}`}>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37] mb-1">Trạng thái</p>
+                <p className={`text-sm font-medium ${isRevoked ? 'text-red-500' : isValid ? 'text-green-500' : 'text-[#D4AF37]'}`}>
                   {data.status}
                 </p>
               </div>
@@ -147,28 +147,28 @@ export default function VerifyPage() {
             {(data.hash || data.blockchain_tx) && (
               <>
                 <div className="h-px w-32 mx-auto bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent my-8" />
-                <div className="p-4 border border-gold/20 bg-black/40">
+                <div className="p-4 border border-[#D4AF37]/20 bg-black/40">
                   <div className="flex items-center gap-2 mb-3">
-                    <Shield className="h-4 w-4 text-gold" />
-                    <p className="text-[10px] tracking-[0.2em] uppercase text-gold">
+                    <Shield className="h-4 w-4 text-[#D4AF37]" />
+                    <p className="text-[10px] tracking-[0.2em] uppercase text-[#D4AF37]">
                       Blockchain Verification
                     </p>
                   </div>
                   {data.hash && (
                     <div className="mb-2">
-                      <p className="text-[9px] text-gold uppercase tracking-wider mb-1">Hash</p>
-                      <p className="text-[10px] text-muted-foreground font-mono break-all">{data.hash}</p>
+                      <p className="text-[9px] text-[#D4AF37] uppercase tracking-wider mb-1">Hash</p>
+                      <p className="text-[10px] text-[#8A7D65] font-mono break-all">{data.hash}</p>
                     </div>
                   )}
                   {data.blockchain_tx && (
                     <div>
-                      <p className="text-[9px] text-gold uppercase tracking-wider mb-1">Transaction Hash</p>
-                      <p className="text-[10px] text-muted-foreground font-mono break-all mb-1">{data.blockchain_tx}</p>
+                      <p className="text-[9px] text-[#D4AF37] uppercase tracking-wider mb-1">Transaction Hash</p>
+                      <p className="text-[10px] text-[#8A7D65] font-mono break-all mb-1">{data.blockchain_tx}</p>
                       <a
                         href={`https://amoy.polygonscan.com/tx/${data.blockchain_tx}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-[9px] text-gold hover:text-foreground uppercase tracking-widest underline underline-offset-2 transition-colors"
+                        className="inline-flex items-center gap-1 text-[9px] text-[#D4AF37] hover:text-[#f5f0e8] uppercase tracking-widest underline underline-offset-2 transition-colors"
                       >
                         Xem trên Polygon Blockchain ↗
                       </a>
@@ -189,13 +189,13 @@ export default function VerifyPage() {
         <div className="flex items-center justify-center gap-6 mt-8">
           <Link
             href={`/certificate/${data.code}`}
-            className="text-sm text-gold hover:text-foreground transition-colors tracking-wider uppercase"
+            className="text-sm text-[#D4AF37] hover:text-[#f5f0e8] transition-colors tracking-wider uppercase"
           >
             Xem chứng thư đầy đủ
           </Link>
           <Link
             href="/"
-            className="flex items-center gap-2 text-sm text-gold hover:text-gold transition-colors tracking-wider uppercase"
+            className="flex items-center gap-2 text-sm text-[#D4AF37] hover:text-[#f5f0e8] transition-colors tracking-wider uppercase"
           >
             <ArrowLeft className="h-4 w-4" />
             Trang chủ
