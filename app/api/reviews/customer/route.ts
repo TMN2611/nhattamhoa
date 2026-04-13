@@ -27,6 +27,13 @@ function sanitizeMediaUrl(url: string | undefined | null): string | null {
   try {
     const parsed = new URL(trimmed);
     if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return null;
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+    if (
+      parsed.hostname.endsWith(".supabase.co") ||
+      trimmed.startsWith(supabaseUrl)
+    ) {
+      return trimmed;
+    }
     return trimmed;
   } catch {
     return null;

@@ -123,7 +123,7 @@ export default function ReviewsPage() {
             <button onClick={() => setVideoModal(null)} className="absolute -top-10 right-0 text-white hover:text-gold transition-colors">
               <X className="h-6 w-6" />
             </button>
-            {videoModal.startsWith("/uploads/") || videoModal.match(/\.(mp4|webm|mov)(\?|$)/i) ? (
+            {videoModal.startsWith("/uploads/") || videoModal.includes("supabase.co/storage") || videoModal.match(/\.(mp4|webm|mov)(\?|$)/i) ? (
               <video src={videoModal} controls autoPlay className="w-full h-full bg-black" />
             ) : (
               <iframe

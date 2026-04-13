@@ -1,8 +1,7 @@
 export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { supabase } from "@/lib/supabase";
 
 const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
 const RATE_LIMIT_WINDOW = 60 * 1000;
@@ -19,6 +18,44 @@ function checkRateLimit(ip: string): boolean {
   entry.count++;
   return true;
 }
+
+const BUCKET_NAME = "reviews";
+
+async function ensureBucket(): Promise<boolean> {
+  try {
+    const { data: buckets, error: listError } = await supabase.storage.listBuckets();
+    if (listError) {
+      console.error("Failed to list buckets:", listError);
+      return false;
+    }
+    const exists = buckets?.some((b) => b.name === BUCKET_NAME);
+    if (!exists) {
+      const { error: createError } = await supabase.storage.createBucket(BUCKET_NAME, {
+        public: true,
+        fileSizeLimit: 52428800,
+        allowedMimeTypes: [
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "image/gif",
+          "video/mp4",
+          "video/webm",
+          "video/quicktime",
+        ],
+      });
+      if (createError) {
+        console.error("Failed to create bucket:", createError);
+        return false;
+      }
+    }
+    return true;
+  } catch (e) {
+    console.error("ensureBucket exception:", e);
+    return false;
+  }
+}
+
+let bucketReady = false;
 
 export async function POST(req: Request) {
   try {
@@ -65,15 +102,43 @@ export async function POST(req: Request) {
       );
     }
 
-    const prefix = isVideo ? "review-video" : "review-img";
+    if (!bucketReady) {
+      const ok = await ensureBucket();
+      if (!ok) {
+        return NextResponse.json(
+          { error: "Hệ thống lưu trữ chưa sẵn sàng. Vui lòng thử lại." },
+          { status: 503 }
+        );
+      }
+      bucketReady = true;
+    }
+
+    const prefix = isVideo ? "video" : "img";
     const safeName = `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+    const filePath = `reviews/${safeName}`;
+
     const buffer = Buffer.from(await file.arrayBuffer());
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, safeName), buffer);
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(filePath, buffer, {
+        contentType: file.type,
+        upsert: false,
+      });
 
-    return NextResponse.json({ success: true, url: `/uploads/${safeName}` });
+    if (uploadError) {
+      console.error("Supabase upload error:", uploadError);
+      return NextResponse.json(
+        { error: "Lỗi tải lên: " + uploadError.message },
+        { status: 500 }
+      );
+    }
+
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(filePath);
+
+    return NextResponse.json({ success: true, url: publicUrlData.publicUrl });
   } catch (error: any) {
     console.error("Public upload error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
