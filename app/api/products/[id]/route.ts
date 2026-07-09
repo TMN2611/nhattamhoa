@@ -25,7 +25,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function PUT(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!validateAdminRequest(req)) {
+  if (!validateAdminRequest(req).valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -54,7 +54,7 @@ export async function PUT(req: Request, { params }: { params: Promise<{ id: stri
 }
 
 export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!validateAdminRequest(req)) {
+  if (!validateAdminRequest(req).valid) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

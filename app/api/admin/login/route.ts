@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import crypto from "crypto";
+import { createAdminToken, hashPassword } from "@/lib/admin-utils";
 
 export async function POST(req: Request) {
   try {
@@ -12,7 +12,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Vui lòng nhập đầy đủ thông tin" }, { status: 400 });
     }
 
-    const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
+    const passwordHash = hashPassword(password);
 
     const { data, error } = await supabase
       .from("admin_users")
@@ -29,11 +29,11 @@ export async function POST(req: Request) {
     }
 
     const user = data[0];
-    const token = Buffer.from(JSON.stringify({
+    const token = createAdminToken({
       id: user.id,
       username: user.username,
       role: user.role,
-    })).toString("base64");
+    });
 
     return NextResponse.json({
       success: true,

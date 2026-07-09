@@ -7,7 +7,7 @@ import { generateCertificateCode, generateBlockchainHash } from '@/lib/certifica
 import { saveCertificateOnChain, checkWalletBalance } from '@/lib/blockchain'
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!validateAdminRequest(req)) {
+  if (!validateAdminRequest(req).valid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

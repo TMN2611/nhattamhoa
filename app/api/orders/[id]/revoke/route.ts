@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 import { validateAdminRequest } from '@/lib/admin-utils'
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
-  if (!validateAdminRequest(req)) {
+  if (!validateAdminRequest(req).valid) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

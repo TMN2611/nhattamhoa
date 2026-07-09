@@ -1,7 +1,20 @@
 import crypto from 'crypto';
 
+function getSecret(): string {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) throw new Error('SESSION_SECRET environment variable is not set');
+  return secret;
+}
+
 export function hashPassword(password: string): string {
   return crypto.createHash('sha256').update(password).digest('hex');
+}
+
+export function createAdminToken(payload: { id: string; username: string; role: string }): string {
+  const data = JSON.stringify(payload);
+  const encoded = Buffer.from(data).toString('base64url');
+  const sig = crypto.createHmac('sha256', getSecret()).update(encoded).digest('base64url');
+  return `${encoded}.${sig}`;
 }
 
 export function validateAdminRequest(req: Request): { valid: boolean; role?: string; userId?: string } {
@@ -10,8 +23,19 @@ export function validateAdminRequest(req: Request): { valid: boolean; role?: str
 
   const token = authHeader.replace('Bearer ', '');
   try {
-    const decoded = Buffer.from(token, 'base64').toString('utf-8');
-    const parsed = JSON.parse(decoded);
+    const dotIdx = token.lastIndexOf('.');
+    if (dotIdx === -1) return { valid: false };
+
+    const encoded = token.slice(0, dotIdx);
+    const sig = token.slice(dotIdx + 1);
+    const expectedSig = crypto.createHmac('sha256', getSecret()).update(encoded).digest('base64url');
+
+    // Constant-time comparison to prevent timing attacks
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) {
+      return { valid: false };
+    }
+
+    const parsed = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'));
     if (parsed.id && parsed.role) {
       return { valid: true, role: parsed.role, userId: parsed.id };
     }
