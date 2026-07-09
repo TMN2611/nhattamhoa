@@ -2,8 +2,7 @@ export const dynamic = "force-dynamic";
 
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
-import { validateAdminRequest } from "@/lib/admin-utils";
-import crypto from "crypto";
+import { validateAdminRequest, hashPassword } from "@/lib/admin-utils";
 
 export async function GET(req: Request) {
   try {
@@ -14,7 +13,7 @@ export async function GET(req: Request) {
 
     const { data, error } = await supabase
       .from("admin_users")
-      .select("id, username, display_name, role, is_active, created_at")
+      .select("id, username, email, display_name, role, is_active, created_at")
       .order("created_at", { ascending: true });
 
     if (error) throw error;
@@ -31,7 +30,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Chỉ chủ cửa hàng mới có quyền tạo tài khoản" }, { status: 403 });
     }
 
-    const { username, password, display_name, role } = await req.json();
+    const { username, password, email, display_name, role } = await req.json();
 
     if (!username || !password) {
       return NextResponse.json({ error: "Thiếu tên đăng nhập hoặc mật khẩu" }, { status: 400 });
@@ -41,17 +40,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Quyền không hợp lệ" }, { status: 400 });
     }
 
-    const passwordHash = crypto.createHash("sha256").update(password).digest("hex");
+    const passwordHash = hashPassword(password);
 
     const { data, error } = await supabase
       .from("admin_users")
       .insert({
         username,
+        email: email || null,
         password_hash: passwordHash,
         display_name: display_name || username,
         role: role || "cashier",
       })
-      .select("id, username, display_name, role, is_active, created_at")
+      .select("id, username, email, display_name, role, is_active, created_at")
       .single();
 
     if (error) {
@@ -74,22 +74,23 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const { id, is_active, password, display_name, role } = await req.json();
+    const { id, is_active, password, email, display_name, role } = await req.json();
     if (!id) return NextResponse.json({ error: "Missing user id" }, { status: 400 });
 
     const updates: any = {};
     if (typeof is_active === "boolean") updates.is_active = is_active;
     if (display_name) updates.display_name = display_name;
+    if (email !== undefined) updates.email = email || null;
     if (role && ["owner", "cashier"].includes(role)) updates.role = role;
     if (password) {
-      updates.password_hash = crypto.createHash("sha256").update(password).digest("hex");
+      updates.password_hash = hashPassword(password);
     }
 
     const { data, error } = await supabase
       .from("admin_users")
       .update(updates)
       .eq("id", id)
-      .select("id, username, display_name, role, is_active, created_at")
+      .select("id, username, email, display_name, role, is_active, created_at")
       .single();
 
     if (error) throw error;
