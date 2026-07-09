@@ -122,6 +122,8 @@ Product (from Ritual Collection) → `/product/[id]?flow=ritual` → "Bắt đ�
 
 ### Admin Pages
 - `/admin/login` - Admin authentication (DB-backed, default: owner/owner2026)
+- `/admin/forgot-password` - Request a password reset email
+- `/admin/reset-password` - Set a new password using the token from the email
 - `/admin/dashboard` - Orders + Products + Banners + Revenue (owner) + Reviews (owner) + Users (owner) management
 
 ## Ritual Flow
@@ -178,9 +180,11 @@ Product Detail → /ready → /checkout (quick ritual)
 
 ### Admin Management
 - `POST /api/admin/login` - DB-backed login (validates against admin_users table)
+- `POST /api/admin/forgot-password` - Send password reset email via Gmail (requires SMTP config)
+- `POST /api/admin/reset-password` - Validate reset token and update password
 - `GET /api/admin/users` - List admin users (owner auth)
 - `POST /api/admin/users` - Create admin user (owner auth)
-- `PATCH /api/admin/users` - Toggle user active status (owner auth)
+- `PATCH /api/admin/users` - Toggle user active status / update email / reset password (owner auth)
 - `GET /api/admin/revenue` - Revenue stats by day/week/month/quarter/year (owner auth)
 
 ### Reviews
@@ -199,12 +203,13 @@ Product Detail → /ready → /checkout (quick ritual)
 
 - **Database-backed**: `admin_users` table with hashed passwords (SHA256)
 - **Roles**: `owner` (full access: revenue, reviews, users) and `cashier` (orders/products/banners only)
-- **Token**: Bearer token = base64 JSON `{id, username, role}`, validated in `lib/admin-utils.ts`
+- **Token**: HMAC-signed token `{id, username, role, iat, exp}` with 24-hour expiry, validated in `lib/admin-utils.ts` using `SESSION_SECRET`
 - **Default account**: username `owner`, password `owner2026`
+- **Password reset**: "Quên mật khẩu" link on `/admin/login` sends a 30-minute reset link via Gmail to the email stored in `admin_users.email`
 - **Owner-only features**: Revenue dashboard, review management, user account management
 
 ### Database Tables (Admin)
-**admin_users**: id (uuid), username, password_hash, display_name, role (owner/cashier), is_active, created_at
+**admin_users**: id (uuid), username, email, password_hash, display_name, role (owner/cashier), is_active, reset_token, reset_expires, created_at
 **reviews**: id (uuid), customer_name, content, rating, image_url, video_url, is_featured, is_active, created_by, created_at
 
 ## Theme System
@@ -235,6 +240,11 @@ Product Detail → /ready → /checkout (quick ritual)
 - `NEXT_PUBLIC_RPC_URL` (optional) - Blockchain RPC URL
 - `PRIVATE_KEY` (optional) - Blockchain wallet private key
 - `NEXT_PUBLIC_CONTRACT_ADDRESS` (optional) - Smart contract address
+- `SMTP_HOST` (optional) - Email server host, defaults to `smtp.gmail.com`
+- `SMTP_PORT` (optional) - Email server port, defaults to `587`
+- `SMTP_USER` (optional) - Email account username (e.g. `minhnhan26112000@gmail.com`)
+- `SMTP_PASS` (optional) - Email app password / SMTP password for sending password reset emails
+- `NEXT_PUBLIC_APP_URL` (optional) - Trusted public URL used for password reset links (e.g. `https://nhattamhoa.replit.app`)
 
 ## Dev Setup
 

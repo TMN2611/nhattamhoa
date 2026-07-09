@@ -3,7 +3,7 @@ export const dynamic = "force-dynamic";
 import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import { hashPassword } from "@/lib/admin-utils";
-import { sendResetEmail } from "@/lib/mail";
+import { sendResetEmail, getTrustedAppUrl } from "@/lib/mail";
 
 export async function POST(req: Request) {
   try {
@@ -41,12 +41,11 @@ export async function POST(req: Request) {
       throw updateError;
     }
 
-    const host = req.headers.get("host") || "localhost:5000";
-    const protocol = req.headers.get("x-forwarded-proto") || "https";
-    const resetUrl = `${protocol}://${host}/admin/reset-password?token=${resetToken}`;
+    const baseUrl = getTrustedAppUrl();
+    const resetPath = `/admin/reset-password?token=${resetToken}`;
 
     try {
-      await sendResetEmail(user.email, resetUrl, user.username);
+      await sendResetEmail(user.email, resetPath, user.username);
     } catch (mailError: any) {
       console.error("Send reset email error:", mailError);
       return NextResponse.json({ error: "Không thể gửi email. Vui lòng kiểm tra cấu hình SMTP (SMTP_USER, SMTP_PASS)." }, { status: 500 });

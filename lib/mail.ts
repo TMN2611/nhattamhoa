@@ -20,14 +20,22 @@ export function createMailTransporter() {
     host,
     port,
     secure: port === 465,
+    requireTLS: true,
     auth: { user, pass },
-    tls: { rejectUnauthorized: false },
   })
 }
 
-export async function sendResetEmail(to: string, resetUrl: string, username: string) {
+export function getTrustedAppUrl(): string {
+  const url = process.env.NEXT_PUBLIC_APP_URL || process.env.APP_URL
+  if (url) return url.replace(/\/$/, '')
+  throw new Error('NEXT_PUBLIC_APP_URL (or APP_URL) environment variable is not set')
+}
+
+export async function sendResetEmail(to: string, resetPath: string, username: string) {
   const { user: from } = getMailConfig()
   const transporter = createMailTransporter()
+  const baseUrl = getTrustedAppUrl()
+  const resetUrl = `${baseUrl}${resetPath}`
 
   await transporter.sendMail({
     from: `"Nhất Tâm Hoa" <${from}>`,

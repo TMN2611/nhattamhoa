@@ -11,7 +11,8 @@ export function hashPassword(password: string): string {
 }
 
 export function createAdminToken(payload: { id: string; username: string; role: string }): string {
-  const data = JSON.stringify(payload);
+  const now = Math.floor(Date.now() / 1000);
+  const data = JSON.stringify({ ...payload, iat: now, exp: now + 24 * 60 * 60 });
   const encoded = Buffer.from(data).toString('base64url');
   const sig = crypto.createHmac('sha256', getSecret()).update(encoded).digest('base64url');
   return `${encoded}.${sig}`;
@@ -36,9 +37,15 @@ export function validateAdminRequest(req: Request): { valid: boolean; role?: str
     }
 
     const parsed = JSON.parse(Buffer.from(encoded, 'base64url').toString('utf-8'));
-    if (parsed.id && parsed.role) {
-      return { valid: true, role: parsed.role, userId: parsed.id };
+    if (!parsed.id || !parsed.role || !parsed.iat || !parsed.exp) {
+      return { valid: false };
     }
+
+    if (Math.floor(Date.now() / 1000) > parsed.exp) {
+      return { valid: false };
+    }
+
+    return { valid: true, role: parsed.role, userId: parsed.id };
   } catch {}
 
   return { valid: false };
