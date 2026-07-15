@@ -270,14 +270,16 @@ function DateNavigator({
   const today = getTodayISO();
 
   function shiftDay(delta: number) {
-    const d = new Date(value);
+    const d = new Date(value || today);
     d.setDate(d.getDate() + delta);
     onChange(
       `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`
     );
   }
 
+  const isAll = !value;
   const isToday = value === today;
+  const label = isAll ? "Tất cả" : isToday ? "Hôm nay" : formatDisplayDate(value);
 
   return (
     <div className="flex items-center gap-1 border border-gold/20 bg-card px-2 py-1">
@@ -293,12 +295,12 @@ function DateNavigator({
         className="flex items-center gap-2 px-2 py-1 text-sm text-foreground hover:text-gold transition-colors min-w-[120px] justify-center"
       >
         <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-        {isToday ? "Hôm nay" : formatDisplayDate(value)}
+        {label}
       </button>
       <input
         ref={inputRef}
         type="date"
-        value={value}
+        value={value || today}
         max={today}
         onChange={(e) => e.target.value && onChange(e.target.value)}
         className="sr-only"
@@ -1278,7 +1280,11 @@ export default function AdminDashboardPage() {
     }
 
     if (filterStatus !== "all") {
-      result = result.filter((o) => o.status === filterStatus);
+      if (filterStatus === "completed") {
+        result = result.filter((o) => o.status === "completed" || o.status === "minted");
+      } else {
+        result = result.filter((o) => o.status === filterStatus);
+      }
     }
 
     if (filterDate && !searchPhone.trim()) {
