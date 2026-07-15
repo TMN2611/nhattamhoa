@@ -1,0 +1,1 @@
+- [Next.js dev manifest race crashes](nextjs-dev-manifest-race.md) — transient 500s / "Invalid or unexpected token" on this project are stale `.next` cache races, not code bugs.
