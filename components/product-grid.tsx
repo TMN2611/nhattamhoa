@@ -24,6 +24,7 @@ interface ProductGridProps {
 export function ProductGrid({ flow = "gift" }: ProductGridProps) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string>("all");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -81,9 +82,44 @@ export function ProductGrid({ flow = "gift" }: ProductGridProps) {
 
   const collectionLabel = flow === "ritual" ? "Ritual Collection" : "Gift Collection";
 
+  const categories = Array.from(
+    new Set(products.map((p) => (p.category || "").trim()).filter(Boolean)),
+  );
+  const showTabs = flow === "gift" && categories.length > 1;
+  const displayedProducts = showTabs && activeCategory !== "all"
+    ? products.filter((p) => (p.category || "").trim() === activeCategory)
+    : products;
+
   return (
     <div className="mx-auto max-w-7xl px-6 pb-24 md:pb-32">
-      {products.length === 0 ? (
+      {showTabs && (
+        <div className="flex items-center justify-center gap-2 md:gap-3 mb-8 md:mb-10 overflow-x-auto flex-nowrap px-1" style={{ scrollbarWidth: "none" }}>
+          <button
+            onClick={() => setActiveCategory("all")}
+            className={`flex-shrink-0 px-4 py-2 text-xs uppercase tracking-wider whitespace-nowrap border transition-all ${
+              activeCategory === "all"
+                ? "bg-gold/15 text-gold border-gold/40"
+                : "text-muted-foreground border-gold/10 hover:border-gold/30 hover:text-gold"
+            }`}
+          >
+            Tất cả
+          </button>
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`flex-shrink-0 px-4 py-2 text-xs uppercase tracking-wider whitespace-nowrap border transition-all ${
+                activeCategory === cat
+                  ? "bg-gold/15 text-gold border-gold/40"
+                  : "text-muted-foreground border-gold/10 hover:border-gold/30 hover:text-gold"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+      {displayedProducts.length === 0 ? (
         <div className="text-center py-20 border border-gold/10 bg-secondary/5">
           <p className="text-gold-dim font-light tracking-widest uppercase text-sm">
             Hiện chưa có tác phẩm nào trong bộ sưu tập{" "}
@@ -112,7 +148,7 @@ export function ProductGrid({ flow = "gift" }: ProductGridProps) {
               className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-4"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
-              {products.map((product) => (
+              {displayedProducts.map((product) => (
                 <Link
                   key={product.id}
                   href={getProductHref(product)}
@@ -145,7 +181,7 @@ export function ProductGrid({ flow = "gift" }: ProductGridProps) {
 
           <div className="hidden md:block">
             <div className="grid grid-cols-3 lg:grid-cols-4 gap-2">
-              {products.map((product) => (
+              {displayedProducts.map((product) => (
                 <Link
                   key={product.id}
                   href={getProductHref(product)}
