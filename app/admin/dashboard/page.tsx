@@ -778,6 +778,33 @@ export default function AdminDashboardPage() {
     productName: string;
   }>({ open: false, productId: "", productName: "" });
 
+  const [saveOrderModal, setSaveOrderModal] = useState(false);
+  const [saveProductModal, setSaveProductModal] = useState(false);
+
+  const [deleteBannerModal, setDeleteBannerModal] = useState<{
+    open: boolean;
+    bannerId: string;
+    bannerTitle: string;
+  }>({ open: false, bannerId: "", bannerTitle: "" });
+
+  const [toggleBannerModal, setToggleBannerModal] = useState<{
+    open: boolean;
+    banner: Banner | null;
+  }>({ open: false, banner: null });
+
+  const [deleteReviewModal, setDeleteReviewModal] = useState<{
+    open: boolean;
+    reviewId: string;
+    reviewLabel: string;
+  }>({ open: false, reviewId: "", reviewLabel: "" });
+
+  const [toggleUserModal, setToggleUserModal] = useState<{
+    open: boolean;
+    userId: string;
+    isActive: boolean;
+    username: string;
+  }>({ open: false, userId: "", isActive: false, username: "" });
+
   const [toast, setToast] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
   const [bannerForm, setBannerForm] = useState({ image_url: "", title: "", link_url: "" });
@@ -957,6 +984,7 @@ export default function AdminDashboardPage() {
       updates.receiver_name = editForm.receiver_name;
     updates.message = editForm.message;
 
+    setSaveOrderModal(false);
     setActionLoading(editingOrder.id);
     await apiCall(`/api/orders/${editingOrder.id}`, "PUT", updates);
     setEditingOrder(null);
@@ -965,6 +993,7 @@ export default function AdminDashboardPage() {
   }
 
   async function handleSaveProduct() {
+    setSaveProductModal(false);
     const body = {
       name: productForm.name,
       description: productForm.description,
@@ -1089,12 +1118,25 @@ export default function AdminDashboardPage() {
     }
   }
 
-  async function toggleBannerActive(banner: Banner) {
+  function openToggleBannerModal(banner: Banner) {
+    setToggleBannerModal({ open: true, banner });
+  }
+
+  async function confirmToggleBanner() {
+    const { banner } = toggleBannerModal;
+    if (!banner) return;
+    setToggleBannerModal({ open: false, banner: null });
     await apiCall(`/api/banners/${banner.id}`, "PUT", { is_active: !banner.is_active });
     await fetchData();
   }
 
-  async function deleteBanner(bannerId: string) {
+  function openDeleteBannerModal(banner: Banner) {
+    setDeleteBannerModal({ open: true, bannerId: banner.id, bannerTitle: banner.title || "Banner không có tiêu đề" });
+  }
+
+  async function confirmDeleteBanner() {
+    const { bannerId } = deleteBannerModal;
+    setDeleteBannerModal({ open: false, bannerId: "", bannerTitle: "" });
     await apiCall(`/api/banners/${bannerId}`, "DELETE");
     await fetchData();
   }
@@ -1135,8 +1177,14 @@ export default function AdminDashboardPage() {
     } catch { showToast("Lỗi tạo đánh giá", "error"); }
   }
 
-  async function deleteReview(id: string) {
-    await fetch(`/api/reviews?id=${id}`, { method: "DELETE", headers: headers() });
+  function openDeleteReviewModal(review: { id: string; customer_name: string }) {
+    setDeleteReviewModal({ open: true, reviewId: review.id, reviewLabel: review.customer_name });
+  }
+
+  async function confirmDeleteReview() {
+    const { reviewId } = deleteReviewModal;
+    setDeleteReviewModal({ open: false, reviewId: "", reviewLabel: "" });
+    await fetch(`/api/reviews?id=${reviewId}`, { method: "DELETE", headers: headers() });
     fetchReviews();
   }
 
@@ -1161,7 +1209,13 @@ export default function AdminDashboardPage() {
     } catch { showToast("Lỗi tạo tài khoản", "error"); }
   }
 
-  async function toggleUserActive(userId: string, isActive: boolean) {
+  function openToggleUserModal(userId: string, isActive: boolean, username: string) {
+    setToggleUserModal({ open: true, userId, isActive, username });
+  }
+
+  async function confirmToggleUser() {
+    const { userId, isActive } = toggleUserModal;
+    setToggleUserModal({ open: false, userId: "", isActive: false, username: "" });
     await fetch("/api/admin/users", { method: "PATCH", headers: headers(), body: JSON.stringify({ id: userId, is_active: !isActive }) });
     fetchAdminUsers();
   }
@@ -1460,7 +1514,7 @@ export default function AdminDashboardPage() {
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <button
-                          onClick={() => toggleBannerActive(banner)}
+                          onClick={() => openToggleBannerModal(banner)}
                           title={banner.is_active ? "Đang hiển thị — nhấn để ẩn" : "Đang ẩn — nhấn để hiện"}
                           className={`text-sm transition-colors ${banner.is_active ? "text-green-400 hover:text-green-300" : "text-[#555] hover:text-[#888]"}`}
                         >
@@ -1471,7 +1525,7 @@ export default function AdminDashboardPage() {
                           )}
                         </button>
                         <button
-                          onClick={() => deleteBanner(banner.id)}
+                          onClick={() => openDeleteBannerModal(banner)}
                           className="p-1.5 text-red-500 hover:bg-red-500/10"
                           title="Xóa banner"
                         >
@@ -1631,7 +1685,7 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
                 <button
-                  onClick={saveEditOrder}
+                  onClick={() => setSaveOrderModal(true)}
                   disabled={actionLoading === editingOrder.id}
                   className="mt-4 px-8 py-2.5 bg-gold text-primary-foreground text-sm uppercase font-bold flex items-center gap-2"
                 >
@@ -1977,7 +2031,7 @@ export default function AdminDashboardPage() {
                 </button>
                 <button
                   disabled={actionLoading === "product-save"}
-                  onClick={handleSaveProduct}
+                  onClick={() => (editingProduct ? setSaveProductModal(true) : handleSaveProduct())}
                   className="flex-1 py-2.5 bg-gold text-primary-foreground text-sm uppercase font-bold flex items-center justify-center gap-2 hover:bg-[var(--gold-dim)] transition-colors disabled:opacity-60"
                 >
                   {actionLoading === "product-save" && (
@@ -2138,7 +2192,7 @@ export default function AdminDashboardPage() {
                     <p className="text-sm text-muted-foreground line-clamp-2">{r.content}</p>
                     {r.video_url && <p className="text-[10px] text-blue-400 mt-1">🎥 Video đính kèm</p>}
                   </div>
-                  <button onClick={() => deleteReview(r.id)} className="self-start p-2 text-red-400 hover:bg-red-500/10 transition-colors">
+                  <button onClick={() => openDeleteReviewModal(r)} className="self-start p-2 text-red-400 hover:bg-red-500/10 transition-colors">
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
@@ -2201,7 +2255,7 @@ export default function AdminDashboardPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3">
-                        <button onClick={() => toggleUserActive(u.id, u.is_active)} className={`text-xs flex items-center gap-1 px-2 py-1 border transition-colors ${u.is_active ? "border-red-400/30 text-red-400 hover:bg-red-500/10" : "border-emerald-400/30 text-emerald-400 hover:bg-emerald-500/10"}`}>
+                        <button onClick={() => openToggleUserModal(u.id, u.is_active, u.username)} className={`text-xs flex items-center gap-1 px-2 py-1 border transition-colors ${u.is_active ? "border-red-400/30 text-red-400 hover:bg-red-500/10" : "border-emerald-400/30 text-emerald-400 hover:bg-emerald-500/10"}`}>
                           {u.is_active ? <><Ban className="h-3 w-3" /> Khoá</> : <><CheckCircle className="h-3 w-3" /> Mở khoá</>}
                         </button>
                       </td>
@@ -2276,6 +2330,65 @@ export default function AdminDashboardPage() {
         confirmVariant="danger"
         onConfirm={confirmDeleteProduct}
         onCancel={() => setDeleteProductModal({ open: false, productId: "", productName: "" })}
+      />
+
+      <ConfirmModal
+        open={saveOrderModal}
+        title="Lưu thay đổi đơn hàng"
+        message="Xác nhận lưu các thay đổi cho đơn hàng này?"
+        confirmText="Lưu thay đổi"
+        onConfirm={saveEditOrder}
+        onCancel={() => setSaveOrderModal(false)}
+        loading={!!editingOrder && actionLoading === editingOrder.id}
+      />
+
+      <ConfirmModal
+        open={saveProductModal}
+        title="Lưu thay đổi sản phẩm"
+        message={`Xác nhận lưu thay đổi cho sản phẩm "${editingProduct?.name || ""}"?`}
+        confirmText="Lưu thay đổi"
+        onConfirm={handleSaveProduct}
+        onCancel={() => setSaveProductModal(false)}
+        loading={actionLoading === "product-save"}
+      />
+
+      <ConfirmModal
+        open={toggleBannerModal.open}
+        title={toggleBannerModal.banner?.is_active ? "Ẩn banner" : "Hiện banner"}
+        message={`Xác nhận ${toggleBannerModal.banner?.is_active ? "ẩn" : "hiện"} banner "${toggleBannerModal.banner?.title || "Banner không có tiêu đề"}"?`}
+        confirmText={toggleBannerModal.banner?.is_active ? "Ẩn" : "Hiện"}
+        onConfirm={confirmToggleBanner}
+        onCancel={() => setToggleBannerModal({ open: false, banner: null })}
+      />
+
+      <ConfirmModal
+        open={deleteBannerModal.open}
+        title="Xóa banner"
+        message={`Xóa banner "${deleteBannerModal.bannerTitle}"? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa"
+        confirmVariant="danger"
+        onConfirm={confirmDeleteBanner}
+        onCancel={() => setDeleteBannerModal({ open: false, bannerId: "", bannerTitle: "" })}
+      />
+
+      <ConfirmModal
+        open={deleteReviewModal.open}
+        title="Xóa đánh giá"
+        message={`Xóa đánh giá của "${deleteReviewModal.reviewLabel}"? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa"
+        confirmVariant="danger"
+        onConfirm={confirmDeleteReview}
+        onCancel={() => setDeleteReviewModal({ open: false, reviewId: "", reviewLabel: "" })}
+      />
+
+      <ConfirmModal
+        open={toggleUserModal.open}
+        title={toggleUserModal.isActive ? "Khoá tài khoản" : "Mở khoá tài khoản"}
+        message={`Xác nhận ${toggleUserModal.isActive ? "khoá" : "mở khoá"} tài khoản "${toggleUserModal.username}"?`}
+        confirmText={toggleUserModal.isActive ? "Khoá" : "Mở khoá"}
+        confirmVariant={toggleUserModal.isActive ? "danger" : "gold"}
+        onConfirm={confirmToggleUser}
+        onCancel={() => setToggleUserModal({ open: false, userId: "", isActive: false, username: "" })}
       />
 
       {/* =========== TOAST NOTIFICATION =========== */}
